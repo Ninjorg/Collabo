@@ -1,0 +1,38 @@
+.searchBar {
+    flex: 1;
+    background-color: #64001e; /* Background color of the search bar */
+    display: flex;
+    align-items: center; /* Aligns items in the center vertically */
+    gap: 20px; /* Space between items */
+    border-radius: 10px; /* Rounded corners */
+    padding: 10px;
+}
+
+.searchBar input {
+    background-color: #64001e; /* Matches the background of the search bar */
+    border: none;
+    outline: none;
+    color: #fff; /* White text for better contrast on dark background */
+    flex: 1;
+}
+
+.search {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+.searchBar img {
+    width: 20px;
+    height: 20px;
+}
+
+.search .add {
+    width: 36;
+    height: 36px;
+    padding: 10px;
+    background-color: #64001e;
+    border-radius: 10px;
+    cursor: pointer;
+}

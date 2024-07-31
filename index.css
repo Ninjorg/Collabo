@@ -1,0 +1,26 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+}
+body {
+  background-image: url("https://wallpapers.com/images/hd/solid-pink-background-omr8b2a5nfq62yu0.jpg");
+  display: flex;
+  margin: 0; /* Removes default margin */
+  padding: 0;
+  height: 100vh; /* Ensures the body takes up the full viewport height */
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  width: 90vw; /* Set the width to 90% of the viewport width */
+  height: 90vh; /* Set the height to 90% of the viewport height */
+  background-color: #ff0055b3;
+  border-radius: 12px;
+  backdrop-filter: blur(19px) saturate(180%);
+  border: 1px solid #ffffff18;
+  display: flex;
+}
