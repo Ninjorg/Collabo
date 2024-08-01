@@ -11,20 +11,34 @@ const Chat = () => {
         { text: "YO WSGGG", own: false, timestamp: "1 min ago" },
         { text: "YO WSGGG", own: true, timestamp: "1 min ago" }
     ]);
+    const [isTyping, setIsTyping] = useState(false);
+    const [theme, setTheme] = useState("light");
 
     const handleEmoji = (e, emojiObject) => {
         setText(prev => prev + emojiObject.emoji);
+        setIsTyping(true);
+        setTimeout(() => setIsTyping(false), 1000); // Simulate typing stop after selecting emoji
     }
 
     const handleSend = () => {
         if (text.trim()) {
             setMessages(prev => [...prev, { text, own: true, timestamp: "Just now" }]);
             setText("");
+            setIsTyping(false);
         }
     }
 
+    const handleTextChange = (e) => {
+        setText(e.target.value);
+        setIsTyping(true);
+    }
+
+    const toggleTheme = () => {
+        setTheme(prevTheme => prevTheme === "light" ? "dark" : "light");
+    }
+
     return (
-        <div className='chat'>
+        <div className={`chat ${theme}`}>
             <div className="top">
                 <div className="user">
                     <img src="./avatar.png" alt="Avatar"/>
@@ -37,6 +51,9 @@ const Chat = () => {
                     <img src="./phone.png" alt="Call"/>
                     <img src="./video.png" alt="Video"/>
                     <img src="./info.png" alt="Info"/>
+                    <button onClick={toggleTheme}>
+                        {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
+                    </button>
                 </div>
             </div>
             <div className="center">
@@ -49,6 +66,7 @@ const Chat = () => {
                         </div>
                     </div>
                 ))}
+                {isTyping && <div className="typing-indicator">Timy is typing...</div>}
             </div>
             <div className="bottom">
                 <div className="icon">
@@ -60,7 +78,7 @@ const Chat = () => {
                     type="text"
                     placeholder="Type a message..."
                     value={text}
-                    onChange={(e) => setText(e.target.value)}
+                    onChange={handleTextChange}
                 />
                 <div className="emoji">
                     <img src="./emoji.png" alt="Emoji" onClick={() => setOpen(prev => !prev)}/>
