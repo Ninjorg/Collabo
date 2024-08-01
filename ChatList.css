@@ -5,7 +5,7 @@
 
 .searchBar {
     flex: 1;
-    background-color: #64001e; /* Background color of the search bar */
+    background-color: #000000a5; /* Background color of the search bar */
     display: flex;
     align-items: center; /* Aligns items in the center vertically */
     gap: 20px; /* Space between items */
@@ -13,8 +13,12 @@
     padding: 10px;
 }
 
+.search :hover {
+    transform: scale(1.07);
+    transition: 0.3s;
+}
 .searchBar input {
-    background-color: #64001e; /* Matches the background of the search bar */
+    background-color: #00000000; /* Matches the background of the search bar */
     border: none;
     outline: none;
     color: #fff; /* White text for better contrast on dark background */
@@ -33,11 +37,13 @@
     height: 20px;
 }
 
+
+
 .search .add {
     width: 36;
     height: 36px;
     padding: 10px;
-    background-color: #64001e;
+    background-color: #ff11589f;
     border-radius: 10px;
     cursor: pointer;
 }
