@@ -2,7 +2,9 @@
     flex:2;
     border-left: 1px solid #64001e;
     border-right: 1px solid #64001e;
-    height: 10px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .chat .top {
@@ -89,10 +91,10 @@
 
 .bottom input {
     flex:1;
-    border: none;
     outline: none;
+    border: none;
     color: white;
-    background-color: #64001e;
+    background-color: #00000098;
     padding: 10px;
     border-radius: 10px;
     font-size: 16px;
@@ -112,4 +114,78 @@
 .center {
     padding: 20px;
     flex: 1;
+    display: flex;
+    overflow: scroll;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.center .message {
+    max-width: 70%;
+    display: flex;
+    gap: 20px;
+}
+
+.center .message.own{
+    align-self: flex-end;
+}
+
+.center .message.own .texts p{
+    background-color: #ff1158;
+    color: white;
+}
+.center .message img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.center .message .texts {
+    flex:1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    color: white;
+}
+
+.center .messages .texts :hover {
+    transform: scale(1.2);
+    transition: 3ms;
+}
+
+.center .message .texts p{
+    padding: 20px;
+    background-color: black;
+    color: white;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.center .message .texts span{
+    font-size: 12px;
+    font-weight: 300;
+}
+
+.center .message.own .texts span{
+    font-size: 12px;
+    font-weight: 300;
+    align-self: flex-end;
+}
+
+.bottom button {
+
+    background-color: #ff1158;
+    color: white;
+    width: 80px;
+    height: 35px;
+    outline: none;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 16px;
+    align-items: center;
+    align-self: center;
+    align-content: center;
 }
