@@ -1,30 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import "./chat.css";
 import EmojiPicker from "emoji-picker-react";
+import gifIcon from './gif.png'; // Assuming you have a GIF icon
+import notificationSound from './notification.mp3'; // Notification sound
 
 const Chat = () => {
     const [open, setOpen] = useState(false);
     const [text, setText] = useState("");
     const [messages, setMessages] = useState([
-        { text: "YO WSGGG", own: false, timestamp: "1 min ago" },
-        { text: "Hello, my name is Ronit but I am referred to in a non-disclosure as Ron. Please refer to me as Bob. Ty.", own: true, timestamp: "1 min ago" },
-        { text: "YO WSGGG", own: false, timestamp: "1 min ago" },
-        { text: "YO WSGGG", own: true, timestamp: "1 min ago" }
+        { id: 1, text: "YO WSGGG", own: false, timestamp: "1 min ago", reactions: {}, read: false },
+        { id: 2, text: "Hello, my name is Ronit but I am referred to in a non-disclosure as Ron. Please refer to me as Bob. Ty.", own: true, timestamp: "1 min ago", reactions: {}, read: false },
+        { id: 3, text: "YO WSGGG", own: false, timestamp: "1 min ago", reactions: {}, read: false },
+        { id: 4, text: "YO WSGGG", own: true, timestamp: "1 min ago", reactions: {}, read: false }
     ]);
     const [isTyping, setIsTyping] = useState(false);
     const [theme, setTheme] = useState("light");
+    const [editingMessage, setEditingMessage] = useState(null);
+    const audioRef = useRef(null);
 
     const handleEmoji = (e, emojiObject) => {
         setText(prev => prev + emojiObject.emoji);
         setIsTyping(true);
-        setTimeout(() => setIsTyping(false), 1000); // Simulate typing stop after selecting emoji
+        setTimeout(() => setIsTyping(false), 1000);
     }
 
     const handleSend = () => {
         if (text.trim()) {
-            setMessages(prev => [...prev, { text, own: true, timestamp: "Just now" }]);
+            if (editingMessage) {
+                setMessages(prev =>
+                    prev.map(msg =>
+                        msg.id === editingMessage.id ? { ...msg, text } : msg
+                    )
+                );
+                setEditingMessage(null);
+            } else {
+                setMessages(prev => [
+                    ...prev,
+                    { id: prev.length + 1, text, own: true, timestamp: "Just now", reactions: {}, read: false }
+                ]);
+            }
             setText("");
             setIsTyping(false);
+            audioRef.current.play(); // Play notification sound
         }
     }
 
@@ -35,6 +52,21 @@ const Chat = () => {
 
     const toggleTheme = () => {
         setTheme(prevTheme => prevTheme === "light" ? "dark" : "light");
+    }
+
+    const handleEditMessage = (message) => {
+        setText(message.text);
+        setEditingMessage(message);
+    }
+
+    const handleReact = (id, emoji) => {
+        setMessages(prev =>
+            prev.map(msg =>
+                msg.id === id
+                    ? { ...msg, reactions: { ...msg.reactions, [emoji]: (msg.reactions[emoji] || 0) + 1 } }
+                    : msg
+            )
+        );
     }
 
     return (
@@ -61,8 +93,16 @@ const Chat = () => {
                     <div className={`message ${message.own ? "own" : ""}`} key={index}>
                         {!message.own && <img src="./avatar.png" alt="Avatar"/>}
                         <div className="texts">
-                            <p>{message.text}</p>
+                            <p onDoubleClick={() => handleReact(message.id, "❤️")}>{message.text}</p>
                             <span>{message.timestamp}</span>
+                            <div className="reactions">
+                                {Object.entries(message.reactions).map(([emoji, count]) => (
+                                    <span key={emoji}>{emoji} {count}</span>
+                                ))}
+                            </div>
+                            {message.own && (
+                                <button onClick={() => handleEditMessage(message)}>Edit</button>
+                            )}
                         </div>
                     </div>
                 ))}
@@ -72,6 +112,7 @@ const Chat = () => {
                 <div className="icon">
                     <img src="./img.png" alt="Attach"/>
                     <img src="./camera.png" alt="Camera"/>
+                    <img src={gifIcon} alt="GIF" onClick={() => alert("GIF feature coming soon!")}/>
                     <img src="./mic.png" alt="Mic"/>
                 </div>
                 <input
@@ -88,8 +129,9 @@ const Chat = () => {
                         </div>
                     )}
                 </div>
-                <button className="sendButton" onClick={handleSend}>Send</button>
+                <button className="sendButton" onClick={handleSend}>{editingMessage ? "Update" : "Send"}</button>
             </div>
+            <audio ref={audioRef} src={notificationSound} />
         </div>
     )
 }
