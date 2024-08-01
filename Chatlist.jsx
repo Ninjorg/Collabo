@@ -1,8 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import "./chat.css";
 import EmojiPicker from "emoji-picker-react";
-import gifIcon from './gif.png'; // Assuming you have a GIF icon
+import gifIcon from './gif.png'; // GIF icon
 import notificationSound from './notification.mp3'; // Notification sound
+import videoIcon from './video.png'; // Video icon
+import fileIcon from './file.png'; // File icon
+import botAvatar from './bot.png'; // Chatbot avatar
 
 const Chat = () => {
     const [open, setOpen] = useState(false);
@@ -16,7 +19,18 @@ const Chat = () => {
     const [isTyping, setIsTyping] = useState(false);
     const [theme, setTheme] = useState("light");
     const [editingMessage, setEditingMessage] = useState(null);
+    const [file, setFile] = useState(null);
+    const [video, setVideo] = useState(null);
+    const [liveTypingUsers, setLiveTypingUsers] = useState([]);
     const audioRef = useRef(null);
+
+    useEffect(() => {
+        // Simulate live typing from other users
+        if (liveTypingUsers.length > 0) {
+            const timer = setTimeout(() => setLiveTypingUsers([]), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [liveTypingUsers]);
 
     const handleEmoji = (e, emojiObject) => {
         setText(prev => prev + emojiObject.emoji);
@@ -25,29 +39,32 @@ const Chat = () => {
     }
 
     const handleSend = () => {
-        if (text.trim()) {
-            if (editingMessage) {
-                setMessages(prev =>
-                    prev.map(msg =>
-                        msg.id === editingMessage.id ? { ...msg, text } : msg
-                    )
-                );
-                setEditingMessage(null);
-            } else {
-                setMessages(prev => [
-                    ...prev,
-                    { id: prev.length + 1, text, own: true, timestamp: "Just now", reactions: {}, read: false }
-                ]);
-            }
+        if (text.trim() || file || video) {
+            const newMessage = {
+                id: messages.length + 1,
+                text,
+                own: true,
+                timestamp: "Just now",
+                reactions: {},
+                read: false,
+                file: file ? URL.createObjectURL(file) : null,
+                video: video ? URL.createObjectURL(video) : null
+            };
+
+            setMessages(prev => [...prev, newMessage]);
             setText("");
+            setFile(null);
+            setVideo(null);
             setIsTyping(false);
-            audioRef.current.play(); // Play notification sound
+            audioRef.current.play();
         }
     }
 
     const handleTextChange = (e) => {
         setText(e.target.value);
         setIsTyping(true);
+        // Simulate live typing from the user
+        setLiveTypingUsers(["Timy"]);
     }
 
     const toggleTheme = () => {
@@ -67,6 +84,19 @@ const Chat = () => {
                     : msg
             )
         );
+    }
+
+    const handleFileUpload = (e) => {
+        setFile(e.target.files[0]);
+    }
+
+    const handleVideoUpload = (e) => {
+        setVideo(e.target.files[0]);
+    }
+
+    const handleBotResponse = () => {
+        // Simulate a bot response
+        setMessages(prev => [...prev, { id: prev.length + 1, text: "This is an automated response.", own: false, timestamp: "Just now", reactions: {}, read: false, file: null, video: null }]);
     }
 
     return (
@@ -94,6 +124,8 @@ const Chat = () => {
                         {!message.own && <img src="./avatar.png" alt="Avatar"/>}
                         <div className="texts">
                             <p onDoubleClick={() => handleReact(message.id, "❤️")}>{message.text}</p>
+                            {message.file && <a href={message.file} download>Download File</a>}
+                            {message.video && <video src={message.video} controls />}
                             <span>{message.timestamp}</span>
                             <div className="reactions">
                                 {Object.entries(message.reactions).map(([emoji, count]) => (
@@ -106,12 +138,19 @@ const Chat = () => {
                         </div>
                     </div>
                 ))}
-                {isTyping && <div className="typing-indicator">Timy is typing...</div>}
+                {isTyping && <div className="typing-indicator">You are typing...</div>}
+                {liveTypingUsers.length > 0 && (
+                    <div className="live-typing">
+                        {liveTypingUsers.join(", ")} {liveTypingUsers.length > 1 ? "are" : "is"} typing...
+                    </div>
+                )}
             </div>
             <div className="bottom">
                 <div className="icon">
-                    <img src="./img.png" alt="Attach"/>
-                    <img src="./camera.png" alt="Camera"/>
+                    <input type="file" accept="video/*" id="video-upload" style={{ display: "none" }} onChange={handleVideoUpload} />
+                    <label htmlFor="video-upload"><img src={videoIcon} alt="Video" /></label>
+                    <input type="file" accept="*/*" id="file-upload" style={{ display: "none" }} onChange={handleFileUpload} />
+                    <label htmlFor="file-upload"><img src={fileIcon} alt="File" /></label>
                     <img src={gifIcon} alt="GIF" onClick={() => alert("GIF feature coming soon!")}/>
                     <img src="./mic.png" alt="Mic"/>
                 </div>
@@ -132,6 +171,10 @@ const Chat = () => {
                 <button className="sendButton" onClick={handleSend}>{editingMessage ? "Update" : "Send"}</button>
             </div>
             <audio ref={audioRef} src={notificationSound} />
+            <div className="bot">
+                <img src={botAvatar} alt="Bot"/>
+                <button onClick={handleBotResponse}>Ask Bot</button>
+            </div>
         </div>
     )
 }
