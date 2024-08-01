@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import "./chat.css";
 import EmojiPicker from "emoji-picker-react";
-import gifIcon from './gif.png'; // GIF icon
-import notificationSound from './notification.mp3'; // Notification sound
-import videoIcon from './video.png'; // Video icon
-import fileIcon from './file.png'; // File icon
-import botAvatar from './bot.png'; // Chatbot avatar
+import gifIcon from './gif.png';
+import notificationSound from './notification.mp3';
+import videoIcon from './video.png';
+import fileIcon from './file.png';
+import botAvatar from './bot.png';
+import stickerIcon from './sticker.png';
+import locationIcon from './location.png';
+import micIcon from './mic.png';
 
 const Chat = () => {
     const [open, setOpen] = useState(false);
@@ -22,10 +25,13 @@ const Chat = () => {
     const [file, setFile] = useState(null);
     const [video, setVideo] = useState(null);
     const [liveTypingUsers, setLiveTypingUsers] = useState([]);
+    const [location, setLocation] = useState(null);
+    const [recording, setRecording] = useState(false);
+    const [audioUrl, setAudioUrl] = useState(null);
     const audioRef = useRef(null);
+    const mediaRecorderRef = useRef(null);
 
     useEffect(() => {
-        // Simulate live typing from other users
         if (liveTypingUsers.length > 0) {
             const timer = setTimeout(() => setLiveTypingUsers([]), 3000);
             return () => clearTimeout(timer);
@@ -39,7 +45,7 @@ const Chat = () => {
     }
 
     const handleSend = () => {
-        if (text.trim() || file || video) {
+        if (text.trim() || file || video || audioUrl || location) {
             const newMessage = {
                 id: messages.length + 1,
                 text,
@@ -48,13 +54,17 @@ const Chat = () => {
                 reactions: {},
                 read: false,
                 file: file ? URL.createObjectURL(file) : null,
-                video: video ? URL.createObjectURL(video) : null
+                video: video ? URL.createObjectURL(video) : null,
+                audio: audioUrl,
+                location
             };
 
             setMessages(prev => [...prev, newMessage]);
             setText("");
             setFile(null);
             setVideo(null);
+            setAudioUrl(null);
+            setLocation(null);
             setIsTyping(false);
             audioRef.current.play();
         }
@@ -63,7 +73,6 @@ const Chat = () => {
     const handleTextChange = (e) => {
         setText(e.target.value);
         setIsTyping(true);
-        // Simulate live typing from the user
         setLiveTypingUsers(["Timy"]);
     }
 
@@ -95,8 +104,52 @@ const Chat = () => {
     }
 
     const handleBotResponse = () => {
-        // Simulate a bot response
         setMessages(prev => [...prev, { id: prev.length + 1, text: "This is an automated response.", own: false, timestamp: "Just now", reactions: {}, read: false, file: null, video: null }]);
+    }
+
+    const handleStickerSelect = (sticker) => {
+        setMessages(prev => [...prev, { id: prev.length + 1, text: "", own: true, timestamp: "Just now", reactions: {}, read: false, sticker }]);
+    }
+
+    const handleLocationShare = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(position => {
+                setLocation({ lat: position.coords.latitude, lng: position.coords.longitude });
+                setMessages(prev => [...prev, { id: prev.length + 1, text: "Shared location", own: true, timestamp: "Just now", reactions: {}, read: false, location: { lat: position.coords.latitude, lng: position.coords.longitude } }]);
+            });
+        }
+    }
+
+    const startRecording = () => {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    const mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorderRef.current = mediaRecorder;
+                    mediaRecorder.start();
+
+                    const audioChunks = [];
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                        audioChunks.push(event.data);
+                    });
+
+                    mediaRecorder.addEventListener("stop", () => {
+                        const audioBlob = new Blob(audioChunks);
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        setAudioUrl(audioUrl);
+                        setMessages(prev => [...prev, { id: prev.length + 1, text: "", own: true, timestamp: "Just now", reactions: {}, read: false, audio: audioUrl }]);
+                    });
+
+                    setRecording(true);
+                });
+        }
+    }
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop();
+            setRecording(false);
+        }
     }
 
     return (
@@ -123,9 +176,12 @@ const Chat = () => {
                     <div className={`message ${message.own ? "own" : ""}`} key={index}>
                         {!message.own && <img src="./avatar.png" alt="Avatar"/>}
                         <div className="texts">
+                            {message.sticker && <img src={message.sticker} alt="Sticker" />}
                             <p onDoubleClick={() => handleReact(message.id, "❤️")}>{message.text}</p>
                             {message.file && <a href={message.file} download>Download File</a>}
                             {message.video && <video src={message.video} controls />}
+                            {message.audio && <audio src={message.audio} controls />}
+                            {message.location && <a href={`https://www.google.com/maps?q=${message.location.lat},${message.location.lng}`} target="_blank" rel="noopener noreferrer">View Location</a>}
                             <span>{message.timestamp}</span>
                             <div className="reactions">
                                 {Object.entries(message.reactions).map(([emoji, count]) => (
@@ -147,33 +203,29 @@ const Chat = () => {
             </div>
             <div className="bottom">
                 <div className="icon">
-                    <input type="file" accept="video/*" id="video-upload" style={{ display: "none" }} onChange={handleVideoUpload} />
-                    <label htmlFor="video-upload"><img src={videoIcon} alt="Video" /></label>
-                    <input type="file" accept="*/*" id="file-upload" style={{ display: "none" }} onChange={handleFileUpload} />
-                    <label htmlFor="file-upload"><img src={fileIcon} alt="File" /></label>
-                    <img src={gifIcon} alt="GIF" onClick={() => alert("GIF feature coming soon!")}/>
-                    <img src="./mic.png" alt="Mic"/>
+                    <label>
+                        <img src="./img.png" alt="File" />
+                        <input type="file" style={{ display: "none" }} onChange={handleFileUpload} />
+                    </label>
+                    <label>
+                        <img src={videoIcon} alt="Video" />
+                        <input type="file" accept="video/*" style={{ display: "none" }} onChange={handleVideoUpload} />
+                    </label>
+                    <label>
+                        <img src={micIcon} alt="Mic" onClick={recording ? stopRecording : startRecording} />
+                    </label>
+                    <img src={stickerIcon} alt="Stickers" onClick={() => handleStickerSelect(stickerIcon)} />
+                    <img src={locationIcon} alt="Location" onClick={handleLocationShare} />
                 </div>
-                <input
-                    type="text"
-                    placeholder="Type a message..."
-                    value={text}
-                    onChange={handleTextChange}
-                />
+                <input type="text" placeholder="Type a message..." value={text} onChange={handleTextChange} />
                 <div className="emoji">
-                    <img src="./emoji.png" alt="Emoji" onClick={() => setOpen(prev => !prev)}/>
-                    {open && (
-                        <div className="picker">
-                            <EmojiPicker onEmojiClick={handleEmoji}/>
-                        </div>
-                    )}
+                    <img src="./emoji.png" alt="Emoji" onClick={() => setOpen(prev => !prev)} />
+                    <div className={`picker ${open ? "open" : ""}`}>
+                        <EmojiPicker onEmojiClick={handleEmoji} />
+                    </div>
                 </div>
-                <button className="sendButton" onClick={handleSend}>{editingMessage ? "Update" : "Send"}</button>
-            </div>
-            <audio ref={audioRef} src={notificationSound} />
-            <div className="bot">
-                <img src={botAvatar} alt="Bot"/>
-                <button onClick={handleBotResponse}>Ask Bot</button>
+                <button className="sendButton" onClick={handleSend}>Send</button>
+                <audio ref={audioRef} src={notificationSound} />
             </div>
         </div>
     )
