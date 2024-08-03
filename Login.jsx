@@ -129,6 +129,52 @@ const Login = () => {
                         sign-up options!
                     </p>
                 </div>
+                <div className="newsletter">
+                    <h2>
+                        Subscribe to Our Newsletter
+                    </h2>
+                    <p>
+                        Stay updated with the latest news and updates from Collabo. 
+                        Subscribe to our newsletter and never miss out on important 
+                        information.
+                    </p>
+                    <form>
+                        <input 
+                            type="email" 
+                            placeholder="Enter your email" 
+                            className="newsletter-input"
+                        />
+                        <button 
+                            type="submit" 
+                            className="newsletter-button"
+                        >
+                            Subscribe
+                        </button>
+                    </form>
+                </div>
+                <div className="social-media">
+                    <h2>
+                        Follow Us
+                    </h2>
+                    <p>
+                        Stay connected and follow us on social media for the latest 
+                        updates and community interactions.
+                    </p>
+                    <div className="social-icons">
+                        <a href="#" className="social-icon">
+                            <img src="facebook.png" alt="Facebook" />
+                        </a>
+                        <a href="#" className="social-icon">
+                            <img src="twitter.png" alt="Twitter" />
+                        </a>
+                        <a href="#" className="social-icon">
+                            <img src="instagram.png" alt="Instagram" />
+                        </a>
+                        <a href="#" className="social-icon">
+                            <img src="linkedin.png" alt="LinkedIn" />
+                        </a>
+                    </div>
+                </div>
             </div>
             <div className="footer">
                 <div className="login">
