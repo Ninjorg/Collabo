@@ -1,10 +1,10 @@
 /* General styles */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Arial Black', Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
-    overflow: hidden; /* Prevent scrolling on the body */
+    overflow: scroll;
 }
 
 /* Home page styles */
@@ -12,164 +12,139 @@ body {
     padding: 20px;
     text-align: center;
     background-color: #ffffff;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    margin: 20px auto;
-    border-radius: 12px;
-    max-width: 800px; /* Center content */
-    position: relative; /* Needed for footer positioning */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 5px;
+    border-radius: 8px;
+    flex: 1;
+    overflow: scroll;
 }
 
 .homePage h1 {
-    font-size: 3em;
-    margin-bottom: 15px;
-    color: #333;
+    font-size: 4em;
+    margin-bottom: 10px;
+    color: #000000;
 }
 
-.homePage p.general {
-    font-size: 1.1em;
-    color: #555;
+.homePage p {
+    font-size: 1.2em;
+    color: #666;
     line-height: 1.6;
-    margin: 0 auto;
-    max-width: 600px;
 }
 
-.homePage .about {
-    margin-top: 30px;
+.homePage .general {
+    background-color: #f6ffca;
+    margin: 20px;
+    padding: 40px;
+    border-radius: 20px;
+}
+
+/* About section styles */
+.about {
+    margin-top: 20px;
 }
 
 .about-item {
-    margin: 20px 0;
+    margin: 10px 0;
+    text-align: left;
 }
 
 .about-item h2 {
     font-size: 2em;
-    color: #222;
+    color: #333;
+    margin-bottom: 10px;
 }
 
 .about-item p {
-    font-size: 1.1em;
-    color: #444;
+    margin: 0;
+    font-size: 1em;
+    color: #666;
 }
 
 /* Features section styles */
 .features {
-    margin-top: 30px;
-    text-align: left;
-    max-width: 600px;
-    margin: 30px auto;
+    margin-top: 40px;
 }
 
 .features h2 {
     font-size: 2em;
-    color: #222;
+    color: #333;
+    margin-bottom: 20px;
 }
 
 .features ul {
-    list-style-type: none;
-    padding: 0;
+    list-style-type: disc;
+    padding-left: 40px;
+    text-align: left;
 }
 
 .features li {
-    font-size: 1.1em;
-    color: #555;
+    font-size: 1.2em;
+    color: #666;
     margin-bottom: 10px;
 }
 
 /* Testimonials section styles */
 .testimonials {
-    margin-top: 30px;
-    max-width: 600px;
-    margin: 30px auto;
+    margin-top: 40px;
 }
 
 .testimonials h2 {
     font-size: 2em;
-    color: #222;
+    color: #333;
+    margin-bottom: 20px;
 }
 
 .testimonial {
     background-color: #f9f9f9;
-    padding: 15px;
+    padding: 20px;
     border-radius: 8px;
     margin-bottom: 20px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
 .testimonial p {
     font-size: 1.1em;
-    color: #444;
-}
-
-.testimonial strong {
-    display: block;
-    margin-top: 10px;
+    color: #666;
 }
 
 /* FAQ section styles */
 .faq {
-    margin-top: 30px;
-    max-width: 600px;
-    margin: 30px auto;
+    margin-top: 40px;
 }
 
 .faq h2 {
     font-size: 2em;
-    color: #222;
+    color: #333;
+    margin-bottom: 20px;
 }
 
 .faq-item {
-    background-color: #f9f9f9;
-    padding: 15px;
-    border-radius: 8px;
+    text-align: left;
     margin-bottom: 20px;
 }
 
 .faq-item h3 {
-    font-size: 1.5em;
-    color: #222;
+    font-size: 1.4em;
+    color: #333;
+    margin-bottom: 10px;
 }
 
 .faq-item p {
     font-size: 1.1em;
-    color: #444;
+    color: #666;
 }
 
 /* Info section styles */
 .info {
-    margin-top: 20px;
-    font-size: 1.1em;
-    color: #333;
+    margin-top: 40px;
+    background-color: #e9f7fe;
+    padding: 20px;
+    border-radius: 8px;
 }
 
-/* Login styles */
-.login {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    background-color: #e0e0e0;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    margin: 10px 0;
-}
-
-.item {
-    flex: 1;
-    padding: 15px;
-    background-color: #007bff;
-    color: #ffffff;
-    text-align: center;
-    border-radius: 8px;
+.info p {
     font-size: 1.2em;
-    cursor: pointer;
-}
-
-.item:hover {
-    background-color: #0056b3;
-}
-
-.seperator {
-    width: 2px;
-    background-color: #ccc;
+    color: #333;
 }
 
 /* Footer styles */
@@ -177,11 +152,9 @@ body {
     padding: 20px;
     text-align: center;
     background-color: #ffffff;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    border-radius: 12px;
-    position: absolute;
-    bottom: 0;
-    width: calc(100% - 40px); /* Adjust for margin */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 40px;
+    border-radius: 8px;
 }
 
 .footer p {
@@ -190,12 +163,238 @@ body {
     color: #666;
 }
 
+.login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+    border-radius: 8px;
+}
+
+.item {
+    flex: 1;
+    padding: 20px;
+    margin: 0 10px;
+    background-color: #e0e0e0;
+    text-align: center;
+    border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.seperator {
+    width: 2px;
+    background-color: #ccc;
+}
+
 /* Banner styles */
 .banner {
-    width: 90%;
-    height: auto;
-    max-width: 1000px;
-    border-radius: 12px;
-    margin: 0 auto 20px;
+    width: 85vw;
+    height: 37vh;
+    border-radius: 20px;
+    margin-bottom: 30px;
     background-color: #ffcece;
+    margin-top: 10px;
+}
+/* General styles */
+body {
+    font-family: 'Arial Black', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    overflow: scroll;
+}
+
+/* Home page styles */
+.homePage {
+    padding: 20px;
+    text-align: center;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 5px;
+    border-radius: 8px;
+    flex: 1;
+    overflow: scroll;
+}
+
+.homePage h1 {
+    font-size: 4em;
+    margin-bottom: 10px;
+    color: #000000;
+}
+
+.homePage p {
+    font-size: 1.2em;
+    color: #666;
+    line-height: 1.6;
+}
+
+.homePage .general {
+    background-color: #f6ffca;
+    margin: 20px;
+    padding: 40px;
+    border-radius: 20px;
+}
+
+/* About section styles */
+.about {
+    margin-top: 20px;
+}
+
+.about-item {
+    margin: 10px 0;
+    text-align: left;
+}
+
+.about-item h2 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.about-item p {
+    margin: 0;
+    font-size: 1em;
+    color: #666;
+}
+
+/* Features section styles */
+.features {
+    margin-top: 40px;
+}
+
+.features h2 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.features ul {
+    list-style-type: disc;
+    padding-left: 40px;
+    text-align: left;
+}
+
+.features li {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+/* Testimonials section styles */
+.testimonials {
+    margin-top: 40px;
+}
+
+.testimonials h2 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.testimonial {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.testimonial p {
+    font-size: 1.1em;
+    color: #666;
+}
+
+/* FAQ section styles */
+.faq {
+    margin-top: 40px;
+}
+
+.faq h2 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.faq-item {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.faq-item h3 {
+    font-size: 1.4em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.faq-item p {
+    font-size: 1.1em;
+    color: #666;
+}
+
+/* Info section styles */
+.info {
+    margin-top: 40px;
+    background-color: #e9f7fe;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.info p {
+    font-size: 1.2em;
+    color: #333;
+}
+
+/* Footer styles */
+.footer {
+    padding: 20px;
+    text-align: center;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 40px;
+    border-radius: 8px;
+}
+
+.footer p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+    border-radius: 8px;
+}
+
+.item {
+    flex: 1;
+    padding: 20px;
+    margin: 0 10px;
+    background-color: #e0e0e0;
+    text-align: center;
+    border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.seperator {
+    width: 2px;
+    background-color: #ccc;
+}
+
+/* Banner styles */
+.banner {
+    width: 85vw;
+    height: 37vh;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    background-color: #ffcece;
+    margin-top: 10px;
 }
