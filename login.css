@@ -1,10 +1,13 @@
 /* General styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial Black', Arial, sans-serif; /* Use Arial Black */
     margin: 0;
     padding: 0;
     background-color: #f4f4f4;
+    overflow: scroll;
 }
+
+
 
 /* Home page styles */
 .homePage {
@@ -12,20 +15,51 @@ body {
     text-align: center;
     background-color: #ffffff;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin: 20px;
+    margin: 5px;
     border-radius: 8px;
+    flex: 1;
+    overflow: scroll;
 }
 
 .homePage h1 {
-    font-size: 2.5em;
+    font-size: 4em; /* This will override the general h1 styling */
     margin-bottom: 10px;
-    color: #333;
+    color: #000000;
 }
 
 .homePage p {
     font-size: 1.2em;
     color: #666;
     line-height: 1.6;
+
+}
+
+.homePage .general {
+    background-color: #f6ffca;
+    margin: 20px;
+    padding: 40px;
+    align-content: center;
+    align-items: center;
+    border-radius: 20px;
+}
+
+/* About section styles */
+.about {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.about-item {
+    flex: 1;
+    padding: 10px;
+    margin: 0 10px;
+}
+
+.about-item p {
+    margin: 0;
+    font-size: 1em;
+    color: #666;
 }
 
 /* Login styles */
@@ -47,9 +81,41 @@ body {
     background-color: #e0e0e0;
     text-align: center;
     border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace; /* Monospace font */
 }
 
 .seperator {
     width: 2px;
     background-color: #ccc;
+}
+
+/* Footer styles */
+.footer {
+    padding: 20px;
+    text-align: center;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    border-radius: 8px;
+    position: fixed;
+    bottom: 0;
+    width: calc(100% - 40px); /* Adjust for margin */
+}
+
+.footer p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* Banner styles */
+.banner {
+    width: 85vw;
+    height: 40vh;
+    border-radius: 20px;
+    margin: 0;
+    margin-bottom: 30px;
+    background-color: #ffcece;
+    margin-top: 10px;
+    
 }
