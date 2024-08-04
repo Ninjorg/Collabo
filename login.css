@@ -100,15 +100,18 @@ body {
 }
 
 .features li {
-    font-size: 1.2em;
+    font-size: 1.1em;
     color: #666;
     margin-bottom: 10px;
-    animation: fadeIn 2s ease-in-out;
+    animation: slideIn 1s ease-in-out;
 }
 
 /* Testimonials section styles */
 .testimonials {
     margin-top: 40px;
+    background-color: #e9f7fe;
+    padding: 20px;
+    border-radius: 8px;
 }
 
 .testimonials h2 {
@@ -118,11 +121,9 @@ body {
 }
 
 .testimonial {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
+    text-align: left;
     margin-bottom: 20px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 2s ease-in-out;
 }
 
 .testimonial p {
@@ -144,6 +145,7 @@ body {
 .faq-item {
     text-align: left;
     margin-bottom: 20px;
+    animation: slideIn 1s ease-in-out;
 }
 
 .faq-item h3 {
@@ -163,6 +165,7 @@ body {
     background-color: #e9f7fe;
     padding: 20px;
     border-radius: 8px;
+    animation: fadeIn 2s ease-in-out;
 }
 
 .info p {
@@ -195,6 +198,7 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin: 20px 0;
     border-radius: 8px;
+    animation: fadeIn 2s ease-in-out;
 }
 
 .item {
@@ -320,4 +324,58 @@ body {
 .social-icon img:hover {
     transform: scale(1.1);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Contact section styles */
+.contact {
+    margin-top: 40px;
+    background-color: #e9f7fe;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.contact h2 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.contact p {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: fadeIn 2s ease-in-out;
+}
+
+.contact-input, .contact-textarea {
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s;
+}
+
+.contact-input:focus, .contact-textarea:focus {
+    border-color: #333;
+}
+
+.contact-button {
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.contact-button:hover {
+    background-color: #555;
 }
