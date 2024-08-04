@@ -386,3 +386,8 @@ body {
     width: 3px;
     background-color: rgb(255, 0, 102);
 }
+
+.botton &:disabled {
+    cursor: not-allowed;
+    background-color:rgb(210, 5, 87) ;
+}
