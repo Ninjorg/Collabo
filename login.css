@@ -170,53 +170,53 @@ body {
     text-align: left;
 }
 
-.about-item h2 {
+.homePage .about-item h2 {
     font-size: 2em;
     color: #333;
     margin-bottom: 10px;
 }
 
-.about-item p {
+.homePage .about-item p {
     margin: 0;
     font-size: 1em;
     color: #666;
 }
 
 /* Features section styles */
-.features {
+.homePage .features {
     margin-top: 40px;
 }
 
-.features h2 {
+.homePage .features h2 {
     font-size: 2em;
     color: #333;
     margin-bottom: 20px;
 }
 
-.features ul {
+.homePage .features ul {
     list-style-type: disc;
     padding-left: 40px;
     text-align: left;
 }
 
-.features li {
+.homePage .features li {
     font-size: 1.2em;
     color: #666;
     margin-bottom: 10px;
 }
 
 /* Testimonials section styles */
-.testimonials {
+.homePage .testimonials {
     margin-top: 40px;
 }
 
-.testimonials h2 {
+.homePage .testimonials h2 {
     font-size: 2em;
     color: #333;
     margin-bottom: 20px;
 }
 
-.testimonial {
+.homePage .testimonial {
     background-color: #f9f9f9;
     padding: 20px;
     border-radius: 8px;
@@ -224,53 +224,53 @@ body {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
-.testimonial p {
+.homePage .testimonial p {
     font-size: 1.1em;
     color: #666;
 }
 
 /* FAQ section styles */
-.faq {
+.homePage .faq {
     margin-top: 40px;
 }
 
-.faq h2 {
+.homePage .faq h2 {
     font-size: 2em;
     color: #333;
     margin-bottom: 20px;
 }
 
-.faq-item {
+.homePage .faq-item {
     text-align: left;
     margin-bottom: 20px;
 }
 
-.faq-item h3 {
+.homePage .faq-item h3 {
     font-size: 1.4em;
     color: #333;
     margin-bottom: 10px;
 }
 
-.faq-item p {
+.homePage .faq-item p {
     font-size: 1.1em;
     color: #666;
 }
 
 /* Info section styles */
-.info {
+.homePage .info {
     margin-top: 0px;
     background-color: #ffbdbd;
     padding: 20px;
     border-radius: 8px;
 }
 
-.info p {
+.homePage .info p {
     font-size: 1.2em;
     color: #333;
 }
 
 /* Footer styles */
-.footer {
+.homePage .footer {
     padding: 20px;
     padding-top: 0px;
     text-align: center;
@@ -280,13 +280,13 @@ body {
     border-radius: 8px;
 }
 
-.footer p {
+.homePage .footer p {
     margin: 0;
     font-size: 0.9em;
     color: #666;
 }
 
-.login {
+.homePage .login {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -297,7 +297,7 @@ body {
     border-radius: 8px;
 }
 
-.item {
+.homePage .item {
     flex: 1;
     padding: 20px;
     margin: 0 10px;
@@ -307,13 +307,13 @@ body {
     font-family: 'Courier New', Courier, monospace;
 }
 
-.seperator {
+.homePage .seperator {
     width: 2px;
     background-color: #ccc;
 }
 
 /* Banner styles */
-.banner {
+.homePage .banner {
     width: 85vw;
     height: 37vh;
     border-radius: 20px;
@@ -321,13 +321,13 @@ body {
     background-color: #ffcece;
     margin-top: 10px;
 }
-.login-footer{
+.homePage .login-footer{
     width:100%;
     height: 100%;
     display: flex;align-items: center;
     gap: 100px;
 }
-.item {
+.homePage .item {
     flex:1;
     display: flex;
     flex-direction: column;
