@@ -1,11 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import "./login.css";
 import logo from "./collabo.png"; // Import the image
 
+
 const Login = () => {
+    const [avatar, setAvatar] =useState({
+        file:null,
+        url:""
+    })
+
+    const handleAvatar = e => {
+        if (e.target.files[0]) {
+            setAvatar({
+                file:e.target.files[0],
+                url: URL.createObjectURL(e.target.files[0])
+            })
+        }
+    }
+
+    const handleLogin = e => {
+        e.preventDefault()
+        toast.warn("Hello")
+    }
     return (
         <>
             <div className="homePage">
+                <div className="info">
+                    <p>
+                        <strong>
+                            Need to log in or sign up?
+                        </strong> 
+                        Scroll down to the bottom of the page to find the login and 
+                        sign-up options!
+                    </p>
+                </div>
                 <img 
                     src={logo} 
                     alt="Collabo Banner" 
@@ -120,106 +150,32 @@ const Login = () => {
                         </p>
                     </div>
                 </div>
-                <div className="info">
-                    <p>
-                        <strong>
-                            Need to log in or sign up?
-                        </strong> 
-                        Scroll down to the bottom of the page to find the login and 
-                        sign-up options!
-                    </p>
-                </div>
-                <div className="newsletter">
-                    <h2>
-                        Subscribe to Our Newsletter
-                    </h2>
-                    <p>
-                        Stay updated with the latest news and updates from Collabo. 
-                        Subscribe to our newsletter and never miss out on important 
-                        information.
-                    </p>
-                    <form>
-                        <input 
-                            type="email" 
-                            placeholder="Enter your email" 
-                            className="newsletter-input"
-                        />
-                        <button 
-                            type="submit" 
-                            className="newsletter-button"
-                        >
-                            Subscribe
-                        </button>
-                    </form>
-                </div>
-                <div className="social-media">
-                    <h2>
-                        Follow Us
-                    </h2>
-                    <p>
-                        Stay connected and follow us on social media for the latest 
-                        updates and community interactions.
-                    </p>
-                    <div className="social-icons">
-                        <a href="#" className="social-icon">
-                            <img src="facebook.png" alt="Facebook" />
-                        </a>
-                        <a href="#" className="social-icon">
-                            <img src="twitter.png" alt="Twitter" />
-                        </a>
-                        <a href="#" className="social-icon">
-                            <img src="instagram.png" alt="Instagram" />
-                        </a>
-                        <a href="#" className="social-icon">
-                            <img src="linkedin.png" alt="LinkedIn" />
-                        </a>
-                    </div>
-                </div>
-                <div className="contact">
-                    <h2>
-                        Contact Us
-                    </h2>
-                    <p>
-                        Have questions or feedback? We'd love to hear from you. Reach 
-                        out to us through the contact form below.
-                    </p>
-                    <form className="contact-form">
-                        <input 
-                            type="text" 
-                            placeholder="Your Name" 
-                            className="contact-input"
-                        />
-                        <input 
-                            type="email" 
-                            placeholder="Your Email" 
-                            className="contact-input"
-                        />
-                        <textarea 
-                            placeholder="Your Message" 
-                            className="contact-textarea"
-                        />
-                        <button 
-                            type="submit" 
-                            className="contact-button"
-                        >
-                            Send
-                        </button>
-                    </form>
-                </div>
-            </div>
-            <div className="footer">
-                <div className="login">
+
+                {/* Footer content moved here */}
+                <div className="login-footer">
                     <div className="item">
-                        Login
+                        <form onSubmit={handleLogin}>
+                            <h2>Sign In</h2>
+                            <input type="text" placeholder="Email" name= "email"/>
+                            <input type="text" placeholder="Password" name= "password"/>
+                            <button>Let's Go!</button>
+                        </form>
                     </div>
                     <div className="seperator"></div>
                     <div className="item">
-                        Sign Up
+                        <form>
+                            <h2>Sign Up</h2>
+                            <label htmlFor="file">
+                                <img src={avatar.url || "./avatar.png"} alt="" />
+                                Upload your profile picture</label>
+                            <input type="file" id="file" style={{display: "none"}} onChange={handleAvatar}/>
+                            <input type="text" placeholder="Username" name= "username"/>
+                            <input type="text" placeholder="Email" name= "email"/>
+                            <input type="text" placeholder="Password" name= "password"/>
+                            <button>Start!</button>
+                        </form>
                     </div>
                 </div>
-                <p>
-                    &copy; {new Date().getFullYear()} Collabo. All rights reserved.
-                </p>
             </div>
         </>
     );
