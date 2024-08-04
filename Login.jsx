@@ -175,6 +175,37 @@ const Login = () => {
                         </a>
                     </div>
                 </div>
+                <div className="contact">
+                    <h2>
+                        Contact Us
+                    </h2>
+                    <p>
+                        Have questions or feedback? We'd love to hear from you. Reach 
+                        out to us through the contact form below.
+                    </p>
+                    <form className="contact-form">
+                        <input 
+                            type="text" 
+                            placeholder="Your Name" 
+                            className="contact-input"
+                        />
+                        <input 
+                            type="email" 
+                            placeholder="Your Email" 
+                            className="contact-input"
+                        />
+                        <textarea 
+                            placeholder="Your Message" 
+                            className="contact-textarea"
+                        />
+                        <button 
+                            type="submit" 
+                            className="contact-button"
+                        >
+                            Send
+                        </button>
+                    </form>
+                </div>
             </div>
             <div className="footer">
                 <div className="login">
