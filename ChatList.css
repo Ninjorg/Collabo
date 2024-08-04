@@ -1,6 +1,7 @@
 .chatList{
     flex:1;
     overflow: scroll;
+    zoom: 90%;
 }
 
 .searchBar {
@@ -77,4 +78,5 @@
 .item .texts p {
     font-size: 14px;
     font-weight: 300;
+    
 }

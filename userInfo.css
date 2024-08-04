@@ -4,6 +4,7 @@
     align-items: center;
     justify-content: space-between;
     transform-origin: top left; /* Adjust if needed */
+    zoom: 90%;
 }
 
 .userInfo .user {

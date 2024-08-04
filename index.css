@@ -3,8 +3,10 @@
   padding: 0;
   box-sizing: border-box;
   font-family: "Arial Black", Arial, sans-serif, monospace;
+  
 }
 body {
+  
   background-image: url("https://i.pinimg.com/736x/d9/18/12/d91812745d1517d03fdbd1746d517021.jpg");
   background-size: cover; /* Make the image cover the entire background */
   background-repeat: no-repeat; /* Prevent the image from repeating */
@@ -25,4 +27,12 @@ body {
   backdrop-filter: blur(19px) saturate(180%);
   border: 1px solid #ffffff18;
   display: flex;
+}
+
+
+.loading {
+  padding: 50px;
+  font: 36px;
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.765);
 }
