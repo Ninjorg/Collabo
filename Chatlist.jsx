@@ -12,27 +12,33 @@ const Chatlist = () => {
 
     useEffect(() => {
         const chatDocRef = doc(db, "userchats", currentUser.id);
-        const unsubscribe = onSnapshot(chatDocRef, (res) => {
-            const items = res.data().chats;
+        const unsubscribe = onSnapshot(chatDocRef, async (res) => {
+            const data = res.data();
 
-            async (res) => {
-                const promises = itmes.map(async(item) => {
+            // Check if 'chats' exists in the document
+            if (data && Array.isArray(data.chats)) {
+                const items = data.chats;
+
+                const promises = items.map(async (item) => {
                     const userDocRef = doc(db, "users", item.receiverId);
-                    const userDocSnap = await getDoc(userdocRef);
+                    const userDocSnap = await getDoc(userDocRef);
 
                     const user = userDocSnap.data();
 
-                    return {...item, user};
-                })
-                const chatData = await Promise.all(promises)
-                setChats(chatData.sort((a,b)=>b.updatedAt - a.updatedAt));
-            } 
+                    return { ...item, user };
+                });
+
+                const chatData = await Promise.all(promises);
+                setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
+            } else {
+                // Handle case where 'chats' is not available or not an array
+                setChats([]);
+            }
         });
 
         // Cleanup subscription on unmount
         return () => unsubscribe();
     }, [currentUser.id]);
-
 
     return (
         <div className='chatList'>
@@ -51,10 +57,10 @@ const Chatlist = () => {
 
             {chats.map((chat) => (
                 <div className="item" key={chat.chatid}>
-                    <img src="./avatar.png" alt="" />
+                    <img src={chat.user.avatar || "./avatar.png"} alt="" />
                     <div className="texts">
-                        <span>Charles Dickonson</span>
-                        <p>{chat.lastMessage}A</p>
+                        <span>{chat.user.username}</span>
+                        <p>{chat.lastMessage}</p>
                     </div>
                 </div>
             ))}
