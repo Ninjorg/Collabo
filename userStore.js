@@ -24,3 +24,5 @@ export const useUserStore = create((set) => ({
         }
     }
 }));
+
+export default useUserStore;

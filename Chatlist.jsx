@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import './ChatList.css';
 import AddUser from './addUser/addUser.jsx';
 import { useUserStore } from '../../../lib/userStore';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { useChatStore } from "../../../lib/chatStore";
 
@@ -41,8 +41,29 @@ const ChatList = () => {
         return () => unsubscribe();
     }, [currentUser]);
 
-    const handleSelect = (chat) => {
-        changeChat(chat.chatId, chat.user);
+    const handleSelect = async (chat) => {
+        
+        const userChats = chats.map(item => {
+            const {user, ...rest} = item;
+            return rest;
+        })
+
+        const chatIndex = userChats.findIndex(item => item.chatId === chat.chatId)
+
+        userChats[chatIndex].isSeem = true;
+
+        const userChatsRef = doc (db, "userchats", currentUser.id);
+
+        try {
+            await updateDoc(userChatsRef,{
+                chats: userChats,
+
+            });
+            changeChat(chat.chatId, chat.user);
+        } catch (error) {
+            console.log(err)
+            
+        }
     }
 
     return (
@@ -61,7 +82,7 @@ const ChatList = () => {
             </div>
 
             {chats.map((chat) => (
-                <div className="item" key={chat.chatId} onClick={() => handleSelect(chat)}>
+                <div className="item" key={chat.chatId} onClick={() => handleSelect(chat)} style= {{backgroundColor: chat?.isSeen ? "transparent" : "#ff1158"}}>
                     <img src={chat.user.avatar || "./avatar.png"} alt="" />
                     <div className="texts">
                         <span>{chat.user.username}</span>
