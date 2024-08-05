@@ -4,18 +4,21 @@ import AddUser from './addUser/addUser.jsx';
 import { useUserStore } from '../../../lib/userStore';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
+import { useChatStore } from "../../../lib/chatStore";
 
-const Chatlist = () => {
+const ChatList = () => {
     const [addMode, setAddMode] = useState(false);
     const [chats, setChats] = useState([]);
     const { currentUser } = useUserStore();
+    const { changeChat } = useChatStore();
 
     useEffect(() => {
+        if (!currentUser) return; // Early return if currentUser is not available
+
         const chatDocRef = doc(db, "userchats", currentUser.id);
         const unsubscribe = onSnapshot(chatDocRef, async (res) => {
             const data = res.data();
 
-            // Check if 'chats' exists in the document
             if (data && Array.isArray(data.chats)) {
                 const items = data.chats;
 
@@ -31,14 +34,16 @@ const Chatlist = () => {
                 const chatData = await Promise.all(promises);
                 setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
             } else {
-                // Handle case where 'chats' is not available or not an array
                 setChats([]);
             }
         });
 
-        // Cleanup subscription on unmount
         return () => unsubscribe();
-    }, [currentUser.id]);
+    }, [currentUser]);
+
+    const handleSelect = (chat) => {
+        changeChat(chat.chatId, chat.user);
+    }
 
     return (
         <div className='chatList'>
@@ -56,7 +61,7 @@ const Chatlist = () => {
             </div>
 
             {chats.map((chat) => (
-                <div className="item" key={chat.chatid}>
+                <div className="item" key={chat.chatId} onClick={() => handleSelect(chat)}>
                     <img src={chat.user.avatar || "./avatar.png"} alt="" />
                     <div className="texts">
                         <span>{chat.user.username}</span>
@@ -69,4 +74,4 @@ const Chatlist = () => {
     );
 }
 
-export default Chatlist;
+export default ChatList;

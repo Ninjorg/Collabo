@@ -1,10 +1,11 @@
 .chat {
-    flex:2;
+    flex: 2;
     border-left: 1px solid #64001e;
     border-right: 1px solid #64001e;
     height: 100%;
     display: flex;
     flex-direction: column;
+    zoom: 100%;
 }
 
 .chat .top {
@@ -19,7 +20,6 @@
     display: flex;
     align-items: center;
     gap: 20px;
-
 }
 
 .chat .top .user img {
@@ -33,7 +33,6 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
-
 }
 
 .texts span {
@@ -51,7 +50,6 @@
 .icons {
     display: flex;
     gap: 20px;
-
 }
 
 .icons img {
@@ -84,13 +82,12 @@
     width: 20px;
     height: 20px;
     cursor: pointer;
-    cursor: pointer;
     align-content: center;
     display: flex;
 }
 
 .bottom input {
-    flex:1;
+    flex: 1;
     outline: none;
     border: none;
     color: white;
@@ -98,7 +95,6 @@
     padding: 10px;
     border-radius: 10px;
     font-size: 16px;
-    /* margin: 15px; */
 }
 
 .emoji {
@@ -123,69 +119,75 @@
 .center .message {
     max-width: 70%;
     display: flex;
-    gap: 20px;
+    gap: 10px; /* Adjust gap as needed */
+    align-items: flex-start; /* Align items to the top */
 }
 
-.center .message.own{
+.center .message.own {
     align-self: flex-end;
 }
 
-.center .message.own .texts p{
-    background-color: #ff1158;
-    color: white;
-}
 .center .message img {
     width: 30px;
     height: 30px;
     border-radius: 50%;
     object-fit: cover;
+    align-self: flex-start; /* Align the image to the start */
 }
+
 .center .message .texts {
-    flex:1;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    color: white;
+    display: inline-block;
+    max-width: 100%;
+    word-wrap: break-word;
 }
 
-.center .messages .texts :hover {
-    transform: scale(1.2);
-    transition: 3ms;
-}
-
-.center .message .texts p{
-    padding: 20px;
+.center .message .texts p {
+    padding: 10px;
     background-color: black;
     color: white;
     border-radius: 10px;
     font-weight: bold;
+    display: inline-block;
+    max-width: 100%;
+    word-wrap: break-word;
 }
 
-.center .message .texts span{
-    font-size: 12px;
-    font-weight: 300;
+.center .message.own .texts p {
+    background-color: #ff1158;
+    color: white;
 }
 
-.center .message.own .texts span{
+.center .message .texts span {
+    display: block;
     font-size: 12px;
     font-weight: 300;
+    margin-top: 5px;
+}
+
+.center .message.own .texts span {
     align-self: flex-end;
+    text-align: right;
 }
 
 .bottom button {
-
     background-color: #ff1158;
     color: white;
-    width: 80px;
-    height: 35px;
+    width: 96px;
+    height: 41px;
     outline: none;
-    padding: 10px;
+    padding: 0; /* Remove padding to ensure centering */
     border: none;
     border-radius: 5px;
-    padding: 10px;
-    border-radius: 10px;
     font-size: 16px;
-    align-items: center;
-    align-self: center;
-    align-content: center;
+    display: flex; /* Use flexbox for centering */
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
 }
+
+.center .message .texts img {
+    width: 100%;
+    height: 300px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
