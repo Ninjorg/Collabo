@@ -1,13 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lama Dev Chat App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <style>
+        #chat {
+            border: 1px solid #ccc;
+            height: 400px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        .message {
+            padding: 5px;
+        }
+    </style>
+    <!-- Include Socket.IO client library -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <h1>Chat App</h1>
+    <form id="chatForm">
+        <input type="text" id="chatId" placeholder="Chat ID" required /><br>
+        <textarea id="message" placeholder="Type a message" required></textarea><br>
+        <button type="submit" id="sendMessage">Send</button>
+    </form>
+    <div id="chat"></div>
+    <p>Logged in as: <span id="username"></span></p>
+    <button id="logout">Logout</button>
+</body>
 </html>
