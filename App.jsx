@@ -1,47 +1,58 @@
-import Chat from "./components/chat/Chat";
-import List from "./components/list/List";
-import Detail from "./components/detail/Detail";
-import Login from "./components/login/Login";
-import Notification from "./components/notification/Notification";
-import React, { useState, useEffect } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "./lib/firebase";
-import { useUserStore } from "./lib/userStore";
+import React, { useState } from 'react';
+import { StreamChat } from 'stream-chat';
+import { Chat } from 'stream-chat-react';
+import Cookies from 'universal-cookie';
+
+import { ChannelListContainer, ChannelContainer, Auth } from './components';
+
+import 'stream-chat-react/dist/css/index.css';
+import './App.css';
+
+const cookies = new Cookies();
+
+const apiKey = 'qgtk9ttyha7j';
+const authToken = cookies.get("token");
+
+const client = StreamChat.getInstance(apiKey);
+
+if(authToken) {
+    client.connectUser({
+        id: cookies.get('userId'),
+        name: cookies.get('username'),
+        fullName: cookies.get('fullName'),
+        image: cookies.get('avatarURL'),
+        hashedPassword: cookies.get('hashedPassword'),
+        phoneNumber: cookies.get('phoneNumber'),
+    }, authToken)
+}
+
 
 const App = () => {
-  const { currentUser, isLoading, fetchUserInfo } = useUserStore();
-  const [loading, setLoading] = useState(true);
+    const [createType, setCreateType] = useState('');
+    const [isCreating, setIsCreating] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
 
-  useEffect(() => {
-    const unSub = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        fetchUserInfo(user?.uid).then(() => setLoading(false));
-      } else {
-        setLoading(false);
-      }
-    });
+    if(!authToken) return <Auth />
 
-    return () => {
-      unSub();
-    };
-  }, [fetchUserInfo]);
-
-  if (loading) return <div className="loading">Loading...</div>;
-
-  return (
-    <div className="container">
-      {currentUser ? (
-        <>
-          <List />
-          <Chat />
-          <Detail />
-        </>
-      ) : (
-        <Login />
-      )}
-      <Notification />
-    </div>
-  );
-};
+    return (
+        <div className="app__wrapper">
+            <Chat client={client} theme="team light">
+                <ChannelListContainer 
+                    isCreating={isCreating}
+                    setIsCreating={setIsCreating}
+                    setCreateType={setCreateType}
+                    setIsEditing={setIsEditing}
+                />
+                <ChannelContainer 
+                    isCreating={isCreating}
+                    setIsCreating={setIsCreating}
+                    isEditing={isEditing}
+                    setIsEditing={setIsEditing}
+                    createType={createType}
+                />
+            </Chat>
+        </div>
+    );
+}
 
 export default App;
