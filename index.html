@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,6 +14,15 @@
         .message {
             padding: 5px;
         }
+        #chatList {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .chat-item {
+            padding: 5px;
+            cursor: pointer;
+        }
     </style>
     <!-- Include Socket.IO client library -->
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
@@ -22,6 +30,7 @@
 </head>
 <body>
     <h1>Chat App</h1>
+    <div id="chatList"></div>
     <form id="chatForm">
         <input type="text" id="chatId" placeholder="Chat ID" required /><br>
         <textarea id="message" placeholder="Type a message" required></textarea><br>
