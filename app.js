@@ -9,8 +9,10 @@ document.getElementById('sendMessage').addEventListener('click', () => {
     const chatId = document.getElementById('chatId').value;
     const message = document.getElementById('message').value;
     const token = localStorage.getItem('token');
-    if (chatId && message && token) {
-        socket.emit('sendMessage', { chatId, message });
+    const username = localStorage.getItem('username'); // Get the username from local storage
+
+    if (chatId && message && token && username) {
+        socket.emit('sendMessage', { chatId, message, username }); // Include username in the emitted message
         document.getElementById('message').value = '';
     }
 });

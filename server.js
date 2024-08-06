@@ -12,7 +12,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const SECRET_KEY = 'your_secret_key'; // Use a secure key in production
 
-app.use(express.static('public')); // Serve static files from 'public' directory
+app.use(express.static('public'));
 app.use(bodyParser.json());
 
 // User data file
