@@ -1,3 +1,4 @@
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -12,11 +13,10 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const SECRET_KEY = 'your_secret_key'; // Use a secure key in production
 
-// Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 
-// User data file and chat directory
+// User data file
 const USERS_FILE = path.join(__dirname, 'users.json');
 const CHATS_DIR = path.join(__dirname, 'chats');
 
@@ -25,10 +25,10 @@ if (!fs.existsSync(CHATS_DIR)) {
     fs.mkdirSync(CHATS_DIR);
 }
 
-// Default chats to be initialized
+// Default chats
 const DEFAULT_CHATS = ['general', 'homework', 'counting'];
 
-// Utility function to read user data from file
+// Utility function to read user data
 const readUsers = () => {
     if (!fs.existsSync(USERS_FILE)) {
         fs.writeFileSync(USERS_FILE, JSON.stringify([]));
@@ -36,7 +36,8 @@ const readUsers = () => {
     return JSON.parse(fs.readFileSync(USERS_FILE));
 };
 
-// Utility function to write user data to file
+
+
 const writeUsers = (users) => {
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 };
@@ -51,7 +52,7 @@ const updateUserStatus = (username, status) => {
     }
 };
 
-// Initialize default chats
+// Initialize default chats and update existing users
 const initializeDefaultChats = () => {
     DEFAULT_CHATS.forEach(chatName => {
         const chatFilePath = path.join(CHATS_DIR, `${chatName}.json`);
@@ -61,13 +62,13 @@ const initializeDefaultChats = () => {
     });
 };
 
-// Initialize default chats for a specific user
 const initializeDefaultChatsForUser = (username) => {
     const defaultChats = ['general', 'homework', 'counting'];
     const users = readUsers();
     const user = users.find(u => u.username === username);
 
     if (user) {
+        // Ensure the user has the default chats
         const missingChats = defaultChats.filter(chat => !user.chats.includes(chat));
         user.chats = [...new Set([...user.chats, ...missingChats])];
         writeUsers(users);
@@ -75,7 +76,7 @@ const initializeDefaultChatsForUser = (username) => {
     }
 };
 
-// Update users with default chats
+// Add default chats to users who don't already have them
 const updateUsersWithDefaultChats = () => {
     const users = readUsers();
     users.forEach(user => {
@@ -143,7 +144,7 @@ const updateChatFile = (chatId, users) => {
     });
 };
 
-// Add a chat to a user's chats
+// Add chat to user's chats
 const addChatToUser = (userEmail, chatId) => {
     const users = readUsers();
     const user = users.find(user => user.email === userEmail);
@@ -173,6 +174,7 @@ app.post('/signup', async (req, res) => {
     addChatToUser(email, DEFAULT_CHATS[0]); // Add user to the default 'general' chat
     users.push(newUser);
 
+    
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 
     res.status(201).json({ message: 'User created' });
@@ -214,74 +216,96 @@ app.get('/userChats', authenticateToken, (req, res) => {
     }
 });
 
-// Fetch notifications
-app.get('/notifications', authenticateToken, (req, res) => {
-    const user = readUsers().find(user => user.email === req.user.email);
-    if (user) {
-        res.json({ notifications: user.notifications || [] });
-    } else {
-        res.status(404).json({ message: 'User not found' });
-    }
-});
-
-// Add notification
-app.post('/notifications', authenticateToken, (req, res) => {
-    const { message } = req.body;
-    const user = readUsers().find(user => user.email === req.user.email);
-    if (user) {
-        user.notifications = user.notifications || [];
-        user.notifications.push({ message, timestamp: new Date().toISOString() });
-        writeUsers(readUsers());
-        res.status(201).json({ message: 'Notification added' });
-    } else {
-        res.status(404).json({ message: 'User not found' });
-    }
-});
-
-// Socket.IO middleware to authenticate users
 io.use((socket, next) => {
     const token = socket.handshake.auth.token;
-    if (token) {
-        jwt.verify(token, SECRET_KEY, (err, user) => {
-            if (err) return next(new Error('Authentication error'));
-            socket.user = user;
-            next();
-        });
-    } else {
-        next(new Error('Authentication error'));
+    if (!token) {
+        console.error('Authentication error: Token is missing');
+        return next(new Error('Authentication error'));
     }
+
+    jwt.verify(token, SECRET_KEY, (err, user) => {
+        if (err) {
+            console.error('Authentication error:', err.message);
+            return next(new Error('Authentication error'));
+        }
+        console.log('Authenticated user:', user); // Debug: Check the decoded user object
+        socket.user = user;
+        next();
+    });
 });
 
+// On user connection
 io.on('connection', (socket) => {
-    console.log('New user connected:', socket.user.username);
+    console.log('A user connected:', socket.id);
 
-    // Notify users when someone connects
-    socket.broadcast.emit('notification', { message: `${socket.user.username} has joined the chat` });
+    // Update user status to active
+    updateUserStatus(socket.user.username, true);
 
-    // Handle chat join
+    // Notify all clients about the user list update
+    const users = readUsers();
+    io.emit('updateUsers', users);
+
+    // Handle user disconnection
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+
+        // Update user status to inactive
+        updateUserStatus(socket.user.username, false);
+
+        // Notify all clients about the user list update
+        const users = readUsers();
+        io.emit('updateUsers', users);
+    });
+
+    // Handle joining a chat
     socket.on('joinChat', (chatId) => {
         socket.join(chatId);
-        socket.emit('notification', { message: `Joined chat ${chatId}` });
+        console.log(`User ${socket.user.username} joined chat ${chatId}`);
+        
+        // Fetch and emit chat messages
+        const chatFilePath = path.join(__dirname, 'chats', `${chatId}.json`);
+        if (fs.existsSync(chatFilePath)) {
+            const messages = JSON.parse(fs.readFileSync(chatFilePath, 'utf8'));
+            socket.emit('loadMessages', messages);
+        }
     });
 
-    // Handle message sending
-    socket.on('sendMessage', (chatId, message) => {
+    // Handle sending a message
+    socket.on('sendMessage', ({ chatId, message }) => {
+        const timestamp = new Date().toISOString();
+        const messageObject = { username: socket.user.username, message, timestamp };
+
+        // Save message to file
         const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
-        const chatData = fs.existsSync(chatFilePath) ? JSON.parse(fs.readFileSync(chatFilePath, 'utf8')) : [];
-        chatData.push({ username: socket.user.username, message, timestamp: new Date().toISOString() });
-        fs.writeFileSync(chatFilePath, JSON.stringify(chatData, null, 2));
-        io.to(chatId).emit('newMessage', { username: socket.user.username, message, timestamp: new Date().toISOString() });
+        if (!fs.existsSync(chatFilePath)) {
+            fs.writeFileSync(chatFilePath, JSON.stringify([]));
+        }
+        const messages = JSON.parse(fs.readFileSync(chatFilePath));
+        messages.push(messageObject);
+        fs.writeFileSync(chatFilePath, JSON.stringify(messages, null, 2));
+
+        // Emit message to chat
+        io.to(chatId).emit('receiveMessage', messageObject);
+
+        // Emit updated user list
+        const chatData = JSON.parse(fs.readFileSync(chatFilePath));
+        // const usersSection = chatData.find(section => section.users !== undefined);
+        // if (usersSection) {
+        //     io.to(chatId).emit('updateUsers', usersSection.users);
+        // }
     });
 
-    // Handle disconnection
+    // Handle user disconnection
     socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.user.username);
-        socket.broadcast.emit('notification', { message: `${socket.user.username} has left the chat` });
+        console.log('User disconnected:', socket.id);
+        // Update the user's isActive status to false
+        updateUserStatus(socket.user.email, false);
     });
 });
 
+
 // Start the server
-const PORT = process.env.PORT || 4000;
+const PORT = 4000;
 server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
