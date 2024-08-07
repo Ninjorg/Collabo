@@ -214,72 +214,69 @@ app.get('/userChats', authenticateToken, (req, res) => {
     }
 });
 
+// Fetch notifications
+app.get('/notifications', authenticateToken, (req, res) => {
+    const user = readUsers().find(user => user.email === req.user.email);
+    if (user) {
+        res.json({ notifications: user.notifications || [] });
+    } else {
+        res.status(404).json({ message: 'User not found' });
+    }
+});
+
+// Add notification
+app.post('/notifications', authenticateToken, (req, res) => {
+    const { message } = req.body;
+    const user = readUsers().find(user => user.email === req.user.email);
+    if (user) {
+        user.notifications = user.notifications || [];
+        user.notifications.push({ message, timestamp: new Date().toISOString() });
+        writeUsers(readUsers());
+        res.status(201).json({ message: 'Notification added' });
+    } else {
+        res.status(404).json({ message: 'User not found' });
+    }
+});
+
 // Socket.IO middleware to authenticate users
 io.use((socket, next) => {
     const token = socket.handshake.auth.token;
-    if (!token) {
-        console.error('Authentication error: Token is missing');
-        return next(new Error('Authentication error'));
+    if (token) {
+        jwt.verify(token, SECRET_KEY, (err, user) => {
+            if (err) return next(new Error('Authentication error'));
+            socket.user = user;
+            next();
+        });
+    } else {
+        next(new Error('Authentication error'));
     }
-
-    jwt.verify(token, SECRET_KEY, (err, user) => {
-        if (err) {
-            console.error('Authentication error:', err.message);
-            return next(new Error('Authentication error'));
-        }
-        console.log('Authenticated user:', user); // Debug: Check the decoded user object
-        socket.user = user;
-        next();
-    });
 });
 
-// On user connection
 io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
+    console.log('New user connected:', socket.user.username);
 
-    // Update user status to active
-    updateUserStatus(socket.user.username, true);
+    // Notify users when someone connects
+    socket.broadcast.emit('notification', { message: `${socket.user.username} has joined the chat` });
 
-    // Notify all clients about the user list update
-    const users = readUsers();
-    io.emit('updateUsers', users);
-
-    // Handle user disconnection
-    socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
-
-        // Update user status to inactive
-        updateUserStatus(socket.user.username, false);
-
-        // Notify all clients about the user list update
-        const users = readUsers();
-        io.emit('updateUsers', users);
-    });
-
-    // Handle joining a chat
+    // Handle chat join
     socket.on('joinChat', (chatId) => {
         socket.join(chatId);
-        console.log(`User ${socket.user.username} joined chat ${chatId}`);
-        
-        // Fetch and emit chat messages
-        const chatFilePath = path.join(__dirname, 'chats', `${chatId}.json`);
-        if (fs.existsSync(chatFilePath)) {
-            const chatData = JSON.parse(fs.readFileSync(chatFilePath, 'utf8'));
-            socket.emit('chatMessages', chatData);
-        }
+        socket.emit('notification', { message: `Joined chat ${chatId}` });
     });
 
     // Handle message sending
     socket.on('sendMessage', (chatId, message) => {
-        const chatFilePath = path.join(__dirname, 'chats', `${chatId}.json`);
+        const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
         const chatData = fs.existsSync(chatFilePath) ? JSON.parse(fs.readFileSync(chatFilePath, 'utf8')) : [];
-
-        // Add new message to chat data
         chatData.push({ username: socket.user.username, message, timestamp: new Date().toISOString() });
         fs.writeFileSync(chatFilePath, JSON.stringify(chatData, null, 2));
-
-        // Broadcast message to chat room
         io.to(chatId).emit('newMessage', { username: socket.user.username, message, timestamp: new Date().toISOString() });
+    });
+
+    // Handle disconnection
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.user.username);
+        socket.broadcast.emit('notification', { message: `${socket.user.username} has left the chat` });
     });
 });
 
