@@ -12,10 +12,11 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const SECRET_KEY = 'your_secret_key'; // Use a secure key in production
 
+// Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 
-// User data file
+// User data file and chat directory
 const USERS_FILE = path.join(__dirname, 'users.json');
 const CHATS_DIR = path.join(__dirname, 'chats');
 
@@ -24,10 +25,10 @@ if (!fs.existsSync(CHATS_DIR)) {
     fs.mkdirSync(CHATS_DIR);
 }
 
-// Default chats
+// Default chats to be initialized
 const DEFAULT_CHATS = ['general', 'homework', 'counting'];
 
-// Utility function to read user data
+// Utility function to read user data from file
 const readUsers = () => {
     if (!fs.existsSync(USERS_FILE)) {
         fs.writeFileSync(USERS_FILE, JSON.stringify([]));
@@ -35,8 +36,7 @@ const readUsers = () => {
     return JSON.parse(fs.readFileSync(USERS_FILE));
 };
 
-
-
+// Utility function to write user data to file
 const writeUsers = (users) => {
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 };
@@ -51,7 +51,7 @@ const updateUserStatus = (username, status) => {
     }
 };
 
-// Initialize default chats and update existing users
+// Initialize default chats
 const initializeDefaultChats = () => {
     DEFAULT_CHATS.forEach(chatName => {
         const chatFilePath = path.join(CHATS_DIR, `${chatName}.json`);
@@ -61,13 +61,13 @@ const initializeDefaultChats = () => {
     });
 };
 
+// Initialize default chats for a specific user
 const initializeDefaultChatsForUser = (username) => {
     const defaultChats = ['general', 'homework', 'counting'];
     const users = readUsers();
     const user = users.find(u => u.username === username);
 
     if (user) {
-        // Ensure the user has the default chats
         const missingChats = defaultChats.filter(chat => !user.chats.includes(chat));
         user.chats = [...new Set([...user.chats, ...missingChats])];
         writeUsers(users);
@@ -75,7 +75,7 @@ const initializeDefaultChatsForUser = (username) => {
     }
 };
 
-// Add default chats to users who don't already have them
+// Update users with default chats
 const updateUsersWithDefaultChats = () => {
     const users = readUsers();
     users.forEach(user => {
@@ -143,7 +143,7 @@ const updateChatFile = (chatId, users) => {
     });
 };
 
-// Add chat to user's chats
+// Add a chat to a user's chats
 const addChatToUser = (userEmail, chatId) => {
     const users = readUsers();
     const user = users.find(user => user.email === userEmail);
@@ -173,7 +173,6 @@ app.post('/signup', async (req, res) => {
     addChatToUser(email, DEFAULT_CHATS[0]); // Add user to the default 'general' chat
     users.push(newUser);
 
-    
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 
     res.status(201).json({ message: 'User created' });
@@ -215,6 +214,7 @@ app.get('/userChats', authenticateToken, (req, res) => {
     }
 });
 
+// Socket.IO middleware to authenticate users
 io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) {
@@ -264,47 +264,27 @@ io.on('connection', (socket) => {
         // Fetch and emit chat messages
         const chatFilePath = path.join(__dirname, 'chats', `${chatId}.json`);
         if (fs.existsSync(chatFilePath)) {
-            const messages = JSON.parse(fs.readFileSync(chatFilePath, 'utf8'));
-            socket.emit('loadMessages', messages);
+            const chatData = JSON.parse(fs.readFileSync(chatFilePath, 'utf8'));
+            socket.emit('chatMessages', chatData);
         }
     });
 
-    // Handle sending a message
-    socket.on('sendMessage', ({ chatId, message }) => {
-        const timestamp = new Date().toISOString();
-        const messageObject = { username: socket.user.username, message, timestamp };
+    // Handle message sending
+    socket.on('sendMessage', (chatId, message) => {
+        const chatFilePath = path.join(__dirname, 'chats', `${chatId}.json`);
+        const chatData = fs.existsSync(chatFilePath) ? JSON.parse(fs.readFileSync(chatFilePath, 'utf8')) : [];
 
-        // Save message to file
-        const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
-        if (!fs.existsSync(chatFilePath)) {
-            fs.writeFileSync(chatFilePath, JSON.stringify([]));
-        }
-        const messages = JSON.parse(fs.readFileSync(chatFilePath));
-        messages.push(messageObject);
-        fs.writeFileSync(chatFilePath, JSON.stringify(messages, null, 2));
+        // Add new message to chat data
+        chatData.push({ username: socket.user.username, message, timestamp: new Date().toISOString() });
+        fs.writeFileSync(chatFilePath, JSON.stringify(chatData, null, 2));
 
-        // Emit message to chat
-        io.to(chatId).emit('receiveMessage', messageObject);
-
-        // Emit updated user list
-        const chatData = JSON.parse(fs.readFileSync(chatFilePath));
-        // const usersSection = chatData.find(section => section.users !== undefined);
-        // if (usersSection) {
-        //     io.to(chatId).emit('updateUsers', usersSection.users);
-        // }
-    });
-
-    // Handle user disconnection
-    socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
-        // Update the user's isActive status to false
-        updateUserStatus(socket.user.email, false);
+        // Broadcast message to chat room
+        io.to(chatId).emit('newMessage', { username: socket.user.username, message, timestamp: new Date().toISOString() });
     });
 });
 
-
 // Start the server
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
