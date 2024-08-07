@@ -11,13 +11,15 @@
             height: 100vh;
         }
         #sidebar {
-            width: 120m;
+            width: 250px; /* Increased width to accommodate user list */
             background-color: #f4f4f4;
             border-right: 1px solid #ccc;
             padding: 10px;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
             margin: 5px;
+            display: flex;
+            flex-direction: column;
         }
         #chatContainer {
             flex: 1;
@@ -52,19 +54,38 @@
         .chatAdd {
             margin-bottom: 10px;
         }
+        #userList {
+            margin-top: 10px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+        .user-item {
+            padding: 5px;
+            background-color: #e0f7fa;
+            margin-bottom: 5px;
+        }
+        
     </style>
     <!-- Include Toastify CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <!-- Include Socket.IO client library -->
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <!-- Include JWT Decode library -->
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <!-- Include Toastify JS -->
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script src="app.js" defer></script>
+    <!-- Your main JavaScript file -->
+    <script type="module" src="app.js"></script>
 </head>
 <body>
     <div id="sidebar">
         <div id="chatList"></div>
         <div class="chatAdd">
             <input type="text" placeholder="user(s)" required id="groupContent"/>
+        </div>
+        <div id="userList">
+            <h3>Users</h3>
+            <!-- User list will be dynamically inserted here -->
         </div>
     </div>
     <div id="chatContainer">

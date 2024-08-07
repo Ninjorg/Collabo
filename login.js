@@ -14,7 +14,7 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
 
         if (response.ok) {
             localStorage.setItem('token', data.token);
-            localStorage.setItem('username', data.username);
+            localStorage.setItem('username', data.username); // Store username here
             window.location.href = 'index.html'; // Redirect to chat page
         } else {
             alert(data.message);

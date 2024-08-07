@@ -1,3 +1,4 @@
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -29,10 +30,93 @@ const readUsers = () => {
     if (!fs.existsSync(USERS_FILE)) {
         fs.writeFileSync(USERS_FILE, JSON.stringify([]));
     }
-    const users = JSON.parse(fs.readFileSync(USERS_FILE));
-    // Ensure every user has isActive field
-    return users.map(user => ({ ...user, isActive: user.isActive || false }));
+    return JSON.parse(fs.readFileSync(USERS_FILE));
 };
+
+fs.readFile('users.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading the file:', err);
+      return;
+    }
+  
+    try {
+      // Parse the JSON data
+      const users = JSON.parse(data);
+      const chatUsers = {};
+  
+      // Loop through each user to collect chat participation
+      users.forEach(user => {
+        user.chats.forEach(chatId => {
+          if (!chatUsers[chatId]) {
+            chatUsers[chatId] = [];
+          }
+          if (!chatUsers[chatId].includes(user.username)) {
+            chatUsers[chatId].push(user.username);
+          }
+        });
+      });
+  
+      // Update each chat file with the collected users
+      Object.keys(chatUsers).forEach(chatId => {
+        updateChatFile(chatId, chatUsers[chatId]);
+      });
+  
+    } catch (parseErr) {
+      console.error('Error parsing JSON data:', parseErr);
+    }
+  });
+  
+  // Function to update the chat file
+  function updateChatFile(chatId, users) {
+  const chatFilePath = path.join(__dirname, `chats/${chatId}.json`);
+
+  fs.readFile(chatFilePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error(`Error reading chat file ${chatId}.json:`, err);
+      return;
+    }
+
+    try {
+      // Clean the JSON data by removing unexpected characters if possible
+      let cleanData = data.replace(/[\u0000-\u0019]+/g, ""); // Remove control characters
+
+      // Parse the chat JSON data
+      let chatData = JSON.parse(cleanData);
+
+      // Ensure chatData is an array
+      if (!Array.isArray(chatData)) {
+        chatData = [chatData];
+      }
+
+      // Find the users section
+      let usersSection = chatData.find(section => section.users !== undefined);
+
+      if (!usersSection) {
+        usersSection = { users: [] };
+        chatData.push(usersSection);
+      }
+
+      // Add new users to the users section
+      users.forEach(username => {
+        if (!usersSection.users.includes(username)) {
+          usersSection.users.push(username);
+        }
+      });
+
+      // Write the updated data back to the file
+      fs.writeFile(chatFilePath, JSON.stringify(chatData, null, 2), 'utf8', err => {
+        if (err) {
+          console.error(`Error writing to chat file ${chatId}.json:`, err);
+        } else {
+          console.log(`Users added to chat ${chatId}.json:`, users);
+        }
+      });
+    } catch (parseErr) {
+      console.error(`Error parsing chat file ${chatId}.json:`, parseErr);
+      console.error(`Problematic content:\n${data}`);
+    }
+  });
+}
 
 
 // Sign-up route
@@ -61,13 +145,9 @@ app.post('/login', async (req, res) => {
         return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    user.isActive = true; // Set user as active
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users));
-
     const token = jwt.sign({ email: user.email, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
     res.json({ token, username: user.username }); // Send the username
 });
-
 
 // Middleware to check authentication
 const authenticateToken = (req, res, next) => {
@@ -93,34 +173,6 @@ const addChatToUser = (userEmail, chatId) => {
         fs.writeFileSync(USERS_FILE, JSON.stringify(users));
     }
 };
-
-// Add user to the chat's users list
-const addUserToChat = (chatId, userEmail) => {
-    const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
-    let chatData = { messages: [], users: [] };
-
-    if (fs.existsSync(chatFilePath)) {
-        try {
-            chatData = JSON.parse(fs.readFileSync(chatFilePath));
-            // Ensure `users` field exists
-            if (!Array.isArray(chatData.users)) {
-                chatData.users = [];
-            }
-        } catch (error) {
-            console.error('Error reading chat file:', error);
-            chatData = { messages: [], users: [] };
-        }
-    }
-
-    // Use Set to ensure unique user emails
-    const usersSet = new Set(chatData.users);
-    usersSet.add(userEmail);
-    chatData.users = Array.from(usersSet);
-
-    fs.writeFileSync(chatFilePath, JSON.stringify(chatData));
-};
-
-
 
 // Fetch user chats
 app.get('/userChats', authenticateToken, (req, res) => {
@@ -155,25 +207,14 @@ io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
     console.log('User details:', socket.user); // Debug: Check user details on connection
 
-    // Set user as active on connection
-    const users = readUsers();
-    const user = users.find(user => user.email === socket.user.email);
-    if (user) {
-        user.isActive = true;
-        fs.writeFileSync(USERS_FILE, JSON.stringify(users));
-    }
-
     // Handle joining a chat
     socket.on('joinChat', (chatId) => {
         socket.join(chatId);
         console.log(`User ${socket.user.email} joined chat ${chatId}`);
-    
+
         // Add chatId to user's chats
         addChatToUser(socket.user.email, chatId);
-    
-        // Add user to chat's users list
-        addUserToChat(chatId, socket.user.email);
-    
+
         // Read messages from file and send to client
         const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
         if (fs.existsSync(chatFilePath)) {
@@ -181,7 +222,6 @@ io.on('connection', (socket) => {
             socket.emit('loadMessages', messages);
         }
     });
-    
 
     // Handle sending a message
     socket.on('sendMessage', ({ chatId, message }) => {
@@ -204,28 +244,8 @@ io.on('connection', (socket) => {
     // Handle user disconnection
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
-    
-        // Set user as inactive on disconnection
-        const users = readUsers();
-        const user = users.find(user => user.email === socket.user.email);
-        if (user) {
-            user.isActive = false;
-            fs.writeFileSync(USERS_FILE, JSON.stringify(users));
-        }
-    
-        // Optionally: Remove user from all chats they were in
-        const userChats = user.chats || [];
-        userChats.forEach(chatId => {
-            const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
-            if (fs.existsSync(chatFilePath)) {
-                const chatData = JSON.parse(fs.readFileSync(chatFilePath));
-                chatData.users = chatData.users.filter(email => email !== socket.user.email);
-                fs.writeFileSync(chatFilePath, JSON.stringify(chatData));
-            }
-        });
     });
 });
-
 
 // Start the server
 const PORT = 4000;
