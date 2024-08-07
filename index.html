@@ -5,41 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
     <style>
+        body {
+            display: flex;
+            margin: 0;
+            height: 100vh;
+        }
+        #sidebar {
+            width: 120m;
+            background-color: #f4f4f4;
+            border-right: 1px solid #ccc;
+            padding: 10px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            margin: 5px;
+        }
+        #chatContainer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
         #chat {
             border: 1px solid #ccc;
-            height: 400px;
+            flex: 1;
             overflow-y: scroll;
             margin-bottom: 10px;
         }
         .message {
             padding: 5px;
         }
-        #chatList {
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
         .chat-item {
             padding: 5px;
             cursor: pointer;
             background-color: #b9ffff;
+            margin-bottom: 5px;
+        }
+        #username {
+            font-weight: bold;
+        }
+        .toastify-message {
+            background-color: #007bff;
+            color: white;
+        }
+        #chatForm {
+            margin-top: auto;
+        }
+        .chatAdd {
+            margin-bottom: 10px;
         }
     </style>
+    <!-- Include Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <!-- Include Socket.IO client library -->
     <script src="/socket.io/socket.io.js"></script>
-    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="app.js" defer></script>
 </head>
 <body>
-    <h1>Chat App</h1>
-    <div id="chatList"></div>
-    <form id="chatForm">
-        <input type="text" id="chatId" placeholder="Chat ID" required /><br>
-        <textarea id="message" placeholder="Type a message" required></textarea><br>
-        <button type="submit" id="sendMessage">Send</button>
-    </form>
-    <div id="chat"></div>
-    <p><span id="username"></span></p>
-    <button id="logout">Logout</button>
+    <div id="sidebar">
+        <div id="chatList"></div>
+        <div class="chatAdd">
+            <input type="text" placeholder="user(s)" required id="groupContent"/>
+        </div>
+    </div>
+    <div id="chatContainer">
+        <h1>Chat App</h1>
+        <div id="chat"></div>
+        <form id="chatForm">
+            <input type="text" id="chatId" placeholder="Chat ID" required /><br>
+            <textarea id="message" placeholder="Type a message" required></textarea><br>
+            <button type="submit" id="sendMessage">Send</button>
+        </form>
+        <p><span id="username"></span></p>
+        <button id="logout">Logout</button>
+    </div>
 </body>
 </html>

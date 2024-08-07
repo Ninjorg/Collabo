@@ -86,7 +86,7 @@ const updateChatList = (chats) => {
     uniqueChats.forEach((chatId) => {
         const chatItem = document.createElement('div');
         chatItem.classList.add('chat-item');
-        chatItem.textContent = `Chat ID: ${chatId}`;
+        chatItem.textContent = `#${chatId}`;
         chatItem.addEventListener('click', () => {
             document.getElementById('chatId').value = chatId;
             socket.emit('joinChat', chatId);
