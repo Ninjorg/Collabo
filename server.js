@@ -1,4 +1,3 @@
-
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -25,6 +24,9 @@ if (!fs.existsSync(CHATS_DIR)) {
     fs.mkdirSync(CHATS_DIR);
 }
 
+// Default chats
+const DEFAULT_CHATS = ['general', 'homework', 'counting'];
+
 // Utility function to read user data
 const readUsers = () => {
     if (!fs.existsSync(USERS_FILE)) {
@@ -33,91 +35,129 @@ const readUsers = () => {
     return JSON.parse(fs.readFileSync(USERS_FILE));
 };
 
-fs.readFile('users.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error('Error reading the file:', err);
-      return;
+
+
+const writeUsers = (users) => {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+};
+
+// Update isActive status of a user
+const updateUserStatus = (username, status) => {
+    const users = readUsers();
+    const user = users.find(u => u.username === username);
+    if (user) {
+        user.isActive = status;
+        writeUsers(users);
     }
-  
-    try {
-      // Parse the JSON data
-      const users = JSON.parse(data);
-      const chatUsers = {};
-  
-      // Loop through each user to collect chat participation
-      users.forEach(user => {
-        user.chats.forEach(chatId => {
-          if (!chatUsers[chatId]) {
-            chatUsers[chatId] = [];
-          }
-          if (!chatUsers[chatId].includes(user.username)) {
-            chatUsers[chatId].push(user.username);
-          }
-        });
-      });
-  
-      // Update each chat file with the collected users
-      Object.keys(chatUsers).forEach(chatId => {
-        updateChatFile(chatId, chatUsers[chatId]);
-      });
-  
-    } catch (parseErr) {
-      console.error('Error parsing JSON data:', parseErr);
-    }
-  });
-  
-  // Function to update the chat file
-  function updateChatFile(chatId, users) {
-  const chatFilePath = path.join(__dirname, `chats/${chatId}.json`);
+};
 
-  fs.readFile(chatFilePath, 'utf8', (err, data) => {
-    if (err) {
-      console.error(`Error reading chat file ${chatId}.json:`, err);
-      return;
-    }
-
-    try {
-      // Clean the JSON data by removing unexpected characters if possible
-      let cleanData = data.replace(/[\u0000-\u0019]+/g, ""); // Remove control characters
-
-      // Parse the chat JSON data
-      let chatData = JSON.parse(cleanData);
-
-      // Ensure chatData is an array
-      if (!Array.isArray(chatData)) {
-        chatData = [chatData];
-      }
-
-      // Find the users section
-      let usersSection = chatData.find(section => section.users !== undefined);
-
-      if (!usersSection) {
-        usersSection = { users: [] };
-        chatData.push(usersSection);
-      }
-
-      // Add new users to the users section
-      users.forEach(username => {
-        if (!usersSection.users.includes(username)) {
-          usersSection.users.push(username);
+// Initialize default chats and update existing users
+const initializeDefaultChats = () => {
+    DEFAULT_CHATS.forEach(chatName => {
+        const chatFilePath = path.join(CHATS_DIR, `${chatName}.json`);
+        if (!fs.existsSync(chatFilePath)) {
+            fs.writeFileSync(chatFilePath, JSON.stringify([]));
         }
-      });
+    });
+};
 
-      // Write the updated data back to the file
-      fs.writeFile(chatFilePath, JSON.stringify(chatData, null, 2), 'utf8', err => {
+const initializeDefaultChatsForUser = (username) => {
+    const defaultChats = ['general', 'homework', 'counting'];
+    const users = readUsers();
+    const user = users.find(u => u.username === username);
+
+    if (user) {
+        // Ensure the user has the default chats
+        const missingChats = defaultChats.filter(chat => !user.chats.includes(chat));
+        user.chats = [...new Set([...user.chats, ...missingChats])];
+        writeUsers(users);
+        console.log(`Default chats assigned to user ${username}`);
+    }
+};
+
+// Add default chats to users who don't already have them
+const updateUsersWithDefaultChats = () => {
+    const users = readUsers();
+    users.forEach(user => {
+        const missingChats = DEFAULT_CHATS.filter(chat => !user.chats.includes(chat));
+        if (missingChats.length > 0) {
+            user.chats = [...new Set([...user.chats, ...DEFAULT_CHATS])];
+        }
+    });
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+};
+
+// Initialize default chats and update existing users at startup
+initializeDefaultChats();
+updateUsersWithDefaultChats();
+
+// Function to update the chat file
+const updateChatFile = (chatId, users) => {
+    const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
+
+    fs.readFile(chatFilePath, 'utf8', (err, data) => {
         if (err) {
-          console.error(`Error writing to chat file ${chatId}.json:`, err);
-        } else {
-          console.log(`Users added to chat ${chatId}.json:`, users);
+            console.error(`Error reading chat file ${chatId}.json:`, err);
+            return;
         }
-      });
-    } catch (parseErr) {
-      console.error(`Error parsing chat file ${chatId}.json:`, parseErr);
-      console.error(`Problematic content:\n${data}`);
-    }
-  });
-}
 
+        try {
+            // Clean the JSON data by removing unexpected characters if possible
+            let cleanData = data.replace(/[\u0000-\u0019]+/g, ""); // Remove control characters
+
+            // Parse the chat JSON data
+            let chatData = JSON.parse(cleanData);
+
+            // Ensure chatData is an array
+            if (!Array.isArray(chatData)) {
+                chatData = [chatData];
+            }
+
+            // Find the users section
+            let usersSection = chatData.find(section => section.users !== undefined);
+
+            if (!usersSection) {
+                usersSection = { users: [] };
+                chatData.push(usersSection);
+            }
+
+            // Add new users to the users section
+            users.forEach(username => {
+                if (!usersSection.users.includes(username)) {
+                    usersSection.users.push(username);
+                }
+            });
+
+            // Write the updated data back to the file
+            fs.writeFile(chatFilePath, JSON.stringify(chatData, null, 2), 'utf8', err => {
+                if (err) {
+                    console.error(`Error writing to chat file ${chatId}.json:`, err);
+                } else {
+                    console.log(`Users added to chat ${chatId}.json:`, users);
+                }
+            });
+        } catch (parseErr) {
+            console.error(`Error parsing chat file ${chatId}.json:`, parseErr);
+            console.error(`Problematic content:\n${data}`);
+        }
+    });
+};
+
+// Add chat to user's chats
+const addChatToUser = (userEmail, chatId) => {
+    const users = readUsers();
+    const user = users.find(user => user.email === userEmail);
+    if (user) {
+        // Use Set to ensure unique chat IDs
+        const userChatsSet = new Set(user.chats);
+        userChatsSet.add(chatId);
+        user.chats = Array.from(userChatsSet);
+        fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+        
+        // Update the chat file with the new user
+        updateChatFile(chatId, [user.username]);
+    }
+};
 
 // Sign-up route
 app.post('/signup', async (req, res) => {
@@ -129,8 +169,12 @@ app.post('/signup', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    users.push({ username, email, password: hashedPassword, chats: [] });
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users));
+    const newUser = { username, email, password: hashedPassword, chats: [] };
+    addChatToUser(email, DEFAULT_CHATS[0]); // Add user to the default 'general' chat
+    users.push(newUser);
+
+    
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 
     res.status(201).json({ message: 'User created' });
 });
@@ -159,19 +203,6 @@ const authenticateToken = (req, res, next) => {
         req.user = user;
         next();
     });
-};
-
-// Add chat to user's chats
-const addChatToUser = (userEmail, chatId) => {
-    const users = readUsers();
-    const user = users.find(user => user.email === userEmail);
-    if (user) {
-        // Use Set to ensure unique chat IDs
-        const userChatsSet = new Set(user.chats);
-        userChatsSet.add(chatId);
-        user.chats = Array.from(userChatsSet);
-        fs.writeFileSync(USERS_FILE, JSON.stringify(users));
-    }
 };
 
 // Fetch user chats
@@ -205,20 +236,35 @@ io.use((socket, next) => {
 // On user connection
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
-    console.log('User details:', socket.user); // Debug: Check user details on connection
+
+    // Update user status to active
+    updateUserStatus(socket.user.username, true);
+
+    // Notify all clients about the user list update
+    const users = readUsers();
+    io.emit('updateUsers', users);
+
+    // Handle user disconnection
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+
+        // Update user status to inactive
+        updateUserStatus(socket.user.username, false);
+
+        // Notify all clients about the user list update
+        const users = readUsers();
+        io.emit('updateUsers', users);
+    });
 
     // Handle joining a chat
     socket.on('joinChat', (chatId) => {
         socket.join(chatId);
-        console.log(`User ${socket.user.email} joined chat ${chatId}`);
-
-        // Add chatId to user's chats
-        addChatToUser(socket.user.email, chatId);
-
-        // Read messages from file and send to client
-        const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
+        console.log(`User ${socket.user.username} joined chat ${chatId}`);
+        
+        // Fetch and emit chat messages
+        const chatFilePath = path.join(__dirname, 'chats', `${chatId}.json`);
         if (fs.existsSync(chatFilePath)) {
-            const messages = JSON.parse(fs.readFileSync(chatFilePath));
+            const messages = JSON.parse(fs.readFileSync(chatFilePath, 'utf8'));
             socket.emit('loadMessages', messages);
         }
     });
@@ -235,17 +281,27 @@ io.on('connection', (socket) => {
         }
         const messages = JSON.parse(fs.readFileSync(chatFilePath));
         messages.push(messageObject);
-        fs.writeFileSync(chatFilePath, JSON.stringify(messages));
+        fs.writeFileSync(chatFilePath, JSON.stringify(messages, null, 2));
 
         // Emit message to chat
         io.to(chatId).emit('receiveMessage', messageObject);
+
+        // Emit updated user list
+        const chatData = JSON.parse(fs.readFileSync(chatFilePath));
+        // const usersSection = chatData.find(section => section.users !== undefined);
+        // if (usersSection) {
+        //     io.to(chatId).emit('updateUsers', usersSection.users);
+        // }
     });
 
     // Handle user disconnection
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
+        // Update the user's isActive status to false
+        updateUserStatus(socket.user.email, false);
     });
 });
+
 
 // Start the server
 const PORT = 4000;

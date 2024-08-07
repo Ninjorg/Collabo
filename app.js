@@ -1,39 +1,9 @@
 // Initialize socket.io client
-
 const socket = io({
     transports: ['websocket'],
     auth: {
         token: localStorage.getItem('token') // Ensure this token is correct and present
     }
-});
-
-document.getElementById('chatId').addEventListener('change', () => {
-    const chatId = document.getElementById('chatId').value;
-    const token = localStorage.getItem('token');
-    if (chatId && token) {
-        socket.emit('joinChat', chatId);
-    }
-});
-
-socket.on('loadMessages', (messages) => {
-    const chat = document.getElementById('chat');
-    chat.innerHTML = ''; // Clear chat
-    messages.forEach((message) => {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message');
-        messageElement.textContent = `[${message.timestamp || 'No timestamp'}] ${message.username || 'Unknown'}: ${message.message}`;
-        chat.appendChild(messageElement);
-    });
-    chat.scrollTop = chat.scrollHeight;
-});
-
-socket.on('receiveMessage', (message) => {
-    const chat = document.getElementById('chat');
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('message');
-    messageElement.textContent = `[${message.timestamp || 'No timestamp'}] ${message.username || 'Unknown'}: ${message.message}`;
-    chat.appendChild(messageElement);
-    chat.scrollTop = chat.scrollHeight;
 });
 
 // Display the logged-in username
@@ -97,3 +67,56 @@ const updateChatList = (chats) => {
 
 // Call fetchUserChats on page load
 fetchUserChats();
+
+// Handle chat change
+document.getElementById('chatId').addEventListener('change', () => {
+    const chatId = document.getElementById('chatId').value;
+    const token = localStorage.getItem('token');
+    if (chatId && token) {
+        socket.emit('joinChat', chatId);
+    }
+});
+
+// Handle receiving and displaying messages
+socket.on('loadMessages', (messages) => {
+    const chat = document.getElementById('chat');
+    chat.innerHTML = ''; // Clear chat
+    messages.forEach((message) => {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        messageElement.textContent = `[${message.timestamp || 'No timestamp'}] ${message.username || 'Unknown'}: ${message.message}`;
+        chat.appendChild(messageElement);
+    });
+    chat.scrollTop = chat.scrollHeight;
+});
+
+// Handle receiving new messages
+socket.on('receiveMessage', (message) => {
+    const chat = document.getElementById('chat');
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message');
+    messageElement.textContent = `[${message.timestamp || 'No timestamp'}] ${message.username || 'Unknown'}: ${message.message}`;
+    chat.appendChild(messageElement);
+    chat.scrollTop = chat.scrollHeight;
+});
+
+// Handle user list updates
+socket.on('updateUsers', (users) => {
+    console.log('Users in the current chat:', users);
+    const userList = document.getElementById('userList');
+    userList.innerHTML = '<h2>Users in Chat</h2>';
+    users.forEach(user => {
+        const userElement = document.createElement('div');
+        userElement.classList.add('user');
+        userElement.textContent = user.username;
+        
+        // Add a green dot if the user is active
+        if (user.isActive) {
+            const activeDot = document.createElement('span');
+            activeDot.classList.add('active-dot');
+            userElement.appendChild(activeDot);
+        }
+
+        userList.appendChild(userElement);
+    });
+});
