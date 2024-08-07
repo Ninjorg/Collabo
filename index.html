@@ -5,209 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat App</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        #chatForm {
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        #chatId, #message {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        #sendMessage {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        #sendMessage:hover {
-            background-color: #0056b3;
-        }
         #chat {
             border: 1px solid #ccc;
             height: 400px;
             overflow-y: scroll;
-            background-color: #fff;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         .message {
             padding: 5px;
-            border-bottom: 1px solid #eee;
-        }
-        .chat-item {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            cursor: pointer;
-            background-color: #fff;
-            border-radius: 4px;
-        }
-        .chat-item:hover {
-            background-color: #f0f0f0;
         }
         #chatList {
-            margin-bottom: 20px;
-        }
-        #createGroupChat {
-            background-color: #28a745;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        #createGroupChat:hover {
-            background-color: #218838;
-        }
-        #username {
-            font-weight: bold;
-        }
-        #logout {
-            background-color: #dc3545;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        #logout:hover {
-            background-color: #c82333;
-        }
-        .chat-header {
-            font-weight: bold;
+            border: 1px solid #ccc;
+            padding: 10px;
             margin-bottom: 10px;
         }
-        .chat-info {
-            font-size: 0.9em;
-            color: #666;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .form-group button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 15px;
+        .chat-item {
+            padding: 5px;
             cursor: pointer;
-            border-radius: 4px;
-        }
-        .form-group button:hover {
-            background-color: #0056b3;
-        }
-        .chat-list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .chat-list-item span {
-            flex: 1;
-            margin-right: 10px;
-        }
-        .chat-list-item button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .chat-list-item button:hover {
-            background-color: #0056b3;
+            background-color: #b9ffff;
         }
     </style>
+    <!-- Include Socket.IO client library -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="app.js" defer></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Chat Application</h1>
-        <p class="chat-info">Welcome to the chat application. Here you can create group chats, send messages, and view your chat history.</p>
-
-        <!-- Create Group Chat Section -->
-        <section id="createChatSection">
-            <h2>Create Group Chat</h2>
-            <form id="createChatForm">
-                <div class="form-group">
-                    <label for="chatName">Chat Name</label>
-                    <input type="text" id="chatName" placeholder="Enter chat name" required />
-                </div>
-                <div class="form-group">
-                    <label for="participants">Participants (comma separated emails)</label>
-                    <input type="text" id="participants" placeholder="Enter participant emails" required />
-                </div>
-                <button type="button" id="createGroupChat">Create Group Chat</button>
-            </form>
-        </section>
-
-        <!-- Chat List Section -->
-        <section id="chatListSection">
-            <h2>My Chats</h2>
-            <div id="chatList"></div>
-        </section>
-
-        <!-- Chat Form Section -->
-        <section id="chatFormSection">
-            <h2>Send a Message</h2>
-            <form id="chatForm">
-                <div class="form-group">
-                    <label for="chatId">Chat ID</label>
-                    <input type="text" id="chatId" placeholder="Enter chat ID" required />
-                </div>
-                <div class="form-group">
-                    <label for="message">Message</label>
-                    <textarea id="message" placeholder="Type a message" required></textarea>
-                </div>
-                <button type="submit" id="sendMessage">Send Message</button>
-            </form>
-        </section>
-
-        <!-- Chat Display Section -->
-        <section id="chatDisplaySection">
-            <h2>Chat Window</h2>
-            <div id="chat"></div>
-        </section>
-
-        <!-- User Info Section -->
-        <section id="userInfoSection">
-            <p>Logged in as: <span id="username"></span></p>
-            <button id="logout">Logout</button>
-        </section>
-    </div>
-
-    <!-- Include Socket.IO client library -->
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script src="app.js" defer></script>
+    <h1>Chat App</h1>
+    <div id="chatList"></div>
+    <form id="chatForm">
+        <input type="text" id="chatId" placeholder="Chat ID" required /><br>
+        <textarea id="message" placeholder="Type a message" required></textarea><br>
+        <button type="submit" id="sendMessage">Send</button>
+    </form>
+    <div id="chat"></div>
+    <p><span id="username"></span></p>
+    <button id="logout">Logout</button>
 </body>
 </html>

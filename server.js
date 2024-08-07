@@ -12,7 +12,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 const SECRET_KEY = 'your_secret_key'; // Use a secure key in production
 
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 
 // User data file
@@ -42,7 +42,7 @@ app.post('/signup', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    users.push({ username, email, password: hashedPassword });
+    users.push({ username, email, password: hashedPassword, chats: [] });
     fs.writeFileSync(USERS_FILE, JSON.stringify(users));
 
     res.status(201).json({ message: 'User created' });
@@ -58,8 +58,8 @@ app.post('/login', async (req, res) => {
         return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ email: user.email }, SECRET_KEY, { expiresIn: '1h' });
-    res.json({ token, username: user.username });
+    const token = jwt.sign({ email: user.email, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+    res.json({ token, username: user.username }); // Send the username
 });
 
 // Middleware to check authentication
@@ -74,12 +74,42 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+// Add chat to user's chats
+const addChatToUser = (userEmail, chatId) => {
+    const users = readUsers();
+    const user = users.find(user => user.email === userEmail);
+    if (user) {
+        // Use Set to ensure unique chat IDs
+        const userChatsSet = new Set(user.chats);
+        userChatsSet.add(chatId);
+        user.chats = Array.from(userChatsSet);
+        fs.writeFileSync(USERS_FILE, JSON.stringify(users));
+    }
+};
+
+// Fetch user chats
+app.get('/userChats', authenticateToken, (req, res) => {
+    const user = readUsers().find(user => user.email === req.user.email);
+    if (user) {
+        res.json({ chats: user.chats });
+    } else {
+        res.status(404).json({ message: 'User not found' });
+    }
+});
+
 io.use((socket, next) => {
     const token = socket.handshake.auth.token;
-    if (!token) return next(new Error('Authentication error'));
+    if (!token) {
+        console.error('Authentication error: Token is missing');
+        return next(new Error('Authentication error'));
+    }
 
     jwt.verify(token, SECRET_KEY, (err, user) => {
-        if (err) return next(new Error('Authentication error'));
+        if (err) {
+            console.error('Authentication error:', err.message);
+            return next(new Error('Authentication error'));
+        }
+        console.log('Authenticated user:', user); // Debug: Check the decoded user object
         socket.user = user;
         next();
     });
@@ -88,11 +118,15 @@ io.use((socket, next) => {
 // On user connection
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
+    console.log('User details:', socket.user); // Debug: Check user details on connection
 
     // Handle joining a chat
     socket.on('joinChat', (chatId) => {
         socket.join(chatId);
         console.log(`User ${socket.user.email} joined chat ${chatId}`);
+
+        // Add chatId to user's chats
+        addChatToUser(socket.user.email, chatId);
 
         // Read messages from file and send to client
         const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
