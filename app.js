@@ -51,7 +51,7 @@ const fetchUserChats = () => {
 // Update chat list on page load
 const updateChatList = (chats) => {
     const chatListElement = document.getElementById('chatList');
-    chatListElement.innerHTML = '<h2>My Chats</h2>';
+    chatListElement.innerHTML = '<h2>NOTEPAD</h2>';
     const uniqueChats = new Set(chats);
     uniqueChats.forEach((chatId) => {
         const chatItem = document.createElement('div');
@@ -78,27 +78,127 @@ document.getElementById('chatId').addEventListener('change', () => {
 });
 
 // Handle receiving and displaying messages
+const currentUser = localStorage.getItem('username'); // Replace with the actual logic to get the current username
+
+// Handle loading messages
 socket.on('loadMessages', (messages) => {
     const chat = document.getElementById('chat');
     chat.innerHTML = ''; // Clear chat
     messages.forEach((message) => {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
-        messageElement.textContent = `[${message.timestamp || 'No timestamp'}] ${message.username || 'Unknown'}: ${message.message}`;
+
+        // Apply special class if the message is from the current user
+        if (message.username === currentUser) {
+            messageElement.classList.add('current-user');
+        }
+
+
+        const userElement = document.createElement('div');
+        userElement.classList.add('username');
+        userElement.textContent = message.username || 'Unknown';
+
+        const textElement = document.createElement('div');
+        textElement.classList.add('text');
+        textElement.textContent = `${message.username}: ${message.message}`;
+
+        const timestampElement = document.createElement('div');
+        timestampElement.classList.add('timestamp');
+        timestampElement.textContent = message.timestamp || 'No timestamp';
+
+        
+        messageElement.appendChild(userElement);
+        messageElement.appendChild(textElement);
+        messageElement.appendChild(timestampElement);
+
         chat.appendChild(messageElement);
     });
     chat.scrollTop = chat.scrollHeight;
 });
 
 // Handle receiving new messages
+// Handle receiving new messages
+// Handle receiving new messages
 socket.on('receiveMessage', (message) => {
+    console.log('New message received:', message); // Debug: Log the received message
+
     const chat = document.getElementById('chat');
+
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
-    messageElement.textContent = `[${message.timestamp || 'No timestamp'}] ${message.username || 'Unknown'}: ${message.message}`;
+
+    // Apply special class if the message is from the current user
+    if (message.username === currentUser) {
+        messageElement.classList.add('current-user');
+        console.log('Message is from current user'); // Debug: Log if the message is from the current user
+    } else {
+        messageElement.classList.add('other-user');
+        console.log('Message is from another user'); // Debug: Log if the message is from another user
+    }
+
+    const timestampElement = document.createElement('div');
+    timestampElement.classList.add('timestamp');
+    timestampElement.textContent = message.timestamp || 'No timestamp';
+
+    const userElement = document.createElement('div');
+    userElement.classList.add('username');
+    userElement.textContent = message.username || 'Unknown';
+
+    const textElement = document.createElement('div');
+    textElement.classList.add('text');
+    textElement.textContent = `${message.username} : ${message.message}`;
+
+    messageElement.appendChild(timestampElement);
+    messageElement.appendChild(userElement);
+    messageElement.appendChild(textElement);
+
     chat.appendChild(messageElement);
     chat.scrollTop = chat.scrollHeight;
+
+    // Show the new message notification
+    showNewMessageNotification(message, chatId);
 });
+
+// Function to show the new message notification
+function showNewMessageNotification(message, chatId) {
+    let notification = document.getElementById('newMessageNotification');
+
+    if (!notification) {
+        // Create the notification element if it doesn't exist
+        notification = document.createElement('div');
+        notification.id = 'newMessageNotification';
+        notification.classList.add('new-message-notification');
+        document.body.appendChild(notification);
+    }
+
+    // Clear previous content
+    notification.innerHTML = '';
+
+    // Create and add the image
+    const imageElement = document.createElement('img');
+    imageElement.src = 'notification.png'; // Path to your image file
+    imageElement.alt = 'Notification Icon';
+    imageElement.style.width = '30px'; // Adjust the width as needed
+    imageElement.style.height = '30px'; // Adjust the height as needed
+    imageElement.style.marginRight = '5px'; // Add some space between the image and the text
+
+    // Create the text content
+    const textContent = `New message in chat: ${message.username}: ${message.message}`;
+
+    // Append the image and text to the notification
+    notification.appendChild(imageElement);
+    notification.appendChild(document.createTextNode(textContent));
+
+    // Show the notification
+    notification.classList.add('show');
+
+    // Hide the notification after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+}
+
+
 
 // Handle user list updates
 socket.on('updateUsers', (users) => {
