@@ -1,4 +1,3 @@
-
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -160,6 +159,8 @@ const addChatToUser = (userEmail, chatId) => {
     }
 };
 
+
+
 // Sign-up route
 app.post('/signup', async (req, res) => {
     const { username, email, password } = req.body;
@@ -179,6 +180,9 @@ app.post('/signup', async (req, res) => {
 
     res.status(201).json({ message: 'User created' });
 });
+
+
+
 
 // Login route
 app.post('/login', async (req, res) => {
@@ -260,6 +264,7 @@ io.on('connection', (socket) => {
     // Handle joining a chat
     socket.on('joinChat', (chatId) => {
         socket.join(chatId);
+        addChatToUser (socket.user.email, chatId);
         console.log(`User ${socket.user.username} joined chat ${chatId}`);
         
         // Fetch and emit chat messages
@@ -294,6 +299,7 @@ io.on('connection', (socket) => {
         //     io.to(chatId).emit('updateUsers', usersSection.users);
         // }
     });
+    
 
     // Handle user disconnection
     socket.on('disconnect', () => {

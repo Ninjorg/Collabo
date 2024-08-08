@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            height: 100vh;
+            font-family: 'Arial Black', monospace;
+            background-color: #ffe1e1;
+        }
+        #sidebar {
+            width: 230px; /* Increased width to accommodate user list */
+            background-color: #f4f4f4;
+            border-right: 1px solid #000000;
+            padding: 10px;
+            box-shadow: 2px 0 5px rgba(255, 255, 255, 0.1);
+            overflow-y: auto;
+            margin: 10px;
+            display: flex;
+            flex-direction: column;
+            background-color: #ff0051;
+            border-radius: 15px;
+        }
+        #chatContainer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        #chat {
+            border: 1px solid #ccc;
+            flex: 1;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        .message {
+            padding: 5px;
+        }
+        .chat-item {
+            padding: 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            background-color: #31001878;
+            margin-bottom: 5px;
+            color: #e0f7fa;
+        }
+        #username {
+            font-weight: bold;
+        }
+        .toastify-message {
+            background-color: #007bff;
+            color: white;
+        }
+        #chatForm {
+            margin-top: auto;
+        }
+        .chatAdd {
+            margin-bottom: 10px;
+        }
+        #userList {
+            margin-top: 10px;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+        .user-item {
+            padding: 5px;
+            background-color: #e0f7fa;
+            margin-bottom: 5px;
+        }
+        .user {
+            position: relative;
+            padding-left: 20px; /* Adjust padding to make space for the dot */
+        }
+
+        .active-dot {
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            width: 8px;
+            height: 8px;
+            background-color: green;
+            border-radius: 50%;
+            transform: translateY(-50%);
+        }
+        .message {
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: left;
+            
+        }
+
+        .timestamp {
+            font-size: 0.6em;
+            color: gray;
+            pad: 2px;
+            border-radius: 10px;
+        }
+
+        .username {
+            font-weight: bold;
+            display: none;
+        }
+
+        .text {
+            margin-top: 5px;
+            background-color: black;
+            color: white;
+            padding: 10px;
+            border-radius: 7px;
+        }
+
+        /* Special styling for messages from the current user */
+        .current-user {
+            align-items: flex-end;
+            text-align: right;
+        }
+
+        .current-user .timestamp {
+            background-color:rgba(255, 255, 255, 0.1);
+        }
+        .current-user .username {
+            display: none;
+        }
+        .current-user .text {
+            background-color: #ff0051; /* Example background color for current user messages */
+            padding: 10px;
+            border-radius: 7px;
+        }
+
+        .current-user .username {
+            font-weight: bold;
+            color: #007bff; /* Example color for username of the current user */
+        }
+    </style>
+    <!-- Include Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- Include Socket.IO client library -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <!-- Include JWT Decode library -->
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <!-- Include Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <!-- Your main JavaScript file -->
+    <script type="module" src="app.js"></script>
+</head>
+<body>
+    <div id="sidebar">
+        <div id="chatList"></div>
+        <div class="chatAdd">
+            <input type="text" placeholder="user(s)" required id="groupContent"/>
+        </div>
+        <div id="userList">
+            <h3>Users</h3>
+            <!-- User list will be dynamically inserted here -->
+        </div>
+    </div>
+    <div id="chatContainer">
+        <h1>Chat App</h1>
+        <div id="chat"></div>
+        <form id="chatForm">
+            <input type="text" id="chatId" placeholder="Chat ID" required /><br>
+            <textarea id="message" placeholder="Type a message" required></textarea><br>
+            <button type="submit" id="sendMessage">Send</button>
+        </form>
+        <p><span id="username"></span></p>
+        <button id="logout">Logout</button>
+    </div>
+</body>
+</html>
