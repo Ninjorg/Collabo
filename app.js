@@ -21,6 +21,7 @@ document.getElementById('logout').addEventListener('click', () => {
     window.location.href = 'login.html';
 });
 
+// Handle sending messages
 document.getElementById('sendMessage').addEventListener('click', (e) => {
     e.preventDefault();
     const chatId = document.getElementById('chatId').value;
@@ -93,7 +94,6 @@ socket.on('loadMessages', (messages) => {
             messageElement.classList.add('current-user');
         }
 
-
         const userElement = document.createElement('div');
         userElement.classList.add('username');
         userElement.textContent = message.username || 'Unknown';
@@ -106,7 +106,6 @@ socket.on('loadMessages', (messages) => {
         timestampElement.classList.add('timestamp');
         timestampElement.textContent = message.timestamp || 'No timestamp';
 
-        
         messageElement.appendChild(userElement);
         messageElement.appendChild(textElement);
         messageElement.appendChild(timestampElement);
@@ -117,9 +116,6 @@ socket.on('loadMessages', (messages) => {
 });
 
 // Handle receiving new messages
-// Handle receiving new messages
-// Handle receiving new messages
-
 let newMessageCount = 0;
 
 function updateTitle() {
@@ -161,11 +157,11 @@ socket.on('receiveMessage', (message) => {
     chat.scrollTop = chat.scrollHeight;
 
     // Show notification and update title
-    showNewMessageNotification(message, chatId);
+    showNewMessageNotification(message);
 });
 
 // Function to show the new message notification
-function showNewMessageNotification(message, chatId) {
+function showNewMessageNotification(message) {
     let notification = document.getElementById('newMessageNotification');
 
     if (!notification) {
@@ -209,8 +205,6 @@ function resetNewMessageCount() {
     newMessageCount = 0;
     updateTitle();
 }
-
-
 
 // Handle user list updates
 socket.on('updateUsers', (users) => {

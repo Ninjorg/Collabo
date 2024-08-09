@@ -61,6 +61,19 @@ const initializeDefaultChats = () => {
     });
 };
 
+const initializeDirectMessages = () => {
+    const users = readUsers();
+    users.forEach(user => {
+        if (!user.directMessages) {
+            user.directMessages = {};
+        }
+    });
+    writeUsers(users);
+};
+
+// Initialize direct messages for all users
+initializeDirectMessages();
+
 const initializeDefaultChatsForUser = (username) => {
     const defaultChats = ['general', 'homework', 'counting'];
     const users = readUsers();
@@ -90,6 +103,21 @@ const updateUsersWithDefaultChats = () => {
 // Initialize default chats and update existing users at startup
 initializeDefaultChats();
 updateUsersWithDefaultChats();
+
+
+const updateUsersWithDirectMessages = () => {
+    const users = readUsers();
+    users.forEach(user => {
+        if (!user.directMessages) {
+            user.directMessages = {};
+        }
+    });
+    writeUsers(users);
+};
+
+// Update existing users with direct messages field
+updateUsersWithDirectMessages();
+
 
 // Function to update the chat file
 const updateChatFile = (chatId, users) => {
@@ -171,12 +199,16 @@ app.post('/signup', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = { username, email, password: hashedPassword, chats: [] };
-    addChatToUser(email, DEFAULT_CHATS[0]); // Add user to the default 'general' chat
-    users.push(newUser);
+    const newUser = {
+        username,
+        email,
+        password: hashedPassword,
+        chats: [DEFAULT_CHATS[0]], // Add user to the default 'general' chat
+        directMessages: {} // Initialize directMessages field
+    };
 
-    
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    users.push(newUser);
+    writeUsers(users);
 
     res.status(201).json({ message: 'User created' });
 });
@@ -245,26 +277,21 @@ io.on('connection', (socket) => {
     // Update user status to active
     updateUserStatus(socket.user.username, true);
 
-    // Notify all clients about the user list update
+    // Ensure the user has directMessages field
     const users = readUsers();
+    const user = users.find(u => u.email === socket.user.email);
+    if (user && !user.directMessages) {
+        user.directMessages = {};
+        writeUsers(users);
+    }
+
+    // Notify all clients about the user list update
     io.emit('updateUsers', users);
-
-    // Handle user disconnection
-    socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
-
-        // Update user status to inactive
-        updateUserStatus(socket.user.username, false);
-
-        // Notify all clients about the user list update
-        const users = readUsers();
-        io.emit('updateUsers', users);
-    });
 
     // Handle joining a chat
     socket.on('joinChat', (chatId) => {
         socket.join(chatId);
-        addChatToUser (socket.user.email, chatId);
+        addChatToUser(socket.user.email, chatId);
         console.log(`User ${socket.user.username} joined chat ${chatId}`);
         
         // Fetch and emit chat messages
@@ -276,38 +303,57 @@ io.on('connection', (socket) => {
     });
 
     // Handle sending a message
-    socket.on('sendMessage', ({ chatId, message }) => {
+    socket.on('sendMessage', ({ chatId, message, toUser }) => {
         const timestamp = new Date().toISOString();
-        const messageObject = { username: socket.user.username, message, timestamp, chatId };
+        const messageObject = { username: socket.user.username, message, timestamp };
 
-        // Save message to file
-        const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
-        if (!fs.existsSync(chatFilePath)) {
-            fs.writeFileSync(chatFilePath, JSON.stringify([]));
+        if (toUser) {
+            // Private message
+            const recipient = users.find(user => user.username === toUser);
+            if (recipient) {
+                // Update recipient's direct messages
+                if (!recipient.directMessages[socket.user.username]) {
+                    recipient.directMessages[socket.user.username] = [];
+                }
+                recipient.directMessages[socket.user.username].push(messageObject);
+                writeUsers(users);
+
+                // Update sender's direct messages
+                if (!user.directMessages[toUser]) {
+                    user.directMessages[toUser] = [];
+                }
+                user.directMessages[toUser].push(messageObject);
+                writeUsers(users);
+
+                // Emit message to recipient
+                const recipientSocket = Array.from(io.sockets.sockets.values()).find(s => s.user.username === toUser);
+                if (recipientSocket) {
+                    recipientSocket.emit('receiveMessage', { ...messageObject, fromUser: socket.user.username });
+                }
+            }
+        } else {
+            // Public message
+            const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
+            if (!fs.existsSync(chatFilePath)) {
+                fs.writeFileSync(chatFilePath, JSON.stringify([]));
+            }
+            const messages = JSON.parse(fs.readFileSync(chatFilePath));
+            messages.push(messageObject);
+            fs.writeFileSync(chatFilePath, JSON.stringify(messages, null, 2));
+
+            // Emit message to chat
+            io.to(chatId).emit('receiveMessage', messageObject);
         }
-        const messages = JSON.parse(fs.readFileSync(chatFilePath));
-        messages.push(messageObject);
-        fs.writeFileSync(chatFilePath, JSON.stringify(messages, null, 2));
-
-        // Emit message to chat
-        io.to(chatId).emit('receiveMessage', messageObject);
-
-        // Emit updated user list
-        const chatData = JSON.parse(fs.readFileSync(chatFilePath));
-        // const usersSection = chatData.find(section => section.users !== undefined);
-        // if (usersSection) {
-        //     io.to(chatId).emit('updateUsers', usersSection.users);
-        // }
     });
-    
 
     // Handle user disconnection
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
-        // Update the user's isActive status to false
         updateUserStatus(socket.user.email, false);
     });
 });
+
+
 
 
 // Start the server
