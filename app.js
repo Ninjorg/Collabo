@@ -218,15 +218,21 @@ function resetNewMessageCount() {
     updateTitle();
 }
 
+// Handle emoji selection
+const emojiPicker = document.getElementById('emojiPicker');
+const messageInput = document.getElementById('message');
 
-
+emojiPicker.addEventListener('emoji-click', (event) => {
+    const emoji = event.detail.unicode;
+    messageInput.value += emoji; // Append the selected emoji to the input field
+});
 
 
 // Handle user list updates
 socket.on('updateUsers', (users) => {
     console.log('Users in the current chat:', users);
     const userList = document.getElementById('userList');
-    userList.innerHTML = '<h2>Users in Chat</h2>';
+    userList.innerHTML = '<h2>USERS</h2>';
     users.forEach(user => {
         const userElement = document.createElement('div');
         userElement.classList.add('user');

@@ -24,6 +24,11 @@
             flex-direction: column;
             background-color: #ff0051;
             border-radius: 15px;
+            transition: transform 0.4s ease;
+        }
+
+        #sidebar:hover {
+            transform: scale(1.03);
         }
         #chatContainer {
             flex: 1;
@@ -51,6 +56,13 @@
             background-color: #31001878;
             margin-bottom: 5px;
             color: #e0f7fa;
+            transition: transform 0.4s ease; /* Optional: For smooth scaling */
+        }
+
+        .chat-item:hover {
+            transform: scale(1.05);
+            background-color: #cccccc9e;
+            color: #000000;
         }
         #username {
             font-weight: bold;
@@ -80,15 +92,21 @@
         }
         .user {
             position: relative;
-            padding-left: 20px; /* Adjust padding to make space for the dot */
+            padding-right: 20px; /* Adjust padding to make space for the dot */
+            padding: 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            background-color: #31001878;
+            margin-bottom: 5px;
+            color: #e0f7fa;
         }
 
         .active-dot {
             position: absolute;
-            left: 5px;
             top: 50%;
             width: 8px;
             height: 8px;
+            margin-left: 5px;
             background-color: rgb(79, 255, 79);
             border-radius: 50%;
             transform: translateY(-50%);
@@ -175,7 +193,9 @@
             flex-direction: column;
             align-items: center;
             margin-top: auto;
+            width: 100%;
         }
+        
         #chatId {
             width: 100%;
             max-width: 300px;
@@ -190,20 +210,19 @@
             font-weight: bold;
         }
         #message {
-            width: 1000px;
+            width: 100%; /* Make it take up 100% of the available width */
+            max-width: 900px;
             padding: 10px;
-            height: 10px;
-            text-align: center;
+            height: 10px; /* Increase the height for better usability */
+            text-align: left;
             align-content: center;
             border-radius: 10px;
-            border: 1px solid #ccc;
-            text-align: center;
-            margin-right: 10px; /* Space between message box and button */
-            border: 3px solid #ff0051 ;
+            border: 3px solid #ff0051;
             background-color: #ff00004d;
             color: rgb(0, 0, 0);
             font-weight: bold;
             font-size: 15px;
+            margin-right: 10px; /* Space between message box and button */
         }
         #message::placeholder{
             color: rgb(0, 0, 0);
@@ -221,9 +240,21 @@
         #sendMessage:hover {
             background-color: #e60048;
         }
+        #chatList h2 {
+            color: white;
+            text-align: center;
+            margin: 0; /* Remove default margin */
+            padding: 10px 0; /* Add padding for spacing */
+        }
+        #userList h2 {
+            color: white;           /* Set text color to white */
+            text-align: center;     /* Center the text horizontally */
+            margin: 0;              /* Remove default margin */
+            padding: 10px 0;        /* Add padding for better spacing */
+        }
     </style>
     <!-- Include Toastify CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet"  href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <!-- Include Socket.IO client library -->
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
     <!-- Include JWT Decode library -->
@@ -232,6 +263,7 @@
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <!-- Your main JavaScript file -->
     <script type="module" src="app.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@latest/dist/index.js"></script>
 </head>
 <body>
     <div id="sidebar">
@@ -249,6 +281,7 @@
         <form id="chatForm">
             
             <div style="display: flex; justify-content: center; width: 100%; max-width: 400px;">
+                <emoji-picker id="emojiPicker"></emoji-picker>
                 <textarea id="message" placeholder="Type a message" required></textarea>
                 <button type="submit" id="sendMessage">Send</button>
             </div>
