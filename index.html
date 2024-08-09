@@ -29,6 +29,8 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            justify-content: flex-end; /* Ensure the form stays at the bottom */
+            padding: 10px;
         }
         #chat {
             border: 3px solid #ff0000;
@@ -58,8 +60,10 @@
             color: white;
         }
         #chatForm {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             margin-top: auto;
-
         }
         .chatAdd {
             margin-bottom: 10px;
@@ -164,6 +168,59 @@
             font-weight: bold;
             color: #007bff; /* Example color for username of the current user */
         }
+
+        /* Additional CSS for chat form */
+        #chatForm {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: auto;
+        }
+        #chatId {
+            width: 100%;
+            max-width: 300px;
+            padding: 8px;
+            margin-top: 10px;
+            border-radius: 20px;
+            border: 4px solid #ffffff;
+            background-color: #ff0051;
+            text-align: center;
+            font-size: 30px;
+            color: white;
+            font-weight: bold;
+        }
+        #message {
+            width: 1000px;
+            padding: 10px;
+            height: 10px;
+            text-align: center;
+            align-content: center;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+            margin-right: 10px; /* Space between message box and button */
+            border: 3px solid #ff0051 ;
+            background-color: #ff00004d;
+            color: rgb(0, 0, 0);
+            font-weight: bold;
+            font-size: 15px;
+        }
+        #message::placeholder{
+            color: rgb(0, 0, 0);
+        }
+        #sendMessage {
+            padding: 8px 16px;
+            background-color: #ff0051;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            align-content: center;
+        }
+        #sendMessage:hover {
+            background-color: #e60048;
+        }
     </style>
     <!-- Include Toastify CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -180,7 +237,6 @@
     <div id="sidebar">
         <div id="chatList"></div>
         <div class="chatAdd">
-            <input type="text" placeholder="user(s)" required id="groupContent"/>
         </div>
         <div id="userList">
             <h3>Users</h3>
@@ -188,12 +244,14 @@
         </div>
     </div>
     <div id="chatContainer">
-        <h1 id="chatName">ChatName</h1>
+        <input type="text" id="chatId" placeholder="Join/Create chats" required /><br>
         <div id="chat"></div>
         <form id="chatForm">
-            <input type="text" id="chatId" placeholder="Chat ID" required /><br>
-            <textarea id="message" placeholder="Type a message" required></textarea><br>
-            <button type="submit" id="sendMessage">Send</button>
+            
+            <div style="display: flex; justify-content: center; width: 100%; max-width: 400px;">
+                <textarea id="message" placeholder="Type a message" required></textarea>
+                <button type="submit" id="sendMessage">Send</button>
+            </div>
         </form>
         <p><span id="username"></span></p>
         <button id="logout">Logout</button>
