@@ -119,9 +119,18 @@ socket.on('loadMessages', (messages) => {
 // Handle receiving new messages
 // Handle receiving new messages
 // Handle receiving new messages
-socket.on('receiveMessage', (message) => {
-    console.log('New message received:', message); // Debug: Log the received message
 
+let newMessageCount = 0;
+
+function updateTitle() {
+    if (newMessageCount > 0) {
+        document.title = `Collabo (${newMessageCount} New Message${newMessageCount > 1 ? 's' : ''})`;
+    } else {
+        document.title = 'Collabo';
+    }
+}
+
+socket.on('receiveMessage', (message) => {
     const chat = document.getElementById('chat');
 
     const messageElement = document.createElement('div');
@@ -130,10 +139,6 @@ socket.on('receiveMessage', (message) => {
     // Apply special class if the message is from the current user
     if (message.username === currentUser) {
         messageElement.classList.add('current-user');
-        console.log('Message is from current user'); // Debug: Log if the message is from the current user
-    } else {
-        messageElement.classList.add('other-user');
-        console.log('Message is from another user'); // Debug: Log if the message is from another user
     }
 
     const timestampElement = document.createElement('div');
@@ -146,7 +151,7 @@ socket.on('receiveMessage', (message) => {
 
     const textElement = document.createElement('div');
     textElement.classList.add('text');
-    textElement.textContent = `${message.username} : ${message.message}`;
+    textElement.textContent = `${message.username}: ${message.message}`;
 
     messageElement.appendChild(timestampElement);
     messageElement.appendChild(userElement);
@@ -155,7 +160,7 @@ socket.on('receiveMessage', (message) => {
     chat.appendChild(messageElement);
     chat.scrollTop = chat.scrollHeight;
 
-    // Show the new message notification
+    // Show notification and update title
     showNewMessageNotification(message, chatId);
 });
 
@@ -164,38 +169,45 @@ function showNewMessageNotification(message, chatId) {
     let notification = document.getElementById('newMessageNotification');
 
     if (!notification) {
-        // Create the notification element if it doesn't exist
         notification = document.createElement('div');
         notification.id = 'newMessageNotification';
         notification.classList.add('new-message-notification');
         document.body.appendChild(notification);
     }
 
-    // Clear previous content
     notification.innerHTML = '';
 
-    // Create and add the image
     const imageElement = document.createElement('img');
-    imageElement.src = 'notification.png'; // Path to your image file
+    imageElement.src = 'notification.png';
     imageElement.alt = 'Notification Icon';
-    imageElement.style.width = '30px'; // Adjust the width as needed
-    imageElement.style.height = '30px'; // Adjust the height as needed
-    imageElement.style.marginRight = '5px'; // Add some space between the image and the text
+    imageElement.style.width = '30px';
+    imageElement.style.height = '30px';
+    imageElement.style.marginRight = '5px';
 
-    // Create the text content
-    const textContent = `New message in chat: ${message.username}: ${message.message}`;
-
-    // Append the image and text to the notification
+    const textContent = `New message in #${message.chatId}: ${message.username}: ${message.message}`;
     notification.appendChild(imageElement);
     notification.appendChild(document.createTextNode(textContent));
 
-    // Show the notification
     notification.classList.add('show');
 
     // Hide the notification after 3 seconds
     setTimeout(() => {
         notification.classList.remove('show');
     }, 3000);
+
+    // Increment the new message count and update the title
+    newMessageCount++;
+    updateTitle();
+}
+
+document.addEventListener('click', () => {
+    resetNewMessageCount();
+});
+
+// Reset the new message count and title when the user views the chat
+function resetNewMessageCount() {
+    newMessageCount = 0;
+    updateTitle();
 }
 
 

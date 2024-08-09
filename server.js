@@ -278,7 +278,7 @@ io.on('connection', (socket) => {
     // Handle sending a message
     socket.on('sendMessage', ({ chatId, message }) => {
         const timestamp = new Date().toISOString();
-        const messageObject = { username: socket.user.username, message, timestamp };
+        const messageObject = { username: socket.user.username, message, timestamp, chatId };
 
         // Save message to file
         const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
