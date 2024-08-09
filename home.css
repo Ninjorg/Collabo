@@ -1,0 +1,434 @@
+/* General styles */
+body {
+    font-family: 'Arial Black', Arial, sans-serif; /* Use Arial Black */
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    overflow: scroll;
+}
+
+
+
+/* Home page styles */
+.homePage {
+    padding: 20px;
+    text-align: center;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 5px;
+    border-radius: 8px;
+    flex: 1;
+    overflow: scroll;
+}
+
+.homePage h1 {
+    font-size: 4em; /* This will override the general h1 styling */
+    margin-bottom: 10px;
+    color: #000000;
+}
+
+.homePage p {
+    font-size: 1.2em;
+    color: #666;
+    line-height: 1.6;
+
+}
+
+.homePage .general {
+    background-color: #f6ffca;
+    margin: 20px;
+    padding: 40px;
+    align-content: center;
+    align-items: center;
+    border-radius: 20px;
+    color: #000000;
+}
+
+/* About section styles */
+.homePage .about {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.homePage .about-item {
+    flex: 1;
+    padding: 10px;
+    margin: 0 10px;
+}
+
+.homePage .about-item p {
+    margin: 0;
+    font-size: 1em;
+    color: #666;
+}
+
+/* Login styles */
+.homePage .login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    border-radius: 8px;
+}
+
+.homePage .item {
+    flex: 1;
+    padding: 20px;
+    margin: 0 10px;
+    background-color: #e0e0e0;
+    text-align: center;
+    border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace; /* Monospace font */
+}
+
+.homePage .seperator {
+    width: 2px;
+    background-color: #ccc;
+}
+
+/* Footer styles */
+.homePage .footer {
+    padding: 20px;
+    padding-top: 0px;
+    text-align: center;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+    border-radius: 8px;
+    position: fixed;
+    bottom: 0;
+    width: calc(100% - 40px); /* Adjust for margin */
+}
+
+.homePage .footer p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* Banner styles */
+.homePage .banner {
+    width: 85vw;
+    height: 40vh;
+    border-radius: 20px;
+    margin: 0;
+    margin-bottom: 30px;
+    background-color: #ffcece;
+    margin-top: 10px;
+    
+}
+/* General styles */
+body {
+    font-family: 'Arial Black', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    overflow: scroll;
+}
+
+/* Home page styles */
+.homePage {
+    padding: 20px;
+    text-align: center;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 5px;
+    border-radius: 8px;
+    flex: 1;
+    overflow: scroll;
+}
+
+.homePage h1 {
+    font-size: 4em;
+    margin-bottom: 10px;
+    color: #000000;
+}
+
+.homePage p {
+    font-size: 1.2em;
+    color: #666;
+    line-height: 1.6;
+}
+
+.homePage .general {
+    background-color: #f6ffca;
+    margin: 20px;
+    padding: 40px;
+    border-radius: 20px;
+}
+
+/* About section styles */
+.homePage .about {
+    margin-top: 20px;
+}
+
+.homePage .about-item {
+    margin: 10px 0;
+    text-align: left;
+}
+
+.homePage .about-item h2 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.homePage .about-item p {
+    margin: 0;
+    font-size: 1em;
+    color: #666;
+}
+
+/* Features section styles */
+.homePage .features {
+    margin-top: 40px;
+}
+
+.homePage .features h2 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.homePage .features ul {
+    list-style-type: disc;
+    padding-left: 40px;
+    text-align: left;
+}
+
+.homePage .features li {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+/* Testimonials section styles */
+.homePage .testimonials {
+    margin-top: 40px;
+}
+
+.homePage .testimonials h2 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.homePage .testimonial {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.homePage .testimonial p {
+    font-size: 1.1em;
+    color: #666;
+}
+
+/* FAQ section styles */
+.homePage .faq {
+    margin-top: 40px;
+}
+
+.homePage .faq h2 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.homePage .faq-item {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.homePage .faq-item h3 {
+    font-size: 1.4em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.homePage .faq-item p {
+    font-size: 1.1em;
+    color: #666;
+}
+
+/* Info section styles */
+.homePage .info {
+    margin-top: 0px;
+    background-color: #ffbdbd;
+    padding: 5px;
+    border-radius: 8px;
+}
+
+.homePage .info p {
+    font-size: 1.2em;
+    color: #333;
+}
+
+/* Footer styles */
+.homePage .footer {
+    padding: 20px;
+    padding-top: 0px;
+    text-align: center;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 40px;
+    border-radius: 8px;
+}
+
+.homePage .footer p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.homePage .login {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+    border-radius: 8px;
+}
+
+.homePage .item {
+    flex: 1;
+    padding: 20px;
+    margin: 0 10px;
+    background-color: #e0e0e0;
+    text-align: center;
+    border-radius: 8px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.homePage .seperator {
+    width: 2px;
+    background-color: #ccc;
+}
+
+/* Banner styles */
+.homePage .banner {
+    width: 85vw;
+    height: 33vh;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    background-color: #ffcece;
+    margin-top: 10px;
+}
+.homePage .login-footer{
+    width:100%;
+    height: 100%;
+    display: flex;align-items: center;
+    gap: 100px;
+}
+.homePage .item {
+    flex:1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    background-color: #f7ffc62d;
+}
+
+.item form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.item form input {
+    padding: 20px;
+    border-radius: 10px;
+    border: solid 1px rgb(255, 0, 102);
+    outline: none;
+    background-color: #fffcfc;
+    color:rgb(0, 0, 0)
+
+}
+
+.item form label {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px;
+    cursor: pointer;
+}
+
+.item form img {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+}
+
+.item form button {
+    width: 300px;
+    border: none;
+    outline: #e0e0e0;
+    padding: 20px;
+    background-color: rgb(255, 0, 102);
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.seperator {
+    height: 80%;
+    width: 3px;
+    background-color: rgb(255, 0, 102);
+}
+
+.botton &:disabled {
+    cursor: not-allowed;
+    background-color:rgb(210, 5, 87) ;
+}
+/* Meet the Team Section */
+.meet-team {
+    margin: 50px 0;
+    text-align: center;
+}
+
+.meet-team h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+.team-row {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.team-member {
+    flex: 1;
+    margin: 0 10px;
+    text-align: center;
+}
+
+.team-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+.team-member h3 {
+    font-size: 1.5em;
+    margin: 10px 0 5px 0;
+}
+
+.team-member p {
+    font-size: 1em;
+    color: #555;
+}

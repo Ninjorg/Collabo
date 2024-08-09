@@ -18,13 +18,23 @@ if (username) {
 document.getElementById('logout').addEventListener('click', () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
-    window.location.href = 'login.html';
+    window.location.href = 'home.html';
 });
 
-
+// Message cooldown logic
+let lastMessageTime = 0;
+const MESSAGE_COOLDOWN = 4000; // 3 seconds in milliseconds
 
 document.getElementById('sendMessage').addEventListener('click', (e) => {
     e.preventDefault();
+    const currentTime = new Date().getTime();
+    
+    if (currentTime - lastMessageTime < MESSAGE_COOLDOWN) {
+        // If the cooldown period has not passed, do not send the message
+        showNewCooldownNotification();
+        return;
+    }
+
     const chatId = document.getElementById('chatId').value;
     const message = document.getElementById('message').value;
     const token = localStorage.getItem('token');
@@ -34,8 +44,12 @@ document.getElementById('sendMessage').addEventListener('click', (e) => {
         const timestamp = new Date().toISOString();
         socket.emit('sendMessage', { chatId, message, username, timestamp });
         document.getElementById('message').value = '';
+
+        // Update last message time
+        lastMessageTime = currentTime;
     }
 });
+
 
 // Fetch and display user's chats
 const fetchUserChats = () => {
@@ -49,7 +63,6 @@ const fetchUserChats = () => {
     .then(data => updateChatList(data.chats))
     .catch(error => console.error('Error fetching user chats:', error));
 };
-
 
 // Update chat list on page load
 const updateChatList = (chats) => {
@@ -101,7 +114,6 @@ socket.on('loadMessages', (messages) => {
             messageElement.classList.add('current-user');
         }
 
-
         const userElement = document.createElement('div');
         userElement.classList.add('username');
         userElement.textContent = message.username || 'Unknown';
@@ -114,7 +126,6 @@ socket.on('loadMessages', (messages) => {
         timestampElement.classList.add('timestamp');
         timestampElement.textContent = message.timestamp || 'No timestamp';
 
-        
         messageElement.appendChild(userElement);
         messageElement.appendChild(textElement);
         messageElement.appendChild(timestampElement);
@@ -125,9 +136,6 @@ socket.on('loadMessages', (messages) => {
 });
 
 // Handle receiving new messages
-// Handle receiving new messages
-// Handle receiving new messages
-
 let newMessageCount = 0;
 
 function updateTitle() {
@@ -208,6 +216,42 @@ function showNewMessageNotification(message, chatId) {
     updateTitle();
 }
 
+function showNewCooldownNotification() {
+    let notification = document.getElementById('newMessageNotification');
+
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'newMessageNotification';
+        notification.classList.add('new-message-notification');
+        document.body.appendChild(notification);
+    }
+
+    notification.innerHTML = '';
+
+    const imageElement = document.createElement('img');
+    imageElement.src = 'notification.png';
+    imageElement.alt = 'Notification Icon';
+    imageElement.style.width = '30px';
+    imageElement.style.height = '30px';
+    imageElement.style.marginRight = '5px';
+
+    const textContent = `You are in cooldown, please wait for 2 seconds.`;
+    notification.appendChild(imageElement);
+    notification.appendChild(document.createTextNode(textContent));
+
+    notification.classList.add('show');
+
+    // Hide the notification after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+
+    // Increment the new message count and update the title
+    newMessageCount++;
+    updateTitle();
+}
+
+
 document.addEventListener('click', () => {
     resetNewMessageCount();
 });
@@ -226,7 +270,6 @@ emojiPicker.addEventListener('emoji-click', (event) => {
     const emoji = event.detail.unicode;
     messageInput.value += emoji; // Append the selected emoji to the input field
 });
-
 
 // Handle user list updates
 socket.on('updateUsers', (users) => {

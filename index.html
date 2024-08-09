@@ -141,6 +141,14 @@
             color: white;
             padding: 10px;
             border-radius: 7px;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+        }
+
+        .text:hover{
+            background-color: white;
+            color: black;
+            transform: scale(1.05);
         }
 
         /* Special styling for messages from the current user */
@@ -180,6 +188,13 @@
             background-color: #ff0051; /* Example background color for current user messages */
             padding: 10px;
             border-radius: 7px;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+        }
+        .current-user .text:hover{
+            background-color: white;
+            color: #ff0051;
+            transform: scale(1.07);
         }
 
         .current-user .username {
