@@ -21,6 +21,8 @@ document.getElementById('logout').addEventListener('click', () => {
     window.location.href = 'login.html';
 });
 
+
+
 document.getElementById('sendMessage').addEventListener('click', (e) => {
     e.preventDefault();
     const chatId = document.getElementById('chatId').value;
@@ -48,6 +50,7 @@ const fetchUserChats = () => {
     .catch(error => console.error('Error fetching user chats:', error));
 };
 
+
 // Update chat list on page load
 const updateChatList = (chats) => {
     const chatListElement = document.getElementById('chatList');
@@ -71,6 +74,11 @@ fetchUserChats();
 // Handle chat change
 document.getElementById('chatId').addEventListener('change', () => {
     const chatId = document.getElementById('chatId').value;
+    const chatNameElement = document.getElementById('chatName');
+    
+    if (chatNameElement) {  // Ensure the chatName element exists
+        chatNameElement.innerText = chatId; // Update chatName text to chatId
+    }
     const token = localStorage.getItem('token');
     if (chatId && token) {
         socket.emit('joinChat', chatId);
@@ -184,7 +192,7 @@ function showNewMessageNotification(message, chatId) {
     imageElement.style.height = '30px';
     imageElement.style.marginRight = '5px';
 
-    const textContent = `New message in #${message.chatId}: ${message.username}: ${message.message}`;
+    const textContent = `New message in ${message.chatId}: ${message.username}: ${message.message}`;
     notification.appendChild(imageElement);
     notification.appendChild(document.createTextNode(textContent));
 
@@ -209,6 +217,8 @@ function resetNewMessageCount() {
     newMessageCount = 0;
     updateTitle();
 }
+
+
 
 
 
