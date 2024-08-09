@@ -13,7 +13,7 @@
             background-color: #ffe1e1;
         }
         #sidebar {
-            width: 230px;
+            width: 230px; /* Increased width to accommodate user list */
             background-color: #f4f4f4;
             border-right: 1px solid #000000;
             padding: 10px;
@@ -72,8 +72,9 @@
         }
         .user {
             position: relative;
-            padding-left: 20px;
+            padding-left: 20px; /* Adjust padding to make space for the dot */
         }
+
         .active-dot {
             position: absolute;
             left: 5px;
@@ -83,7 +84,7 @@
             background-color: rgb(79, 255, 79);
             border-radius: 50%;
             transform: translateY(-50%);
-            border: 2.5px solid black;
+            border: 2.5px solid black; /* Add a black border to create the outline */
         }
         .message {
             margin-bottom: 10px;
@@ -93,17 +94,21 @@
             text-align: left;
             position: relative;
             margin-bottom: 20px;
+            
         }
+
         .timestamp {
             font-size: 0.6em;
             color: gray;
             pad: 2px;
             border-radius: 10px;
         }
+
         .username {
             font-weight: bold;
             display: none;
         }
+
         .text {
             margin-top: 5px;
             background-color: black;
@@ -111,10 +116,13 @@
             padding: 10px;
             border-radius: 7px;
         }
+
+        /* Special styling for messages from the current user */
         .current-user {
             align-items: flex-end;
             text-align: right;
         }
+        /* Styling for the new message label */
         .new-message-notification {
             position: fixed;
             bottom: 20px;
@@ -123,31 +131,34 @@
             color: black;
             padding: 10px;
             border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; /* Use flexbox */
+            align-items: center; /* Center items vertically */
+            justify-content: center; /* Center items horizontally */
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
             z-index: 1000;
         }
+
         .new-message-notification.show {
             opacity: 1;
         }
+
         .current-user .timestamp {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color:rgba(255, 255, 255, 0.1);
         }
         .current-user .username {
             display: none;
         }
         .current-user .text {
-            background-color: #ff0051;
+            background-color: #ff0051; /* Example background color for current user messages */
             padding: 10px;
             border-radius: 7px;
         }
+
         .current-user .username {
             font-weight: bold;
-            color: #007bff;
+            color: #007bff; /* Example color for username of the current user */
         }
     </style>
     <!-- Include Toastify CSS -->
@@ -165,8 +176,7 @@
     <div id="sidebar">
         <div id="chatList"></div>
         <div class="chatAdd">
-            <input type="text" id="groupContent" placeholder="Add Users or Create DM" />
-            <button id="createDM">Create DM</button>
+            <input type="text" placeholder="user(s)" required id="groupContent"/>
         </div>
         <div id="userList">
             <h3>Users</h3>
