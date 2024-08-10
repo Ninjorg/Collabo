@@ -18,6 +18,7 @@ if (username) {
 document.getElementById('logout').addEventListener('click', () => {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
+
     window.location.href = 'home.html';
 });
 
@@ -47,7 +48,9 @@ document.getElementById('sendMessage').addEventListener('click', (e) => {
 
         // Update last message time
         lastMessageTime = currentTime;
+        
     }
+    
 });
 
 
@@ -147,6 +150,10 @@ function updateTitle() {
 }
 
 socket.on('receiveMessage', (message) => {
+    if (message.username !== currentUser) {
+        showNewMessageNotification(message);
+    }
+
     const chat = document.getElementById('chat');
 
     const messageElement = document.createElement('div');
@@ -177,7 +184,6 @@ socket.on('receiveMessage', (message) => {
     chat.scrollTop = chat.scrollHeight;
 
     // Show notification and update title
-    showNewMessageNotification(message, chatId);
 });
 
 // Function to show the new message notification
@@ -210,6 +216,13 @@ function showNewMessageNotification(message, chatId) {
     setTimeout(() => {
         notification.classList.remove('show');
     }, 3000);
+    notification.classList.add('show');
+
+    // Hide the notification after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+    
 
     // Increment the new message count and update the title
     newMessageCount++;
@@ -279,9 +292,9 @@ socket.on('updateUsers', (users) => {
         console.error('User list element not found');
         return;
     }
-
+    userList.innerHTML = '<h2>USERS</h2>';
+    
     if (users && Array.isArray(users)) {
-        userList.innerHTML = '<h2>USERS</h2>';
         users.forEach(user => {
             const userElement = document.createElement('div');
             userElement.classList.add('user');

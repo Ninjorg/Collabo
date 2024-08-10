@@ -53,7 +53,19 @@ const readUsers = () => {
     return JSON.parse(fs.readFileSync(USERS_FILE));
 };
 
-
+async function getUserChats(userId) {
+    try {
+        const userDoc = await db.collection('users').doc(userId).get();
+        if (!userDoc.exists) {
+            throw new Error('User not found');
+        }
+        const userData = userDoc.data();
+        return userData.chats || [];
+    } catch (error) {
+        console.error('Error fetching user chats:', error);
+        return [];
+    }
+}
 
 const writeUsers = (users) => {
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
@@ -358,6 +370,7 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+
 // Fetch user chats
 app.get('/userChats', authenticateToken, async (req, res) => {
     try {
@@ -378,6 +391,23 @@ app.get('/userChats', authenticateToken, async (req, res) => {
         res.json({ chats: user.chats });
     } catch (error) {
         console.error("Error fetching user chats: ", error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+app.get('/chat/:chatId', async (req, res) => {
+    const chatId = req.params.chatId;
+
+    try {
+        const chatDoc = await getDoc(doc(db, "chats", chatId));
+
+        if (chatDoc.exists()) {
+            res.json(chatDoc.data());
+        } else {
+            res.status(404).json({ message: 'Chat not found' });
+        }
+    } catch (error) {
+        console.error("Error fetching chat data:", error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
@@ -421,6 +451,7 @@ io.on('connection', (socket) => {
 
         // Emit users to the client
         socket.emit('updateUsers', users);
+        console.log(updateUsers, users);
     } catch (error) {
         console.error("Error fetching users: ", error);
     }
@@ -439,7 +470,7 @@ io.on('connection', (socket) => {
 
         // Notify all clients about the user list update
         const users = readUsers();
-        io.emit('updateUsers', users);
+        updateUsers();
     });
 
     // Handle joining a chat
@@ -463,12 +494,13 @@ io.on('connection', (socket) => {
         } catch (error) {
             console.error(`Error loading messages for chat ${chatId}:`, error);
         }
+        updateUsers();
     });
 
     // Handle sending a message
     socket.on('sendMessage', async ({ chatId, message }) => {
         const timestamp = new Date().toISOString();
-        const messageObject = { username: socket.user.username, message, timestamp };
+        const messageObject = { chatId, username: socket.user.username, message, timestamp };
     
         try {
             // Save message to Firestore
@@ -476,20 +508,16 @@ io.on('connection', (socket) => {
             await updateChatDocument(chatId, [messageObject]);
     
             // Emit message to chat
-            io.to(chatId).emit('receiveMessage', messageObject);
+            io.emit('receiveMessage', messageObject);
+            console.log(messageObject);
+            // io.emit('receiveMessage', message);
     
         } catch (error) {
             console.error(`Error sending message to chat ${chatId}:`, error);
         }
+        updateUsers();
     });
     
-
-    // Handle user disconnection
-    socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
-        // Update the user's isActive status to false
-        updateUserStatus(socket.user.username, false);
-    });
 });
 
 
