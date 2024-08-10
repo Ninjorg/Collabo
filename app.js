@@ -1,4 +1,27 @@
 // Initialize socket.io client
+
+// Import and configure Firebase
+import firebase from 'firebase/app';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js';
+import { getFirestore, collection, getDocs, addDoc, query, where } from 'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js';
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDKiSo9RJpJoycuvqqlCfY2wI8m8Ijgl-c",
+    authDomain: "collabo-fbdb7.firebaseapp.com",
+    projectId: "collabo-fbdb7",
+    storageBucket: "collabo-fbdb7.appspot.com",
+    messagingSenderId: "937554501908",
+    appId: "1:937554501908:web:5819b29dd7b73d5eefa201",
+    measurementId: "G-JP2F2E3275"
+};
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+
+// Get a reference to the database
+const db = firebase.firestore(); // For Firestore
+// const db = firebase.database(); // For Realtime Database
+
 const socket = io({
     transports: ['websocket'],
     auth: {
@@ -25,44 +48,58 @@ document.getElementById('logout').addEventListener('click', () => {
 let lastMessageTime = 0;
 const MESSAGE_COOLDOWN = 4000; // 3 seconds in milliseconds
 
-document.getElementById('sendMessage').addEventListener('click', (e) => {
+document.getElementById('sendMessage').addEventListener('click', async (e) => {
     e.preventDefault();
+
     const currentTime = new Date().getTime();
-    
     if (currentTime - lastMessageTime < MESSAGE_COOLDOWN) {
-        // If the cooldown period has not passed, do not send the message
         showNewCooldownNotification();
         return;
     }
 
     const chatId = document.getElementById('chatId').value;
     const message = document.getElementById('message').value;
-    const token = localStorage.getItem('token');
     const username = localStorage.getItem('username');
 
-    if (chatId && message && token && username) {
+    if (chatId && message && username) {
         const timestamp = new Date().toISOString();
-        socket.emit('sendMessage', { chatId, message, username, timestamp });
+        await db.collection('chats').doc(chatId).collection('messages').add({
+            message,
+            username,
+            timestamp
+        });
         document.getElementById('message').value = '';
-
-        // Update last message time
         lastMessageTime = currentTime;
     }
 });
 
 
-// Fetch and display user's chats
-const fetchUserChats = () => {
-    fetch('/userChats', {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+
+
+
+const fetchUserChats = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            console.error('No token found');
+            return;
         }
-    })
-    .then(response => response.json())
-    .then(data => updateChatList(data.chats))
-    .catch(error => console.error('Error fetching user chats:', error));
+
+        const userDoc = await db.collection('users').doc(token).get();
+        if (!userDoc.exists) {
+            console.error('No such user!');
+            return;
+        }
+
+        const userData = userDoc.data();
+        const chats = userData.chats || [];
+
+        updateChatList(chats);
+    } catch (error) {
+        console.error('Error fetching user chats:', error);
+    }
 };
+
 
 // Update chat list on page load
 const updateChatList = (chats) => {
@@ -85,18 +122,42 @@ const updateChatList = (chats) => {
 fetchUserChats();
 
 // Handle chat change
-document.getElementById('chatId').addEventListener('change', () => {
-    const chatId = document.getElementById('chatId').value;
-    const chatNameElement = document.getElementById('chatName');
-    
-    if (chatNameElement) {  // Ensure the chatName element exists
-        chatNameElement.innerText = chatId; // Update chatName text to chatId
-    }
-    const token = localStorage.getItem('token');
-    if (chatId && token) {
-        socket.emit('joinChat', chatId);
-    }
+const chatId = document.getElementById('chatId').value;
+
+db.collection('chats').doc(chatId).collection('messages').orderBy('timestamp').onSnapshot((snapshot) => {
+    const chat = document.getElementById('chat');
+    chat.innerHTML = '';
+    snapshot.forEach(doc => {
+        const message = doc.data();
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+
+        if (message.username === currentUser) {
+            messageElement.classList.add('current-user');
+        }
+
+        const userElement = document.createElement('div');
+        userElement.classList.add('username');
+        userElement.textContent = message.username || 'Unknown';
+
+        const textElement = document.createElement('div');
+        textElement.classList.add('text');
+        textElement.textContent = `${message.username}: ${message.message}`;
+
+        const timestampElement = document.createElement('div');
+        timestampElement.classList.add('timestamp');
+        timestampElement.textContent = message.timestamp || 'No timestamp';
+
+        messageElement.appendChild(userElement);
+        messageElement.appendChild(textElement);
+        messageElement.appendChild(timestampElement);
+
+        chat.appendChild(messageElement);
+    });
+    chat.scrollTop = chat.scrollHeight;
 });
+
+
 
 // Handle receiving and displaying messages
 const currentUser = localStorage.getItem('username'); // Replace with the actual logic to get the current username
@@ -250,6 +311,14 @@ function showNewCooldownNotification() {
     newMessageCount++;
     updateTitle();
 }
+
+db.collection('chats').doc(chatId).collection('users').onSnapshot((snapshot) => {
+    const users = [];
+    snapshot.forEach(doc => users.push(doc.data()));
+
+    updateUserList(users);
+});
+
 
 
 document.addEventListener('click', () => {
