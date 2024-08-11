@@ -117,6 +117,25 @@ const updateUserStatus = async (username, status) => {
     }
 };
 
+async function initializeStreaks() {
+    const usersSnapshot = await db.collection('users').get();
+    const batch = db.batch();
+
+    usersSnapshot.forEach(doc => {
+        batch.update(doc.ref, {
+            streak: {
+                count: 0,
+                lastUpdated: null
+            }
+        });
+    });
+
+    await batch.commit();
+    console.log('Streak initialized for all users.');
+}
+
+initializeStreaks().catch(console.error);
+
 // Initialize default chats and update existing users
 const initializeDefaultChats = () => {
     DEFAULT_CHATS.forEach(chatName => {
@@ -249,38 +268,30 @@ const addChatToUser = async (userEmail, chatId) => {
 
 // Sign-up route
 app.post('/signup', async (req, res) => {
-    const { username, email, password } = req.body;
-
-    // Validate input
-    if (!username || !email || !password) {
-        return res.status(400).json({ message: 'Missing required fields' });
-    }
-
-    const users = readUsers();
-
-    if (users.find(user => user.email === email)) {
-        return res.status(400).json({ message: 'User already exists' });
-    }
+    const { email, password, username } = req.body;
 
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const userRef = doc(db, "users", username);
-
-        await setDoc(userRef, {
-            username,
+        const userRecord = await admin.auth().createUser({
             email,
-            password: hashedPassword,
-            chats: DEFAULT_CHATS,
-            isActive: true
+            password,
+            displayName: username
         });
 
-        console.log("Document successfully written with username:", username);
-        res.status(201).json({ message: 'User created successfully' });
-    } catch (e) {
-        console.error("Error adding document:", e);
-        res.status(500).json({ message: 'Internal server error' });
+        await db.collection('users').doc(userRecord.uid).set({
+            email,
+            username,
+            streak: {
+                count: 0,
+                lastUpdated: null
+            }
+        });
+
+        res.status(201).send({ message: 'User created successfully' });
+    } catch (error) {
+        res.status(400).send({ error: error.message });
     }
 });
+
 
 
 const updateChatsWithUsers = async () => {
@@ -372,7 +383,54 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+app.post('/message', async (req, res) => {
+    const { uid, message } = req.body;
+    const userRef = db.collection('users').doc(uid);
 
+    try {
+        const userDoc = await userRef.get();
+        const userData = userDoc.data();
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+
+        let newStreakCount = userData.streak.count;
+        let lastUpdated = userData.streak.lastUpdated;
+
+        if (lastUpdated) {
+            const lastDate = new Date(lastUpdated);
+            const diffTime = Math.abs(new Date(today) - lastDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) {
+                newStreakCount += 1; // Increase streak
+            } else if (diffDays > 1) {
+                newStreakCount = 1; // Reset streak
+            }
+        } else {
+            newStreakCount = 1; // First streak
+        }
+
+        await userRef.update({
+            streak: {
+                count: newStreakCount,
+                lastUpdated: today
+            }
+        });
+
+        // Save the message (assuming you have a separate collection for messages)
+        await db.collection('messages').add({
+            uid,
+            message,
+            timestamp: new Date().toISOString()
+        });
+
+        res.status(200).send({ message: 'Message sent, streak updated.' });
+    } catch (error) {
+        res.status(400).send({ error: error.message });
+    }
+});
+
+
+// Fetch user chats
 // Fetch user chats
 app.get('/userChats', authenticateToken, async (req, res) => {
     try {
@@ -389,8 +447,23 @@ app.get('/userChats', authenticateToken, async (req, res) => {
         const userDoc = querySnapshot.docs[0];
         const user = userDoc.data();
 
-        // Respond with the user's chat data
-        res.json({ chats: user.chats });
+        // Fetch the user's chats
+        const chats = user.chats || [];
+
+        // Fetch chat details for each chat ID
+        const chatDetailsPromises = chats.map(async chatId => {
+            const chatRef = doc(db, "chats", chatId);
+            const chatDoc = await getDoc(chatRef);
+            return chatDoc.exists() ? { id: chatId, ...chatDoc.data() } : null;
+        });
+
+        const chatDetails = await Promise.all(chatDetailsPromises);
+
+        // Filter out any null values in case of missing chat documents
+        const filteredChatDetails = chatDetails.filter(chat => chat !== null);
+
+        // Respond with the list of chat details
+        res.json({ chats: filteredChatDetails });
     } catch (error) {
         console.error("Error fetching user chats: ", error);
         res.status(500).json({ message: 'Internal server error' });
