@@ -432,3 +432,6 @@ body {
     font-size: 1em;
     color: #555;
 }
+a {
+    color: rgb(76, 0, 137);
+}

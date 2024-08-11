@@ -1,0 +1,309 @@
+body {
+    display: flex;
+    margin: 0;
+    height: 100vh;
+    font-family: 'Arial Black', monospace;
+    background-color: #121212; /* Dark background */
+    color: #ffffff; /* White text for contrast */
+}
+#sidebar {
+    width: 230px; /* Increased width to accommodate user list */
+    background-color: #1e1e1e; /* Darker background for sidebar */
+    border-right: 1px solid #333333; /* Subtle border for separation */
+    padding: 10px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5); /* Shadow for depth */
+    overflow-y: auto;
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 15px;
+    transition: transform 0.4s ease;
+}
+
+#sidebar:hover {
+    transform: scale(1.03);
+    background-color: #252525; /* Slightly lighter on hover */
+}
+#chatContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Ensure the form stays at the bottom */
+    padding: 10px;
+}
+#chat {
+    border: 3px solid #333333; /* Dark border */
+    flex: 1;
+    overflow-y: scroll;
+    margin-bottom: 10px;
+    margin-right: 15px;
+    padding: 10px;
+    border-radius: 15px;
+    background-color: #1e1e1e; /* Dark background for chat area */
+}
+.message {
+    padding: 5px;
+}
+.chat-item {
+    padding: 10px;
+    border-radius: 15px;
+    cursor: pointer;
+    background-color: #1e1e1e; /* Dark background for chat items */
+    margin-bottom: 5px;
+    color: #cccccc; /* Light grey text */
+    transition: transform 0.4s ease; /* Optional: For smooth scaling */
+}
+
+.chat-item:hover {
+    transform: scale(1.05);
+    background-color: #252525; /* Slightly lighter on hover */
+    color: #ffffff; /* White text on hover */
+}
+#username {
+    font-weight: bold;
+}
+.toastify-message {
+    background-color: #333333; /* Dark toast notification */
+    color: white;
+}
+#chatForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: auto;
+}
+.chatAdd {
+    margin-bottom: 10px;
+}
+#userList {
+    margin-top: 10px;
+    border-top: 1px solid #444444; /* Dark border for separation */
+    padding-top: 10px;
+}
+.user-item {
+    padding: 5px;
+    background-color: #252525; /* Dark background for user items */
+    margin-bottom: 5px;
+}
+.user {
+    position: relative;
+    padding-right: 20px; /* Adjust padding to make space for the dot */
+    padding: 10px;
+    border-radius: 15px;
+    cursor: pointer;
+    background-color: #1e1e1e; /* Dark background */
+    margin-bottom: 5px;
+    color: #cccccc; /* Light grey text */
+}
+
+.active-dot {
+    position: absolute;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    margin-left: 5px;
+    background-color: #76ff03; /* Bright green for active status */
+    border-radius: 50%;
+    transform: translateY(-50%);
+    border: 2.5px solid #1e1e1e; /* Dark border for contrast */
+}
+.message {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timestamp {
+    font-size: 0.6em;
+    color: #bbbbbb; /* Light grey for timestamp */
+    pad: 2px;
+    border-radius: 10px;
+}
+
+.username {
+    font-weight: bold;
+    display: none;
+}
+
+.text {
+    margin-top: 5px;
+    background-color: #333333; /* Dark grey for message background */
+    color: white;
+    padding: 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: transform 0.4s ease;
+}
+
+.text:hover{
+    background-color: white;
+    color: #333333; /* Dark grey text on hover */
+    transform: scale(1.05);
+}
+
+/* Special styling for messages from the current user */
+.current-user {
+    align-items: flex-end;
+    text-align: right;
+}
+.current-user .timestamp {
+    background-color:rgba(255, 255, 255, 0.1);
+}
+.current-user .username {
+    display: none;
+}
+.current-user .text {
+    background-color: #444444; /* Slightly lighter grey for current user messages */
+    padding: 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: transform 0.4s ease;
+}
+.current-user .text:hover{
+    background-color: white;
+    color: #444444;
+    transform: scale(1.07);
+}
+
+.current-user .username {
+    font-weight: bold;
+    color: #cccccc; /* Light grey for the current user's username */
+}
+
+/* Additional CSS for chat form */
+#chatForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: auto;
+    width: 100%;
+}
+
+#chatId {
+    width: 100%;
+    max-width: 300px;
+    padding: 8px;
+    margin-top: 10px;
+    border-radius: 20px;
+    border: 4px solid #333333; /* Dark border */
+    background-color: #444444; /* Dark grey background */
+    text-align: center;
+    font-size: 30px;
+    color: white;
+    font-weight: bold;
+}
+#message {
+    width: 100%; /* Make it take up 100% of the available width */
+    max-width: 900px;
+    padding: 10px;
+    height: 10px; /* Increase the height for better usability */
+    text-align: left;
+    align-content: center;
+    border-radius: 10px;
+    border: 3px solid #444444; /* Dark border */
+    background-color: #1e1e1e; /* Dark background */
+    color: #cccccc; /* Light grey text */
+    font-weight: bold;
+    font-size: 15px;
+    margin-right: 10px; /* Space between message box and button */
+}
+#message::placeholder{
+    color: #666666; /* Dark grey placeholder text */
+}
+#sendMessage {
+    padding: 8px 16px;
+    background-color: #444444; /* Dark grey button */
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    align-content: center;
+}
+#sendMessage:hover {
+    background-color: #555555; /* Slightly lighter grey on hover */
+}
+#chatList h2 {
+    color: #cccccc; /* Light grey text color */
+    text-align: center;
+    margin: 0; /* Remove default margin */
+    padding: 10px 0; /* Add padding for spacing */
+}
+#chatList{
+    max-height: 400px;
+    overflow: scroll;
+}
+#userList h2 {
+    color: #cccccc;           /* Light grey text color */
+    text-align: center;     /* Center the text horizontally */
+    margin: 0;              /* Remove default margin */
+    padding: 10px 0;        /* Add padding for better spacing */
+}
+#userlist {
+    max-height: 400px;
+    overflow: scroll;
+}
+
+/* Button Styles */
+.mode-buttons {
+    display: flex;
+    gap: 10px; /* Spacing between buttons */
+}
+
+.mode-btn {
+    width: 40px; /* Adjust size as needed */
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: transparent;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mode-btn img {
+    width: 35px; /* Adjust size as needed */
+    height: 35px;
+    object-fit: cover;
+}
+
+/* Top bar styles */
+.top-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between input and buttons */
+    margin-bottom: 10px;
+}
+
+#chatId {
+    flex: 1; /* Allow input to take up available space */
+    padding: 8px;
+    border-radius: 20px;
+    border: 4px solid #333333; /* Dark border */
+    background-color: #444444; /* Dark grey background */
+    text-align: center;
+    font-size: 30px;
+    color: white;
+    font-weight: bold;
+}
+#logout {
+    background-color: #555555; /* Dark grey button */
+    color: white;
+    outline: 2px solid #333333; /* Dark border */
+    width: 100px;
+    height: 30px;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+}
+
+#logout:hover {
+    background-color: #444444; /* Lighter grey on hover */
+}

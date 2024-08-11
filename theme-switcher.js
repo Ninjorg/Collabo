@@ -17,14 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'ninja':
                 themeLink.href = 'ninja-mode.css';
                 break;
-            case 'dark':
-                themeLink.href = 'dark-mode.css'; // Add dark-mode.css for the Dark theme
+            case 'moon':
+                themeLink.href = 'moon.css'; // Add dark-mode.css for the Dark theme
                 break;
             case 'daisy':
-                themeLink.href = 'daisy-mode.css'; // Add daisy-mode.css for the Daisy theme
+                themeLink.href = 'flower.css'; // Add daisy-mode.css for the Daisy theme
                 break;
             case 'ocean':
-                themeLink.href = 'ocean-mode.css'; // Add ocean-mode.css for the Ocean theme
+                themeLink.href = 'ocean.css'; // Add ocean-mode.css for the Ocean theme
                 break;
             default:
                 themeLink.href = 'styles.css';
