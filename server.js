@@ -601,3 +601,175 @@ const PORT = 4000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+// Endpoint to fetch all users
+app.get('/users', authenticateToken, async (req, res) => {
+    try {
+        const usersSnapshot = await getDocs(collection(db, "users"));
+        const users = usersSnapshot.docs.map(doc => doc.data());
+        res.json(users);
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Endpoint to fetch a single user by username
+app.get('/user/:username', authenticateToken, async (req, res) => {
+    const { username } = req.params;
+
+    try {
+        const userDoc = await getDoc(doc(db, "users", username));
+        if (userDoc.exists()) {
+            res.json(userDoc.data());
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Endpoint to delete a user
+app.delete('/user/:username', authenticateToken, async (req, res) => {
+    const { username } = req.params;
+
+    try {
+        await deleteDoc(doc(db, "users", username));
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Endpoint to create a new chat
+app.post('/chat', authenticateToken, async (req, res) => {
+    const { chatId } = req.body;
+
+    if (!chatId) {
+        return res.status(400).json({ message: 'Chat ID is required' });
+    }
+
+    try {
+        await setDoc(doc(db, "chats", chatId), { messages: [], users: [] });
+        res.status(201).json({ message: 'Chat created successfully' });
+    } catch (error) {
+        console.error("Error creating chat:", error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Endpoint to delete a chat
+app.delete('/chat/:chatId', authenticateToken, async (req, res) => {
+    const { chatId } = req.params;
+
+    try {
+        await deleteDoc(doc(db, "chats", chatId));
+        res.status(200).json({ message: 'Chat deleted successfully' });
+    } catch (error) {
+        console.error("Error deleting chat:", error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Endpoint to fetch message history for a specific chat
+app.get('/chat/:chatId/messages', authenticateToken, async (req, res) => {
+    const { chatId } = req.params;
+
+    try {
+        const chatDoc = await getDoc(doc(db, "chats", chatId));
+        if (chatDoc.exists()) {
+            res.json(chatDoc.data().messages || []);
+        } else {
+            res.status(404).json({ message: 'Chat not found' });
+        }
+    } catch (error) {
+        console.error("Error fetching chat messages:", error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Socket.io enhancement: Notify users when someone joins or leaves a chat
+io.on('connection', (socket) => {
+    console.log('A user connected:', socket.user.username);
+
+    // Notify users in the chat about a new member
+    socket.on('joinChat', async (chatId) => {
+        socket.join(chatId);
+        await addChatToUser(socket.user.email, chatId);
+        console.log(`User ${socket.user.username} joined chat ${chatId}`);
+        
+        // Notify others in the chat
+        socket.to(chatId).emit('notification', `${socket.user.username} has joined the chat`);
+
+        // Fetch and emit chat messages from Firestore
+        try {
+            const chatRef = doc(db, "chats", chatId);
+            const chatDoc = await getDoc(chatRef);
+            
+            if (chatDoc.exists()) {
+                const chatData = chatDoc.data();
+                socket.emit('loadMessages', chatData.messages || []);
+            } else {
+                console.log(`Chat ${chatId} does not exist`);
+                socket.emit('loadMessages', []);
+            }
+        } catch (error) {
+            console.error(`Error loading messages for chat ${chatId}:`, error);
+        }
+        updateUsers();
+    });
+
+    // Notify users when someone leaves a chat
+    socket.on('leaveChat', (chatId) => {
+        socket.leave(chatId);
+        console.log(`User ${socket.user.username} left chat ${chatId}`);
+
+        // Notify others in the chat
+        socket.to(chatId).emit('notification', `${socket.user.username} has left the chat`);
+    });
+
+    // Handle sending a message
+    socket.on('sendMessage', async ({ chatId, message }) => {
+        const timestamp = new Date().toISOString();
+        const messageObject = { chatId, username: socket.user.username, message, timestamp };
+
+        try {
+            // Save message to Firestore
+            const chatRef = doc(db, "chats", chatId);
+            await updateChatDocument(chatId, [messageObject]);
+
+            // Emit message to chat
+            io.to(chatId).emit('receiveMessage', messageObject);
+            console.log(messageObject);
+
+        } catch (error) {
+            console.error(`Error sending message to chat ${chatId}:`, error);
+        }
+        updateUsers();
+    });
+
+    // Handle user disconnection
+    socket.on('disconnect', function () {
+        console.log('User disconnected:', socket.user.username);
+
+        // Notify all clients about the user list update
+        const users = readUsers();
+        updateUsers();
+
+        // Notify all chats that the user has left
+        for (const chatId of socket.user.chats || []) {
+            socket.to(chatId).emit('notification', `${socket.user.username} has left the chat`);
+        }
+
+        // Update user status to inactive
+        updateUserStatus(socket.user.username, false);
+    });
+});
+
+// Start the server
+const PORT = 4000;
+server.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
