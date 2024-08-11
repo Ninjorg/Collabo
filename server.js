@@ -67,6 +67,8 @@ async function getUserChats(userId) {
     }
 }
 
+
+
 const writeUsers = (users) => {
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
 };
@@ -462,7 +464,7 @@ io.on('connection', (socket) => {
 
 
     // Handle user disconnection
-    socket.on('disconnect', () => {
+    socket.on('disconnect', function () {
         console.log('User disconnected:', socket.id);
 
         // Update user status to inactive

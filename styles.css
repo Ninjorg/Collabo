@@ -255,11 +255,19 @@ body {
     margin: 0; /* Remove default margin */
     padding: 10px 0; /* Add padding for spacing */
 }
+#chatList{
+    max-height: 400px;
+    overflow: scroll;
+}
 #userList h2 {
     color: white;           /* Set text color to white */
     text-align: center;     /* Center the text horizontally */
     margin: 0;              /* Remove default margin */
     padding: 10px 0;        /* Add padding for better spacing */
+}
+#userlist {
+    max-height: 400px;
+    overflow: scroll;
 }
 
 /* Button Styles */
@@ -283,8 +291,8 @@ body {
 }
 
 .mode-btn img {
-    width: 24px; /* Adjust size as needed */
-    height: 24px;
+    width: 35px; /* Adjust size as needed */
+    height: 35px;
     object-fit: cover;
 }
 
@@ -306,4 +314,20 @@ body {
     font-size: 30px;
     color: white;
     font-weight: bold;
+}
+#logout {
+    background-color: #e60048;
+    color: white;
+    outline: 2px solid white;
+    width: 100px;
+    height: 30px;
+    border: none;
+    border-radius: 20px;
+    transition: transform 0.4s ease;
+}
+
+#logout:hover {
+    transform: scale(1.2);
+
+
 }
