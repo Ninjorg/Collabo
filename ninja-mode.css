@@ -1,0 +1,295 @@
+/* General Styles */
+body {
+    display: flex;
+    margin: 0;
+    height: 100vh;
+    font-family: 'Arial', sans-serif; /* Adjusted for a more Google-like font */
+    background-color: #ffffff; /* Light background similar to Google Docs */
+}
+
+/* Sidebar Styles */
+#sidebar {
+    width: 230px;
+    background-color: #f1f3f4; /* Light gray similar to Google Docs sidebar */
+    border-right: 1px solid #dcdcdc; /* Subtle border */
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Light shadow for a clean look */
+    overflow-y: auto;
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff; /* White background for consistency */
+    border-radius: 8px;
+    transition: transform 0.4s ease;
+}
+
+#sidebar:hover {
+    transform: scale(1.02);
+}
+
+/* Sidebar User List */
+#userList {
+    margin-top: 10px;
+    border-top: 1px solid #dcdcdc; /* Subtle border */
+    padding-top: 10px;
+}
+
+.user-item {
+    padding: 5px;
+    background-color: #ffffff; /* White background */
+    margin-bottom: 5px;
+    border-radius: 4px; /* Slightly rounded corners */
+    border: 1px solid #dcdcdc; /* Subtle border */
+}
+
+.chat-item {
+    padding: 10px;
+    background-color: #ffffff; /* White background */
+    margin-bottom: 5px;
+    border-radius: 4px; /* Slightly rounded corners */
+    border: 1px solid #dcdcdc; /* Subtle border */
+    font-weight: bold;
+}
+
+/* User Item Active Dot */
+.user {
+    position: relative;
+    padding-right: 30px; /* Adjust padding to make space for the dot */
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #ffffff; /* White background */
+    margin-bottom: 5px;
+    color: #333; /* Dark text color */
+    border: 1px solid #dcdcdc; /* Subtle border */
+}
+
+.active-dot {
+    position: absolute;
+    top: 50%;
+    right: 10px; /* Adjusted position for better alignment */
+    width: 8px;
+    height: 8px;
+    background-color: rgb(79, 255, 79); /* Green dot */
+    border-radius: 50%;
+    transform: translateY(-50%);
+    border: 2px solid #ffffff; /* White border for visibility */
+}
+
+/* Chat Container Styles */
+#chatContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 10px;
+}
+
+/* Chat Area Styles */
+#chat {
+    border: 1px solid #dcdcdc; /* Subtle border */
+    flex: 1;
+    overflow-y: scroll;
+    margin-bottom: 10px;
+    margin-right: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #ffffff; /* White background */
+}
+
+/* Message Styles */
+.message {
+    padding: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    position: relative;
+}
+
+.timestamp {
+    font-size: 0.75em;
+    color: gray;
+    padding: 2px;
+    border-radius: 8px;
+}
+
+.username {
+    font-weight: bold;
+    display: none;
+}
+
+.text {
+    margin-top: 5px;
+    background-color: #f1f3f4; /* Light gray background */
+    color: black;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.text:hover {
+    background-color: #e8e8e8; /* Slightly darker gray on hover */
+    color: black;
+    transform: scale(1.02);
+}
+
+/* Special Styling for Current User's Messages */
+.current-user {
+    align-items: flex-end;
+    text-align: right;
+}
+
+
+.current-user .username {
+    display: none;
+}
+
+.current-user .text {
+    background-color: #dbe2e8; /* Subtle blue-gray */
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.current-user .text:hover {
+    background-color: #cfd8dc; /* Slightly darker blue-gray on hover */
+    color: black;
+    transform: scale(1.02);
+}
+
+/* Notification Styles */
+.new-message-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #f4f4f4;
+    color: black;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1000;
+}
+
+.new-message-notification.show {
+    opacity: 1;
+}
+
+/* Chat Form Styles */
+#chatForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: auto;
+    width: 100%;
+}
+
+#chatId {
+    width: 100%;
+    max-width: 300px;
+    padding: 8px;
+    margin-top: 10px;
+    border-radius: 20px;
+    border: 2px solid #dcdcdc;
+    background-color: #f1f3f4;
+    text-align: center;
+    font-size: 20px;
+    color: #000;
+    font-weight: normal;
+}
+
+#message {
+    width: 100%;
+    max-width: 900px;
+    padding: 10px;
+    height: 50px; /* Adjusted height for better usability */
+    text-align: left;
+    align-content: center;
+    border-radius: 8px;
+    border: 2px solid #dcdcdc;
+    background-color: #f1f3f4;
+    color: #000;
+    font-size: 14px;
+    margin-right: 10px;
+}
+
+#message::placeholder {
+    color: #aaa;
+}
+
+#sendMessage {
+    padding: 8px 16px;
+    background-color: #007bff; /* Blue button similar to Google's accent color */
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    align-content: center;
+}
+
+#sendMessage:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Header Styles */
+#chatList h2, #userList h2 {
+    color: #333;
+    text-align: center;
+    margin: 0;
+    padding: 10px 0;
+}
+
+/* Button Styles */
+.mode-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.mode-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: transparent;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mode-btn img {
+    width: 24px;
+    height: 24px;
+    object-fit: cover;
+}
+
+/* Top Bar Styles */
+.top-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#chatId {
+    flex: 1;
+    padding: 8px;
+    border-radius: 20px;
+    border: 2px solid #dcdcdc;
+    background-color: #f1f3f4;
+    text-align: center;
+    font-size: 20px;
+    color: #000;
+    font-weight: normal;
+}

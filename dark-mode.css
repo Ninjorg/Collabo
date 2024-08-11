@@ -1,0 +1,294 @@
+/* General Styles */
+body {
+    display: flex;
+    margin: 0;
+    height: 100vh;
+    font-family: 'Arial Black', monospace;
+    background-color: #1c1c1c; /* Dark background for the whole page */
+}
+
+/* Sidebar Styles */
+#sidebar {
+    width: 230px;
+    background-color: #2e2e2e; /* Darker gray for the sidebar */
+    border-right: 1px solid #333; /* Dark border */
+    padding: 10px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5); /* Dark shadow */
+    overflow-y: auto;
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 15px;
+    transition: transform 0.4s ease;
+}
+
+#sidebar:hover {
+    transform: scale(1.03);
+}
+
+/* Sidebar User List */
+#userList {
+    margin-top: 10px;
+    border-top: 1px solid #444; /* Darker border */
+    padding-top: 10px;
+}
+
+.user-item {
+    padding: 5px;
+    background-color: #333; /* Darker background for user items */
+    margin-bottom: 5px;
+    border-radius: 8px;
+    border: 1px solid #444; /* Slightly lighter border */
+}
+
+/* User Item Active Dot */
+.user {
+    position: relative;
+    padding-right: 30px;
+    padding: 10px;
+    border-radius: 15px;
+    cursor: pointer;
+    background-color: #444; /* Darker background for user items */
+    margin-bottom: 5px;
+    color: #e0e0e0; /* Lighter text color */
+}
+
+.active-dot {
+    position: absolute;
+    top: 50%;
+    right: 10px; /* Adjusted position for alignment */
+    width: 8px;
+    height: 8px;
+    background-color: rgb(79, 255, 79); /* Green dot */
+    border-radius: 50%;
+    transform: translateY(-50%);
+    border: 2px solid #222; /* Darker border to match the theme */
+}
+
+/* Chat Container Styles */
+#chatContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 10px;
+}
+
+/* Chat Area Styles */
+#chat {
+    border: 3px solid #ff0051;
+    flex: 1;
+    overflow-y: scroll;
+    margin-bottom: 10px;
+    margin-right: 15px;
+    padding: 10px;
+    border-radius: 15px;
+    background-color: #1c1c1c; /* Dark background */
+    color: #e0e0e0; /* Light text color */
+}
+
+/* Message Styles */
+.message {
+    padding: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    position: relative;
+}
+
+.timestamp {
+    font-size: 0.6em;
+    color: gray;
+    padding: 2px;
+    border-radius: 10px;
+}
+
+.username {
+    font-weight: bold;
+    display: none;
+}
+
+.text {
+    margin-top: 5px;
+    background-color: #2e2e2e; /* Darker background for messages */
+    color: #e0e0e0; /* Light text color */
+    padding: 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: transform 0.4s ease;
+}
+
+.text:hover {
+    background-color: #e0e0e0; /* Light background on hover */
+    color: #1c1c1c; /* Dark text color on hover */
+    transform: scale(1.05);
+}
+
+/* Special Styling for Current User's Messages */
+.current-user {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.current-user .timestamp {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.current-user .username {
+    display: none;
+}
+
+.current-user .text {
+    background-color: #ff0051; /* Highlight color for current user messages */
+    padding: 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: transform 0.4s ease;
+}
+
+.current-user .text:hover {
+    background-color: #ffffff; /* Light background on hover */
+    color: #ff0051; /* Highlight text color on hover */
+    transform: scale(1.07);
+}
+
+.current-user .username {
+    font-weight: bold;
+    color: #007bff; /* Highlight color for username */
+}
+
+/* Notification Styles */
+.new-message-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #ffea00; /* Notification background */
+    color: black;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1000;
+}
+
+.new-message-notification.show {
+    opacity: 1;
+}
+
+/* Chat Form Styles */
+#chatForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: auto;
+    width: 100%;
+}
+
+#chatId {
+    width: 100%;
+    max-width: 300px;
+    padding: 8px;
+    margin-top: 10px;
+    border-radius: 20px;
+    border: 4px solid #ffffff;
+    background-color: #ff0051; /* Highlight color for chat ID */
+    text-align: center;
+    font-size: 30px;
+    color: white;
+    font-weight: bold;
+}
+
+#message {
+    width: 100%;
+    max-width: 900px;
+    padding: 10px;
+    height: 50px; /* Adjusted height for better usability */
+    text-align: left;
+    align-content: center;
+    border-radius: 10px;
+    border: 3px solid #ff0051; /* Highlight color for the border */
+    background-color: #ff00004d; /* Slightly transparent background */
+    color: rgb(0, 0, 0); /* Dark text color */
+    font-weight: bold;
+    font-size: 15px;
+    margin-right: 10px;
+}
+
+#message::placeholder {
+    color: rgb(0, 0, 0); /* Dark placeholder text */
+}
+
+#sendMessage {
+    padding: 8px 16px;
+    background-color: #ff0051; /* Highlight color for button */
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    align-content: center;
+}
+
+#sendMessage:hover {
+    background-color: #e60048; /* Darker highlight color on hover */
+}
+
+/* Header Styles */
+#chatList h2, #userList h2 {
+    color: white; /* Light text color for headers */
+    text-align: center;
+    margin: 0;
+    padding: 10px 0;
+}
+
+/* Button Styles */
+.mode-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.mode-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: transparent;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mode-btn img {
+    width: 24px;
+    height: 24px;
+    object-fit: cover;
+}
+
+/* Top Bar Styles */
+.top-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#chatId {
+    flex: 1;
+    padding: 8px;
+    border-radius: 20px;
+    border: 4px solid #ffffff;
+    background-color: #ff0051;
+    text-align: center;
+    font-size: 30px;
+    color: white;
+    font-weight: bold;
+}
