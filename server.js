@@ -8,7 +8,10 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { initializeApp } = require('firebase/app');
-const { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion, collection, query, where, getDocs } = require('firebase/firestore');
+const { getFirestore, doc, setDoc, getDoc, updateDoc, deleteDoc, arrayUnion, collection, query, where, getDocs } = require('firebase/firestore');
+const session = require('express-session');
+const rateLimit = require('express-rate-limit');
+const multer = require('multer');
 
 // Initialize Express and server
 const app = express();
@@ -39,6 +42,33 @@ const DEFAULT_CHATS = ['general', 'homework', 'counting'];
 // Middleware
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Rate limiter to prevent abuse
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // Limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
+
+// Session management
+app.use(session({
+    secret: 'your_session_secret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false } // Set to true if using HTTPS
+}));
+
+// File upload setup
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage });
 
 // Ensure chats directory and default chats files exist
 const initializeDefaultChats = () => {
@@ -75,32 +105,17 @@ const updateChatDocument = async (chatId, messages) => {
     }
 };
 
-// Update user status
-const updateUserStatus = async (username, status) => {
-    try {
-        const userRef = doc(db, "users", username);
-        await updateDoc(userRef, { isActive: status });
-        console.log(`User ${username} status updated to ${status}`);
-    } catch (error) {
-        console.error("Error updating user status:", error);
+// Create a new chat room
+const createChatRoom = (chatName) => {
+    const chatFilePath = path.join(CHATS_DIR, `${chatName}.json`);
+    if (!fs.existsSync(chatFilePath)) {
+        fs.writeFileSync(chatFilePath, JSON.stringify([]));
+        console.log(`Chat room ${chatName} created.`);
     }
-};
-
-// Add default chats to users
-const updateUsersWithDefaultChats = () => {
-    const users = readUsers();
-    users.forEach(user => {
-        const missingChats = DEFAULT_CHATS.filter(chat => !user.chats.includes(chat));
-        if (missingChats.length > 0) {
-            user.chats = [...new Set([...user.chats, ...DEFAULT_CHATS])];
-        }
-    });
-    writeUsers(users);
 };
 
 // Initialize chats and update users
 initializeDefaultChats();
-updateUsersWithDefaultChats();
 
 // Sign-up route
 app.post('/signup', async (req, res) => {
@@ -117,7 +132,8 @@ app.post('/signup', async (req, res) => {
             email,
             password: hashedPassword,
             chats: DEFAULT_CHATS,
-            isActive: true
+            isActive: true,
+            avatar: null
         });
         console.log("Document successfully written with username:", username);
         res.status(201).json({ message: 'User created successfully' });
@@ -142,8 +158,8 @@ app.post('/login', async (req, res) => {
 
         if (!isPasswordValid) return res.status(400).json({ message: 'Invalid credentials' });
 
-        const token = jwt.sign({ email: user.email, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
-        res.json({ token, username: user.username });
+        req.session.user = { email: user.email, username: user.username };
+        res.json({ message: 'Login successful', username: user.username });
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).json({ message: 'Internal server error' });
@@ -152,20 +168,41 @@ app.post('/login', async (req, res) => {
 
 // Middleware to check authentication
 const authenticateToken = (req, res, next) => {
-    const token = req.headers['authorization']?.split(' ')[1];
-    if (!token) return res.sendStatus(401);
-
-    jwt.verify(token, SECRET_KEY, (err, user) => {
-        if (err) return res.sendStatus(403);
-        req.user = user;
-        next();
-    });
+    if (!req.session.user) return res.sendStatus(401);
+    next();
 };
+
+// File upload route
+app.post('/upload', authenticateToken, upload.single('avatar'), (req, res) => {
+    const { filename } = req.file;
+    updateUserAvatar(req.session.user.username, filename);
+    res.json({ message: 'File uploaded successfully', filename });
+});
+
+// Update user avatar in Firestore
+const updateUserAvatar = async (username, avatar) => {
+    try {
+        const userRef = doc(db, "users", username);
+        await updateDoc(userRef, { avatar });
+        console.log(`User ${username}'s avatar updated to ${avatar}`);
+    } catch (error) {
+        console.error("Error updating user avatar:", error);
+    }
+};
+
+// Create a new chat room
+app.post('/createChat', authenticateToken, (req, res) => {
+    const { chatName } = req.body;
+    if (!chatName) return res.status(400).json({ message: 'Chat name is required' });
+
+    createChatRoom(chatName);
+    res.json({ message: `Chat room ${chatName} created` });
+});
 
 // Fetch user chats
 app.get('/userChats', authenticateToken, async (req, res) => {
     try {
-        const q = query(collection(db, "users"), where("email", "==", req.user.email));
+        const q = query(collection(db, "users"), where("email", "==", req.session.user.email));
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) return res.status(404).json({ message: 'User not found' });
@@ -195,50 +232,22 @@ app.get('/chat/:chatId', async (req, res) => {
 // Socket.io authentication
 io.use((socket, next) => {
     const token = socket.handshake.auth.token;
-    if (!token) {
-        console.error('Authentication error: Token is missing');
-        return next(new Error('Authentication error'));
-    }
+    if (!token) return next(new Error('Authentication error'));
 
-    jwt.verify(token, SECRET_KEY, (err, user) => {
-        if (err) {
-            console.error('Authentication error:', err.message);
-            return next(new Error('Authentication error'));
-        }
-        socket.user = user;
+    jwt.verify(token, SECRET_KEY, (err, decoded) => {
+        if (err) return next(new Error('Authentication error'));
+        socket.user = decoded;
         next();
     });
 });
 
 // Socket.io events
 io.on('connection', (socket) => {
-    console.log('A user connected');
-    updateUserStatus(socket.user.username, true);
-
-    const updateUsers = async () => {
-        try {
-            const usersSnapshot = await getDocs(collection(db, "users"));
-            const users = usersSnapshot.docs.map(doc => ({
-                username: doc.data().username,
-                isActive: doc.data().isActive ?? false
-            }));
-            socket.emit('updateUsers', users);
-        } catch (error) {
-            console.error("Error fetching users:", error);
-        }
-    };
-
-    updateUsers();
-
-    socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
-        updateUserStatus(socket.user.username, false);
-        updateUsers();
-    });
+    console.log('User connected:', socket.user.username);
 
     socket.on('joinChat', async (chatId) => {
-        socket.join(chatId);
         try {
+            socket.join(chatId);
             const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
             if (!fs.existsSync(chatFilePath)) fs.writeFileSync(chatFilePath, JSON.stringify([]));
 
@@ -261,6 +270,21 @@ io.on('connection', (socket) => {
             io.to(chatId).emit('newMessage', message);
         } catch (error) {
             console.error("Error sending message:", error);
+        }
+    });
+
+    socket.on('deleteMessage', async (chatId, messageId) => {
+        try {
+            const chatFilePath = path.join(CHATS_DIR, `${chatId}.json`);
+            const chatMessages = JSON.parse(fs.readFileSync(chatFilePath));
+            const updatedMessages = chatMessages.filter(msg => msg.id !== messageId);
+            fs.writeFileSync(chatFilePath, JSON.stringify(updatedMessages, null, 2));
+
+            // Update Firestore
+            await updateChatDocument(chatId, updatedMessages);
+            io.to(chatId).emit('messageDeleted', messageId);
+        } catch (error) {
+            console.error("Error deleting message:", error);
         }
     });
 });
