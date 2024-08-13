@@ -526,15 +526,25 @@ io.on('connection', (socket) => {
         socket.join(chatId);
         await addChatToUser(socket.user.email, chatId);
         console.log(`User ${socket.user.username} joined chat ${chatId}`);
-        
+    
         // Fetch and emit chat messages from Firestore
         try {
             const chatRef = doc(db, "chats", chatId);
             const chatDoc = await getDoc(chatRef);
-            
+    
             if (chatDoc.exists()) {
                 const chatData = chatDoc.data();
-                socket.emit('loadMessages', chatData.messages || []);
+                const messages = chatData.messages || [];
+    
+                // Define the cutoff time: 10 hours ago from the current time
+                const tenHoursAgo = new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString();
+    
+                // Filter messages to include only those from the last 10 hours
+                const recentMessages = messages.filter(message => {
+                    return message.timestamp >= tenHoursAgo;
+                });
+    
+                socket.emit('loadMessages', recentMessages);
             } else {
                 console.log(`Chat ${chatId} does not exist`);
                 socket.emit('loadMessages', []);
@@ -544,48 +554,51 @@ io.on('connection', (socket) => {
         }
         updateUsers();
     });
+    
 
     // Handle sending a message
     socket.on('sendMessage', async ({ chatId, message }) => {
-        const timestamp = new Date().toISOString();
-        const messageObject = { chatId, username: socket.user.username, message, timestamp };
-    
-        try {
-            // Save message to Firestore
-            const chatRef = doc(db, "chats", chatId);
-            await updateChatDocument(chatId, [messageObject]);
-    
-            // Emit message to chat
-            io.emit('receiveMessage', messageObject);
-            console.log(messageObject);
-    
-            // Retrieve user's current streak from Firestore
-            const userRef = doc(db, "users", socket.user.username);
-            const userSnapshot = await getDoc(userRef);
-    
-            if (userSnapshot.exists()) {
-                const userData = userSnapshot.data();
-                const lastStreakTimestamp = userData.streak[1];
-                const currentTimestamp = new Date(timestamp).getTime();
-                const lastTimestamp = new Date(lastStreakTimestamp).getTime();
-                const timeDifference = currentTimestamp - lastTimestamp;
-    
-                // Check if 24 hours or more have passed
-                if (timeDifference >= 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
-                    const newStreak = userData.streak[0] + 1;
-                    await updateDoc(userRef, {
-                        streak: [newStreak, timestamp]
-                    });
-                }
-            } else {
-                console.error(`User not found: ${socket.user.username}`);
+    // Replace "nigga" with "ninja" in the message
+    const sanitizedMessage = message.replace(/\bnigga\b/gi, 'ninja');
+
+    const timestamp = new Date().toISOString();
+    const messageObject = { chatId, username: socket.user.username, message: sanitizedMessage, timestamp };
+
+    try {
+        // Save message to Firestore
+        const chatRef = doc(db, "chats", chatId);
+        await updateChatDocument(chatId, [messageObject]);
+
+        // Emit message to chat
+        io.emit('receiveMessage', messageObject);
+        console.log(messageObject);
+
+        // Retrieve user's current streak from Firestore
+        const userRef = doc(db, "users", socket.user.username);
+        const userSnapshot = await getDoc(userRef);
+
+        if (userSnapshot.exists()) {
+            const userData = userSnapshot.data();
+            const lastStreakTimestamp = userData.streak[1];
+            const currentTimestamp = new Date(timestamp).getTime();
+            const lastTimestamp = new Date(lastStreakTimestamp).getTime();
+            const timeDifference = currentTimestamp - lastTimestamp;
+
+            // Check if 24 hours or more have passed
+            if (timeDifference >= 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
+                const newStreak = userData.streak[0] + 1;
+                await updateDoc(userRef, {
+                    streak: [newStreak, timestamp]
+                });
             }
-            
-            updateUsers();
-        } catch (error) {
-            console.error(`Error sending message to chat ${chatId}:`, error);
+        } else {
+            console.error(`User not found: ${socket.user.username}`);
         }
-    });    
+
+        updateUsers();
+    } catch (error) {
+        console.error(`Error sending message to chat ${chatId}:`, error);
+    }
 });
 
 

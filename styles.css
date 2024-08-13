@@ -1,21 +1,22 @@
+
 body {
     display: flex;
     margin: 0;
     height: 100vh;
     font-family: 'Arial Black', monospace;
-    background-color: #f7d1d1; /* Light sunset color */
+    background-color: #ffe1e1;
 }
-
 #sidebar {
-    width: 230px;
-    background-color: #ff6f61; /* Sunset orange */
-    border-right: 1px solid #6d2e2e; /* Darker border for contrast */
+    width: 230px; /* Increased width to accommodate user list */
+    background-color: #f4f4f4;
+    border-right: 1px solid #000000;
     padding: 10px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 2px 0 5px rgba(255, 255, 255, 0.1);
     overflow-y: auto;
     margin: 10px;
     display: flex;
     flex-direction: column;
+    background-color: #ff0051;
     border-radius: 15px;
     transition: transform 0.4s ease;
 }
@@ -23,88 +24,75 @@ body {
 #sidebar:hover {
     transform: scale(1.03);
 }
-
 #chatContainer {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    justify-content: flex-end; /* Ensure the form stays at the bottom */
     padding: 10px;
 }
-
 #chat {
-    border: 3px solid #ff4f4f; /* Sunset red */
+    border: 3px solid #ff0000;
     flex: 1;
     overflow-y: scroll;
     margin-bottom: 10px;
     margin-right: 15px;
     padding: 10px;
     border-radius: 15px;
-    background-color: #fff0f0; /* Soft background color */
 }
-
 .message {
     padding: 5px;
 }
-
 .chat-item {
     padding: 10px;
     border-radius: 15px;
     cursor: pointer;
-    background-color: #5a2b57; /* Purple shade */
+    background-color: #31001878;
     margin-bottom: 5px;
-    color: #f3e5f5; /* Light magenta */
-    transition: transform 0.4s ease;
+    color: #e0f7fa;
+    transition: transform 0.4s ease; /* Optional: For smooth scaling */
 }
 
 .chat-item:hover {
     transform: scale(1.05);
-    background-color: #dcb8d6; /* Light magenta */
-    color: #3c0b2c; /* Darker purple */
+    background-color: #cccccc9e;
+    color: #000000;
 }
-
 #username {
     font-weight: bold;
 }
-
 .toastify-message {
-    background-color: #ff8c00; /* Sunset orange */
+    background-color: #007bff;
     color: white;
 }
-
 #chatForm {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-top: auto;
-    width: 100%;
 }
-
 .chatAdd {
     margin-bottom: 10px;
 }
-
 #userList {
     margin-top: 10px;
-    border-top: 1px solid #dcb8d6; /* Light magenta */
+    border-top: 1px solid #ccc;
     padding-top: 10px;
 }
-
 .user-item {
     padding: 5px;
-    background-color: #f3e5f5; /* Light magenta */
+    background-color: #e0f7fa;
     margin-bottom: 5px;
 }
-
 .user {
     position: relative;
-    padding-right: 20px;
+    padding-right: 20px; /* Adjust padding to make space for the dot */
     padding: 10px;
     border-radius: 15px;
     cursor: pointer;
-    background-color: #5a2b57; /* Purple shade */
+    background-color: #31001878;
     margin-bottom: 5px;
-    color: #f3e5f5; /* Light magenta */
+    color: #e0f7fa;
 }
 
 .active-dot {
@@ -113,12 +101,11 @@ body {
     width: 8px;
     height: 8px;
     margin-left: 5px;
-    background-color: #66ff66; /* Light green for active dot */
+    background-color: rgb(79, 255, 79);
     border-radius: 50%;
     transform: translateY(-50%);
-    border: 2.5px solid #3c3c3c; /* Darker border */
+    border: 2.5px solid black; /* Add a black border to create the outline */
 }
-
 .message {
     margin-bottom: 10px;
     display: flex;
@@ -127,12 +114,13 @@ body {
     text-align: left;
     position: relative;
     margin-bottom: 20px;
+    
 }
 
 .timestamp {
     font-size: 0.6em;
     color: gray;
-    padding: 2px;
+    pad: 2px;
     border-radius: 10px;
 }
 
@@ -143,7 +131,7 @@ body {
 
 .text {
     margin-top: 5px;
-    background-color: #ff6f61; /* Sunset orange */
+    background-color: black;
     color: white;
     padding: 10px;
     border-radius: 7px;
@@ -151,44 +139,64 @@ body {
     transition: transform 0.4s ease;
 }
 
-.text:hover {
+.text:hover{
     background-color: white;
-    color: #ff6f61; /* Sunset orange */
+    color: black;
     transform: scale(1.05);
 }
 
+/* Special styling for messages from the current user */
 .current-user {
     align-items: flex-end;
     text-align: right;
 }
-
-.current-user .timestamp {
-    background-color: rgba(255, 255, 255, 0.2);
+/* Styling for the new message label */
+.new-message-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: rgb(255, 248, 170);
+    color: black;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex; /* Use flexbox */
+    align-items: center; /* Center items vertically */
+    justify-content: center; /* Center items horizontally */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1000;
 }
 
+.new-message-notification.show {
+    opacity: 1;
+}
+
+.current-user .timestamp {
+    background-color:rgba(255, 255, 255, 0.1);
+}
 .current-user .username {
     display: none;
 }
-
 .current-user .text {
-    background-color: #d9534f; /* Darker sunset red */
+    background-color: #ff0051; /* Example background color for current user messages */
     padding: 10px;
     border-radius: 7px;
     cursor: pointer;
     transition: transform 0.4s ease;
 }
-
-.current-user .text:hover {
+.current-user .text:hover{
     background-color: white;
-    color: #d9534f; /* Darker sunset red */
+    color: #ff0051;
     transform: scale(1.07);
 }
 
 .current-user .username {
     font-weight: bold;
-    color: #ff8c00; /* Sunset orange */
+    color: #007bff; /* Example color for username of the current user */
 }
 
+/* Additional CSS for chat form */
 #chatForm {
     display: flex;
     flex-direction: column;
@@ -204,36 +212,33 @@ body {
     margin-top: 10px;
     border-radius: 20px;
     border: 4px solid #ffffff;
-    background-color: #ff6f61; /* Sunset orange */
+    background-color: #ff0051;
     text-align: center;
     font-size: 30px;
     color: white;
     font-weight: bold;
 }
-
 #message {
-    width: 100%;
+    width: 100%; /* Make it take up 100% of the available width */
     max-width: 900px;
     padding: 10px;
-    height: 10px;
+    height: 10px; /* Increase the height for better usability */
     text-align: left;
     align-content: center;
     border-radius: 10px;
-    border: 3px solid #ff6f61; /* Sunset orange */
-    background-color: #ff4f4f; /* Sunset red */
+    border: 3px solid #ff0051;
+    background-color: #ff00004d;
     color: rgb(0, 0, 0);
     font-weight: bold;
     font-size: 15px;
-    margin-right: 10px;
+    margin-right: 10px; /* Space between message box and button */
 }
-
-#message::placeholder {
+#message::placeholder{
     color: rgb(0, 0, 0);
 }
-
 #sendMessage {
     padding: 8px 16px;
-    background-color: #ff6f61; /* Sunset orange */
+    background-color: #ff0051;
     color: white;
     font-weight: bold;
     border: none;
@@ -241,42 +246,38 @@ body {
     cursor: pointer;
     align-content: center;
 }
-
 #sendMessage:hover {
-    background-color: #d9534f; /* Darker sunset red */
+    background-color: #e60048;
 }
-
 #chatList h2 {
     color: white;
     text-align: center;
-    margin: 0;
-    padding: 10px 0;
+    margin: 0; /* Remove default margin */
+    padding: 10px 0; /* Add padding for spacing */
 }
-
-#chatList {
+#chatList{
     max-height: 400px;
     overflow: scroll;
 }
-
 #userList h2 {
-    color: white;
-    text-align: center;
-    margin: 0;
-    padding: 10px 0;
+    color: white;           /* Set text color to white */
+    text-align: center;     /* Center the text horizontally */
+    margin: 0;              /* Remove default margin */
+    padding: 10px 0;        /* Add padding for better spacing */
 }
-
-#userList {
+#userlist {
     max-height: 400px;
     overflow: scroll;
 }
 
+/* Button Styles */
 .mode-buttons {
     display: flex;
-    gap: 10px;
+    gap: 10px; /* Spacing between buttons */
 }
 
 .mode-btn {
-    width: 40px;
+    width: 40px; /* Adjust size as needed */
     height: 40px;
     border: none;
     border-radius: 50%;
@@ -290,32 +291,32 @@ body {
 }
 
 .mode-btn img {
-    width: 35px;
+    width: 35px; /* Adjust size as needed */
     height: 35px;
     object-fit: cover;
 }
 
+/* Top bar styles */
 .top-bar {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 10px; /* Space between input and buttons */
     margin-bottom: 10px;
 }
 
 #chatId {
-    flex: 1;
+    flex: 1; /* Allow input to take up available space */
     padding: 8px;
     border-radius: 20px;
     border: 4px solid #ffffff;
-    background-color: #ff6f61; /* Sunset orange */
+    background-color: #ff0051;
     text-align: center;
     font-size: 30px;
     color: white;
     font-weight: bold;
 }
-
 #logout {
-    background-color: #d9534f; /* Darker sunset red */
+    background-color: #e60048;
     color: white;
     outline: 2px solid white;
     width: 100px;
@@ -327,4 +328,39 @@ body {
 
 #logout:hover {
     transform: scale(1.2);
+
+
 }
+
+/* Popup Styles */
+.popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.popup p {
+    margin: 0;
+    font-size: 16px;
+}
+
+.popup-close {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.popup-close:hover {
+    background-color: #0056b3;
+}
+

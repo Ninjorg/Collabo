@@ -307,3 +307,23 @@ body {
 #logout:hover {
     background-color: #444444; /* Lighter grey on hover */
 }
+.new-message-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: rgb(255, 248, 170);
+    color: black;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex; /* Use flexbox */
+    align-items: center; /* Center items vertically */
+    justify-content: center; /* Center items horizontally */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1000;
+}
+
+.new-message-notification.show {
+    opacity: 1;
+}
