@@ -1,10 +1,35 @@
 // Initialize socket.io client
-const socket = io({
+const socket = io({ 
     transports: ['websocket'],
     auth: {
         token: localStorage.getItem('token') // Ensure this token is correct and present
     }
 });
+
+
+const fetchAndDisplayUserStreak = async () => {
+    const username = localStorage.getItem('username');
+    if (username) {
+        try {
+            const userRef = doc(db, 'users', username);
+            const userDoc = await getDoc(userRef);
+
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                const streak = userData.streak ? userData.streak[0] : 0; // Adjust based on your data structure
+                document.getElementById('streakValue').textContent = streak;
+            } else {
+                console.error('User document not found.');
+                document.getElementById('streakValue').textContent = 'Error';
+            }
+        } catch (error) {
+            console.error('Error fetching streak:', error);
+            document.getElementById('streakValue').textContent = 'Error';
+        }
+    } else {
+        document.getElementById('streakValue').textContent = 'Not logged in';
+    }
+};
 
 // Display the logged-in username
 const username = localStorage.getItem('username');
@@ -53,6 +78,15 @@ document.getElementById('sendMessage').addEventListener('click', (e) => {
     
 });
 
+const checkLogin = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        window.location.href = 'home.html'; // Redirect to home.html if not logged in
+    }
+};
+
+// Call the login check function at the start
+checkLogin();
 
 // Fetch and display user's chats
 const fetchUserChats = () => {
@@ -283,6 +317,136 @@ emojiPicker.addEventListener('emoji-click', (event) => {
     const emoji = event.detail.unicode;
     messageInput.value += emoji; // Append the selected emoji to the input field
 });
+
+//themes
+document.addEventListener('DOMContentLoaded', async () => {
+    const themeLink = document.getElementById('theme-link');
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    const streakRequirements = {
+        'default': 1,
+        'ninja': 1, // Example: Requires a streak of 5 to unlock 'ninja' theme
+        'moon': 10, // Example: Requires a streak of 10 to unlock 'moon' theme
+        'daisy': 15, // Example: Requires a streak of 15 to unlock 'daisy' theme
+        'ocean': 20, // Example: Requires a streak of 20 to unlock 'ocean' theme
+    };
+
+    const username = localStorage.getItem('username'); // Assuming you store username in localStorage
+
+    if (username) {
+        try {
+            const response = await fetch(`/userStreak?username=${username}`);
+            const data = await response.json();
+            
+            if (response.ok) {
+                const currentStreak = data.streak || 0;
+                updateThemeButtons(currentStreak);
+            } else {
+                console.error(data.error);
+            }
+        } catch (error) {
+            console.error('Error fetching streak:', error);
+        }
+    } else {
+        console.log('User not logged in');
+        disableAllButtons();
+    }
+
+    function updateThemeButtons(currentStreak) {
+        modeButtons.forEach(button => {
+            const theme = button.getAttribute('data-theme');
+            const requiredStreak = streakRequirements[theme];
+
+
+        });
+    }
+
+    modeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const theme = button.getAttribute('data-theme');
+            handleThemeSelection(theme);
+        });
+    });
+
+    function handleThemeSelection(theme) {
+        const requiredStreak = streakRequirements[theme];
+
+        if (requiredStreak !== undefined) {
+            fetch(`/userStreak?username=${localStorage.getItem('username')}`)
+                .then(response => response.json())
+                .then(data => {
+                    const currentStreak = data.streak || 0;
+
+                    if (currentStreak >= requiredStreak) {
+                        switchTheme(theme);
+                    } else if (currentStreak < requiredStreak) {
+                        alert(`Your streak is not big enough to access this theme. ${requiredStreak} days needed!`);
+                    }
+                    
+                })
+                .catch(error => {
+                    console.error('Error checking streak:', error);
+                });
+        }
+    }
+
+    function switchTheme(theme) {
+        switch (theme) {
+            case 'default':
+                themeLink.href = 'styles.css';
+                break;
+            case 'ninja':
+                themeLink.href = 'ninja-mode.css';
+                break;
+            case 'moon':
+                themeLink.href = 'moon.css';
+                break;
+            case 'daisy':
+                themeLink.href = 'flower.css';
+                break;
+            case 'ocean':
+                themeLink.href = 'ocean.css';
+                break;
+            default:
+                themeLink.href = 'styles.css';
+        }
+    }
+
+    function showNewStreakNotification(requiredStreak) {
+        let notification = document.getElementById('streakNotification');
+        
+        if (!notification) {
+            notification = document.createElement('div');
+            notification.id = 'streakNotification';
+            notification.classList.add('streak-notification');
+            document.body.appendChild(notification);
+        }
+        
+        notification.innerHTML = '';
+        
+        const imageElement = document.createElement('img');
+        imageElement.src = 'notification.png';
+        imageElement.alt = 'Notification Icon';
+        imageElement.style.width = '30px';
+        imageElement.style.height = '30px';
+        imageElement.style.marginRight = '5px';
+        
+        const textContent = `Your streak is too small to access this. You need ${requiredStreak} streak points.`;
+        notification.appendChild(imageElement);
+        notification.appendChild(document.createTextNode(textContent));
+        
+        notification.classList.add('show');
+        
+        // Hide the notification after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+        
+        // Increment the new message count and update the title
+        newMessageCount++;
+        updateTitle();
+    }    
+});
+
 
 // Handle user list updates
 socket.on('updateUsers', (users) => {
