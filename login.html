@@ -5,23 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <title>Collabo: Login</title>
+    <style>
+        /* Styling for the hint */
+        #classHint {
+            color: red;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
     <h1>Login</h1>
     <form id="loginForm">
         <input type="email" id="email" placeholder="Email" required /><br>
         <input type="password" id="password" placeholder="Password" required /><br>
+        <input type="text" id="classId" placeholder="Class ID" required /><br>
         <button type="submit" id="loginButton">Login</button>
     </form>
     <p id="signupPrompt">
         If you don't have an account, <a href="signup.html">sign up here</a>.
     </p>
-    <script src="login.js" defer></script>
+    <p id="classHint">P.S. Class ID is "ronit"</p>
+    
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const classId = document.getElementById('classId').value; // Get classId value
+
+            // Check if the Class ID is correct
+            if (classId !== 'ronit') {
+                alert('Incorrect Class ID. Please try again.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('username', data.username);
+                    window.location.href = 'index.html'; // Redirect to chat page
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+
     <!-- Include Socket.IO client script -->
     <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
-<!-- Include JWT Decode script -->
+    <!-- Include JWT Decode script -->
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
-<!-- Your app.js script -->
+    <!-- Your app.js script -->
     <script src="app.js"></script>
 </body>
 </html>

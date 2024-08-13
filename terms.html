@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collabo: Terms and Conditions</title>
+    <style>
+        /* Full-screen background */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+            font-family: Arial, sans-serif;
+        }
+
+        /* Modal container */
+        .modal {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 80%;
+            max-width: 500px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        /* Title */
+        .modal h1 {
+            margin-top: 0;
+            font-size: 24px;
+            color: #333;
+        }
+
+        /* Paragraphs and list */
+        .modal p, .modal ul {
+            text-align: left;
+            margin: 10px 0;
+            color: #555;
+        }
+
+        /* List items */
+        .modal ul li {
+            margin-bottom: 10px;
+        }
+
+        /* Agree button */
+        #agreeButton {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Hover effect for the button */
+        #agreeButton:hover {
+            background-color: #45a049;
+        }
+
+        /* Fade-in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div id="termsModal" class="modal" style="display: none;">
+        <h1>Terms and Conditions</h1>
+        <p>Welcome to Collabo. By using this platform, you agree to the following terms:</p>
+        <ul>
+            <li>You are responsible for your own actions on the platform.</li>
+            <li>You agree not to engage in spamming or any other disruptive behavior.</li>
+            <li>Collabo is not responsible for any actions taken by users on this platform.</li>
+            <li>Respect others and engage in constructive communication.</li>
+            <li>Any misuse of the platform may result in suspension or termination of your account.</li>
+        </ul>
+        <p>If you agree to these terms, please click the "Agree" button to proceed to the login page.</p>
+        <button id="agreeButton">Agree</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!localStorage.getItem('agreedToTerms')) {
+                document.getElementById('termsModal').style.display = 'block';
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        document.getElementById('agreeButton').addEventListener('click', function() {
+            localStorage.setItem('agreedToTerms', 'true');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>
