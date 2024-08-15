@@ -183,6 +183,8 @@ function updateTitle() {
     }
 }
 
+
+
 socket.on('receiveMessage', (message) => {
     if (message.username !== currentUser) {
         showNewMessageNotification(message);
@@ -318,6 +320,7 @@ emojiPicker.addEventListener('emoji-click', (event) => {
     messageInput.value += emoji; // Append the selected emoji to the input field
 });
 
+
 //themes
 document.addEventListener('DOMContentLoaded', async () => {
     const themeLink = document.getElementById('theme-link');
@@ -388,6 +391,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
         }
     }
+    
 
     function switchTheme(theme) {
         switch (theme) {
@@ -449,20 +453,48 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 // Handle user list updates
+// Listen for updates to the user list from the server
+function generateRandomChatId() {
+    return Math.random().toString(36).substring(2, 7); // Generates a 5-character ID
+}
+
+// Function to join a chat with a specific ID
+async function joinChat(chatId) {
+    try {
+        socket.emit('joinChat', { chatId }, (response) => {
+            if (response.status === 'ok') {
+                console.log(`Joined DM with ID: ${chatId}`);
+                document.getElementById('chat').textContent = `Joined DM: ${chatId}`;
+                // Add additional logic to update the chat UI as necessary
+            } else {
+                console.error('Failed to join DM:', response.error);
+                alert('Failed to join the DM. Please try again.');
+            }
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while joining the chat. Please try again.');
+    }
+}
+
+// Event listener for updating the user list
 socket.on('updateUsers', (users) => {
     console.log('Received updateUsers event:', users);
     const userList = document.getElementById('userList');
+    
     if (!userList) {
         console.error('User list element not found');
         return;
     }
+
     userList.innerHTML = '<h2>USERS</h2>';
     
     if (users && Array.isArray(users)) {
         users.forEach(user => {
             const userElement = document.createElement('div');
             userElement.classList.add('user');
-            userElement.textContent = user.username;
+            userElement.textContent = user.username || 'Unknown User'; // Ensure username is properly accessed
+            userElement.setAttribute('data-username', user.username); // Store the username as a data attribute
 
             // Add a green dot if the user is active
             if (user.isActive) {
@@ -471,9 +503,64 @@ socket.on('updateUsers', (users) => {
                 userElement.appendChild(activeDot);
             }
 
+            // Attach click event listener to the user element
+            userElement.addEventListener('click', async () => {
+                const clickedUser = user.username;
+                const currentUser = localStorage.getItem('username'); // Assuming username is stored in localStorage
+
+                if (clickedUser && currentUser) {
+                    // Generate a random 5-character chat ID
+                    const newChatId = generateRandomChatId();
+                    console.log(`Creating DM with ID: ${newChatId} for users: ${currentUser}, ${clickedUser}`);
+
+                    try {
+                        // Send a request to create a new DM with the clicked user
+                        const response = await fetch('/createDM', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ chatId: newChatId, otherUser: clickedUser })
+                        });
+
+                        // Check if the response is JSON
+                        const contentType = response.headers.get('Content-Type');
+                        if (contentType && contentType.includes('application/json')) {
+                            const data = await response.json();
+                            if (response.ok) {
+                                console.log(`DM created successfully: ${JSON.stringify(data)}`);
+                                // Automatically join the new DM
+                                joinChat(newChatId);
+                            } else {
+                                console.error('Error creating DM:', data.message || 'Unknown error');
+                                alert('Failed to create a DM. Please try again.');
+                            }
+                        } else {
+                            // Handle unexpected HTML responses
+                            const responseText = await response.text();
+                            console.error('Unexpected response format:', responseText);
+                            alert('An error occurred while creating the DM. Please try again.');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('An error occurred. Please try again.');
+                    }
+                } else {
+                    alert('Unable to identify users. Please try again.');
+                }
+            });
+
             userList.appendChild(userElement);
         });
     } else {
         console.error('Invalid users data:', users);
     }
 });
+
+// Function to join a chat with a specific ID
+
+
+// Function to join a chat with a specific ID
+
+
+// Function to generate a random 5-character chat ID

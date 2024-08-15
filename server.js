@@ -145,6 +145,7 @@ const initializeDefaultChatsForUser = (username) => {
     }
 };
 
+
 // Add default chats to users who don't already have them
 const updateUsersWithDefaultChats = () => {
     const users = readUsers();
@@ -160,6 +161,11 @@ const updateUsersWithDefaultChats = () => {
 // Initialize default chats and update existing users at startup
 initializeDefaultChats();
 updateUsersWithDefaultChats();
+
+function sanitizeMessage(msg) {
+    const offensivePattern = /\b(n[\s'_\-]*i[\s'_\-]*g[\s'_\-]*g[\s'_\-]*a|n[\s'_\-]*i[\s'_\-]*g[\s'_\-]*g[\s'_\-]*r|n[\s'_\-]*i[\s'_\-]*g[\s'_\-]*g[\s'_\-]*e[\s'_\-]*r)\b/gi;
+    return msg.replace(offensivePattern, 'ninja');
+}
 
 // Function to update the chat file
 const updateChatFile = (chatId, users) => {
@@ -248,6 +254,47 @@ const addChatToUser = async (userEmail, chatId) => {
         console.error("Error adding chat to user: ", error);
     }
 };
+
+// Function to create a DM chat
+app.post('/createDM', async (req, res) => {
+    try {
+        const { chatId, otherUser } = req.body;
+        const currentUser = req.headers['current-user']; // Modify if needed
+
+        if (!chatId || !otherUser || !currentUser) {
+            return res.status(400).json({ error: 'Chat ID, other user, and current user are required.' });
+        }
+
+        const chatRef = doc(db, "chats", chatId);
+        const chatDoc = await getDoc(chatRef);
+
+        if (chatDoc.exists()) {
+            console.log(`DM chat ${chatId} already exists.`);
+            res.status(200).json({ message: 'DM chat already exists.' });
+        } else {
+            // Create a new DM chat document
+            await setDoc(chatRef, {
+                chatId, 
+                users: [currentUser, otherUser], // Include both users
+                messages: [],  // Initialize with an empty messages array
+                isDM: true
+            });
+            console.log(`DM chat ${chatId} created successfully.`);
+            res.status(201).json({ message: 'DM chat created successfully.' });
+        }
+
+        // Add the current user and the other user to their chat documents
+        await addChatToUser(currentUser, chatId);
+        await addChatToUser(otherUser, chatId);
+
+    } catch (error) {
+        console.error('Error creating DM chat:', error);
+        res.status(500).json({ error: 'Error creating DM chat.' });
+    }
+});
+
+
+
 
 
 
@@ -378,40 +425,31 @@ updateChatsWithUsers();
 
 
 app.post('/login', async (req, res) => {
-    const { email, username, password } = req.body;
+    const { email, password } = req.body;
 
     try {
         const usersRef = collection(db, "users");
+        const q = query(usersRef, where("email", "==", email));
+        const querySnapshot = await getDocs(q);
 
-        // Check if the email already exists
-        const emailQuery = query(usersRef, where("email", "==", email));
-        const emailSnapshot = await getDocs(emailQuery);
-
-        if (!emailSnapshot.empty) {
-            return res.status(400).json({ message: 'Email is already in use' });
+        if (querySnapshot.empty) {
+            return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // Check if the username already exists
-        const usernameQuery = query(usersRef, where("username", "==", username));
-        const usernameSnapshot = await getDocs(usernameQuery);
+        const userDoc = querySnapshot.docs[0];
+        const user = userDoc.data();
 
-        if (!usernameSnapshot.empty) {
-            return res.status(400).json({ message: 'Username is already in use' });
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // Hash the password before storing
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const token = jwt.sign({ email: user.email, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
 
-        // Create the new user document
-        await addDoc(usersRef, {
-            email,
-            username,
-            password: hashedPassword
-        });
-
-        res.status(201).json({ message: 'User registered successfully' });
+        res.json({ token, username: user.username });
     } catch (error) {
-        console.error("Error during registration: ", error);
+        console.error("Error during login: ", error);
         res.status(500).json({ message: 'Internal server error' });
     }
 });
@@ -535,60 +573,79 @@ io.on('connection', (socket) => {
     // Handle joining a chat
     socket.on('joinChat', async (chatId) => {
         socket.join(chatId);
+        await addChatToUser(socket.user.email, chatId);
         console.log(`User ${socket.user.username} joined chat ${chatId}`);
-
+    
         // Fetch and emit chat messages from Firestore
         try {
             const chatRef = doc(db, "chats", chatId);
             const chatDoc = await getDoc(chatRef);
-
-            if (!chatDoc.exists()) {
-                console.error(`Chat ${chatId} does not exist.`);
-                return;
+    
+            if (chatDoc.exists()) {
+                const chatData = chatDoc.data();
+                const messages = chatData.messages || [];
+    
+                // Define the cutoff time: 10 hours ago from the current time
+                const tenHoursAgo = new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString();
+    
+                // Filter messages to include only those from the last 10 hours
+                const recentMessages = messages.filter(message => {
+                    return message.timestamp >= tenHoursAgo;
+                });
+    
+                socket.emit('loadMessages', recentMessages);
+            } else {
+                console.log(`Chat ${chatId} does not exist`);
+                socket.emit('loadMessages', []);
             }
-
-            const chatData = chatDoc.data();
-            if (!chatData.users.includes(socket.user.username)) {
-                console.error(`User ${socket.user.username} is not authorized to join chat ${chatId}.`);
-                return;
-            }
-
-            socket.emit('chatMessages', chatData.messages);
         } catch (error) {
-            console.error(`Error fetching chat messages for chat ${chatId}:`, error);
+            console.error(`Error loading messages for chat ${chatId}:`, error);
         }
+        updateUsers();
     });
     
 
     // Handle sending a message
     socket.on('sendMessage', async ({ chatId, message }) => {
-        const username = socket.user.username;
-
+        const timestamp = new Date().toISOString();
+        const messageObject = { chatId, username: socket.user.username, message, timestamp };
+    
         try {
+            // Save message to Firestore
             const chatRef = doc(db, "chats", chatId);
-            const chatDoc = await getDoc(chatRef);
-
-            if (!chatDoc.exists()) {
-                console.error(`Chat ${chatId} does not exist.`);
-                return;
+            await updateChatDocument(chatId, [messageObject], messageObject.username);
+    
+            // Emit message to chat
+            io.emit('receiveMessage', messageObject);
+            console.log(messageObject);
+    
+            // Retrieve user's current streak from Firestore
+            const userRef = doc(db, "users", socket.user.username);
+            const userSnapshot = await getDoc(userRef);
+    
+            if (userSnapshot.exists()) {
+                const userData = userSnapshot.data();
+                const lastStreakTimestamp = userData.streak[1];
+                const currentTimestamp = new Date(timestamp).getTime();
+                const lastTimestamp = new Date(lastStreakTimestamp).getTime();
+                const timeDifference = currentTimestamp - lastTimestamp;
+    
+                // Check if 24 hours or more have passed
+                if (timeDifference >= 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
+                    const newStreak = userData.streak[0] + 1;
+                    await updateDoc(userRef, {
+                        streak: [newStreak, timestamp]
+                    });
+                }
+            } else {
+                console.error(`User not found: ${socket.user.username}`);
             }
-
-            const chatData = chatDoc.data();
-            if (!chatData.users.includes(username)) {
-                console.error(`User ${username} is not authorized to send messages to chat ${chatId}.`);
-                return;
-            }
-
-            // Update chat messages
-            await updateChatDocument(chatId, [message], username);
-            io.to(chatId).emit('chatMessages', chatData.messages);
-
-            console.log(`Message sent to chat ${chatId}: ${message}`);
+            
+            updateUsers();
         } catch (error) {
             console.error(`Error sending message to chat ${chatId}:`, error);
         }
-    });
-
+    });    
 });
 
 
