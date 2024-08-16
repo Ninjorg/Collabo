@@ -97,7 +97,7 @@ const fetchUserChats = () => {
         }
     })
     .then(response => response.json())
-    .then(data => updateChatList(data.chats))
+    .then(data => updateChatList(data.chats ))
     .catch(error => console.error('Error fetching user chats:', error));
 };
 
@@ -117,6 +117,7 @@ const updateChatList = (chats) => {
         chatListElement.appendChild(chatItem);
     });
 };
+
 
 // Call fetchUserChats on page load
 fetchUserChats();
@@ -478,6 +479,7 @@ async function joinChat(chatId) {
 }
 
 // Event listener for updating the user list
+// Event listener for updating the user list
 socket.on('updateUsers', (users) => {
     console.log('Received updateUsers event:', users);
     const userList = document.getElementById('userList');
@@ -520,13 +522,14 @@ socket.on('updateUsers', (users) => {
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify({ chatId: newChatId, otherUser: clickedUser })
+                            body: JSON.stringify({ chatId: newChatId, users: [currentUser, clickedUser] }) // Use `chatId` here
                         });
 
                         // Check if the response is JSON
                         const contentType = response.headers.get('Content-Type');
                         if (contentType && contentType.includes('application/json')) {
                             const data = await response.json();
+                            console.log("Response Data:", data);
                             if (response.ok) {
                                 console.log(`DM created successfully: ${JSON.stringify(data)}`);
                                 // Automatically join the new DM
@@ -556,6 +559,11 @@ socket.on('updateUsers', (users) => {
         console.error('Invalid users data:', users);
     }
 });
+
+
+
+
+
 
 // Function to join a chat with a specific ID
 

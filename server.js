@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 
 const { initializeApp } = require("firebase/app");
 const { getFirestore, doc, setDoc} = require("firebase/firestore");
-const { collection, query, where, getDocs, getDoc, updateDoc, arrayUnion } = require('firebase/firestore');   // For Firestore
+const { collection, query, where, getDocs, getDoc, updateDoc, arrayUnion, arrayRemove } = require('firebase/firestore');   // For Firestore
 
 const firebaseConfig = {
     apiKey: "AIzaSyDKiSo9RJpJoycuvqqlCfY2wI8m8Ijgl-c",
@@ -220,80 +220,121 @@ const updateChatFile = (chatId, users) => {
 };
 
 // Add chat to user's chats
-const addChatToUser = async (userEmail, chatId) => {
+async function addChatToUser(user, chatId) {
     try {
-        // Find the user document by searching through all users in the "users" collection
-        const usersSnapshot = await getDocs(collection(db, "users"));
-        let userDocRef = null;
-        let userData = null;
+        const userRef = doc(db, 'users', user);
+        const userDoc = await getDoc(userRef);
 
-        usersSnapshot.forEach(doc => {
-            if (doc.data().email === userEmail) {
-                userDocRef = doc.ref;
-                userData = doc.data();
+        if (userDoc.exists()) {
+            const userChats = userDoc.data().chats || [];
+            // Check if chatId is already in userChats
+            if (!userChats.includes(chatId)) {
+                userChats.push(chatId);
+                await updateDoc(userRef, { chats: userChats });
+                console.log(`Chat ID ${chatId} added to user ${user}`);
             }
-        });
-
-        if (userDocRef && userData) {
-            // Add the chat ID to the user's chats array using arrayUnion to ensure it's unique
-            await updateDoc(userDocRef, {
-                chats: arrayUnion(chatId)
-            });
-
-            console.log(`Chat ID ${chatId} added to user ${userData.username}'s chats`);
-
-            // Optionally update the chat document with the new user
-            const chatRef = doc(db, "chats", chatId);
-            await updateDoc(chatRef, {
-                users: arrayUnion(userData.username)
-            });
         } else {
-            console.log("User not found");
+            console.error(`User ${user} not found`);
         }
     } catch (error) {
-        console.error("Error adding chat to user: ", error);
+        console.error('Error updating user chats:', error);
     }
-};
+}
 
 // Function to create a DM chat
+
 app.post('/createDM', async (req, res) => {
     try {
-        const { chatId, otherUser } = req.body;
-        const currentUser = req.headers['current-user']; // Modify if needed
+        const { chatId, users } = req.body;
 
-        if (!chatId || !otherUser || !currentUser) {
-            return res.status(400).json({ error: 'Chat ID, other user, and current user are required.' });
+        if (!chatId || !users || !Array.isArray(users) || users.length !== 2) {
+            return res.status(400).json({ message: 'Invalid request data' });
         }
 
-        const chatRef = doc(db, "chats", chatId);
+        // Destructure users
+        const [user1, user2] = users;
+
+        // Check if the DM chat already exists
+        const chatRef = doc(db, 'chats', chatId);
         const chatDoc = await getDoc(chatRef);
 
         if (chatDoc.exists()) {
             console.log(`DM chat ${chatId} already exists.`);
-            res.status(200).json({ message: 'DM chat already exists.' });
+            
+            // Delete other DM chats between these two users
+            await deleteOtherChats(user1, user2, chatId);
+
+            return res.status(200).json({ message: `DM chat ${chatId} already exists.` });
         } else {
             // Create a new DM chat document
             await setDoc(chatRef, {
-                chatId, 
-                users: [currentUser, otherUser], // Include both users
-                messages: [],  // Initialize with an empty messages array
+                chatId,
+                users,
+                messages: [],  // Start with an empty messages array
                 isDM: true
             });
             console.log(`DM chat ${chatId} created successfully.`);
-            res.status(201).json({ message: 'DM chat created successfully.' });
+            
+            // Optionally, update the user documents to include the new chat
+            for (const user of users) {
+                await addChatToUser(user, chatId);
+            }
+
+            return res.status(201).json({ message: `DM chat ${chatId} created successfully.` });
         }
-
-        // Add the current user and the other user to their chat documents
-        await addChatToUser(currentUser, chatId);
-        await addChatToUser(otherUser, chatId);
-
     } catch (error) {
         console.error('Error creating DM chat:', error);
-        res.status(500).json({ error: 'Error creating DM chat.' });
+        return res.status(500).json({ message: 'Internal server error' });
     }
 });
 
+// Helper function to delete old DM chats between two users, keeping only the latest one
+async function deleteOtherChats(user1, user2, keepChatId) {
+    try {
+        // Query for existing DM chats between user1 and user2
+        const q = query(
+            collection(db, 'chats'),
+            where('isDM', '==', true),
+            where('users', 'array-contains-any', [user1, user2])
+        );
 
+        const querySnapshot = await getDocs(q);
+
+        querySnapshot.forEach(async (doc) => {
+            const chatData = doc.data();
+            const chatId = chatData.chatId;
+
+            // Delete chats that are not the one to keep
+            if (chatId !== keepChatId) {
+                console.log(`Deleting old DM chat ${chatId}`);
+                await deleteDoc(doc.ref);
+
+                // Optionally, remove the chat ID from the user documents
+                await removeChatFromUser(user1, chatId);
+                await removeChatFromUser(user2, chatId);
+            }
+        });
+    } catch (error) {
+        console.error('Error deleting old DM chats:', error);
+    }
+}
+
+
+async function removeChatFromUser(username, chatId) {
+    try {
+        // Reference to the user's document
+        const userRef = doc(db, 'users', username);
+
+        // Update the user's document to remove the chat ID
+        await updateDoc(userRef, {
+            chats: arrayRemove(chatId) // Remove the chatId from the chats array
+        });
+
+        console.log(`Removed chat ${chatId} from user ${username}`);
+    } catch (error) {
+        console.error(`Error removing chat ${chatId} from user ${username}:`, error);
+    }
+}
 
 
 
@@ -352,6 +393,7 @@ app.post('/signup', async (req, res) => {
 });
 
 app.get('/userStreak', async (req, res) => {
+    
     const username = req.query.username; // Get the username from query parameters
 
     if (!username) {
@@ -572,6 +614,38 @@ io.on('connection', (socket) => {
 
     // Handle joining a chat
     socket.on('joinChat', async (chatId) => {
+        socket.join(chatId);
+        await addChatToUser(socket.user.email, chatId);
+        console.log(`User ${socket.user.username} joined chat ${chatId}`);
+    
+        // Fetch and emit chat messages from Firestore
+        try {
+            const chatRef = doc(db, "chats", chatId);
+            const chatDoc = await getDoc(chatRef);
+    
+            if (chatDoc.exists()) {
+                const chatData = chatDoc.data();
+                const messages = chatData.messages || [];
+    
+                // Define the cutoff time: 10 hours ago from the current time
+                const tenHoursAgo = new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString();
+    
+                // Filter messages to include only those from the last 10 hours
+                const recentMessages = messages.filter(message => {
+                    return message.timestamp >= tenHoursAgo;
+                });
+    
+                socket.emit('loadMessages', recentMessages);
+            } else {
+                console.log(`Chat ${chatId} does not exist`);
+                socket.emit('loadMessages', []);
+            }
+        } catch (error) {
+            console.error(`Error loading messages for chat ${chatId}:`, error);
+        }
+        updateUsers();
+    });
+    socket.on('joinDMChat', async (chatId) => {
         socket.join(chatId);
         await addChatToUser(socket.user.email, chatId);
         console.log(`User ${socket.user.username} joined chat ${chatId}`);
