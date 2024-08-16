@@ -132,9 +132,11 @@ document.getElementById('chatId').addEventListener('change', () => {
     }
     const token = localStorage.getItem('token');
     if (chatId && token) {
+        document.getElementById('chatId').value = existingChatId;
         socket.emit('joinChat', chatId);
     }
 });
+
 
 // Handle receiving and displaying messages
 const currentUser = localStorage.getItem('username'); // Replace with the actual logic to get the current username
@@ -460,25 +462,80 @@ function generateRandomChatId() {
 }
 
 // Function to join a chat with a specific ID
+let isJoining = false;
+
 async function joinChat(chatId) {
+    if (isJoining) return; // Prevent multiple joins
+    isJoining = true;
+
+    console.log(`joinChat called with ID: ${chatId} at ${new Date().toISOString()}`);
+
     try {
         socket.emit('joinChat', { chatId }, (response) => {
+            console.log(`Server response for joinChat:`, response);
+            isJoining = false; // Reset flag after response
+
             if (response.status === 'ok') {
-                console.log(`Joined DM with ID: ${chatId}`);
-                document.getElementById('chat').textContent = `Joined DM: ${chatId}`;
-                // Add additional logic to update the chat UI as necessary
+                console.log(`Successfully joined DM with ID: ${chatId}`);
+                const chat = document.getElementById('chat');
+                if (chat) {
+                    chat.textContent = `Joined DM: ${chatId}`;
+                } else {
+                    console.error('Chat element not found');
+                }
+                
+                fetchMessagesForChat(chatId);
             } else {
                 console.error('Failed to join DM:', response.error);
                 alert('Failed to join the DM. Please try again.');
             }
         });
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error joining chat:', error);
         alert('An error occurred while joining the chat. Please try again.');
+        isJoining = false; // Reset flag on error
     }
 }
 
+
 // Event listener for updating the user list
+async function checkDMExists(user1, user2) {
+    try {
+        const response = await fetch('/checkDM', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ users: [user1, user2] })
+        });
+
+        const contentType = response.headers.get('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            if (response.ok) {
+                return data.chatId; // Return the existing chat ID if found
+            } else {
+                console.error('Error checking DM existence:', data.message || 'Unknown error');
+            }
+        } else {
+            const responseText = await response.text();
+            console.error('Unexpected response format:', responseText);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+    return null; // Return null if no DM exists or if an error occurred
+}
+
+function updateChatName(Id) {
+    const chatNameElement = document.getElementById('chatName');
+    const chatId = document.getElementById('chatId')
+    if (chatNameElement) {
+        chatNameElement.innerText = `Chat ID: ${chatId}`; // Adjust as needed
+    }
+    chatId.innerText = `Chat ID: ${Id}`
+}
+
 // Event listener for updating the user list
 socket.on('updateUsers', (users) => {
     console.log('Received updateUsers event:', users);
@@ -511,42 +568,73 @@ socket.on('updateUsers', (users) => {
                 const currentUser = localStorage.getItem('username'); // Assuming username is stored in localStorage
 
                 if (clickedUser && currentUser) {
-                    // Generate a random 5-character chat ID
-                    const newChatId = generateRandomChatId();
-                    console.log(`Creating DM with ID: ${newChatId} for users: ${currentUser}, ${clickedUser}`);
-
-                    try {
-                        // Send a request to create a new DM with the clicked user
-                        const response = await fetch('/createDM', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ chatId: newChatId, users: [currentUser, clickedUser] }) // Use `chatId` here
-                        });
-
-                        // Check if the response is JSON
-                        const contentType = response.headers.get('Content-Type');
-                        if (contentType && contentType.includes('application/json')) {
-                            const data = await response.json();
-                            console.log("Response Data:", data);
-                            if (response.ok) {
-                                console.log(`DM created successfully: ${JSON.stringify(data)}`);
-                                // Automatically join the new DM
-                                joinChat(newChatId);
-                            } else {
-                                console.error('Error creating DM:', data.message || 'Unknown error');
-                                alert('Failed to create a DM. Please try again.');
-                            }
-                        } else {
-                            // Handle unexpected HTML responses
-                            const responseText = await response.text();
-                            console.error('Unexpected response format:', responseText);
-                            alert('An error occurred while creating the DM. Please try again.');
+                    // Check if DM already exists
+                    const existingChatId = await checkDMExists(currentUser, clickedUser);
+                    
+                    if (existingChatId) {
+                        // If DM exists, join the existing chat
+                        const chatId = document.getElementById('chatId').value;
+                        const chatNameElement = document.getElementById('chatName');
+                        
+                        if (chatNameElement) {  // Ensure the chatName element exists
+                            chatNameElement.innerText = existingChatId; // Update chatName text to chatId
                         }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('An error occurred. Please try again.');
+                        const token = localStorage.getItem('token');
+                        
+                        if (chatId && token) {
+
+                            document.getElementById('chatId').value = existingChatId;
+                            socket.emit('joinChat', existingChatId);
+                        }
+
+                    } else {
+                        // Generate a random 5-character chat ID
+                        const newChatId = generateRandomChatId();
+                        console.log(`Creating DM with ID: ${newChatId} for users: ${currentUser}, ${clickedUser}`);
+
+                        try {
+                            // Send a request to create a new DM with the clicked user
+                            const response = await fetch('/createDM', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ chatId: newChatId, users: [currentUser, clickedUser] }) // Use `chatId` here
+                            });
+
+                            // Check if the response is JSON
+                            const contentType = response.headers.get('Content-Type');
+                            if (contentType && contentType.includes('application/json')) {
+                                const data = await response.json();
+                                console.log("Response Data:", data);
+                                if (response.ok) {
+                                    console.log(`DM created successfully: ${JSON.stringify(data)}`);
+                                    // Automatically join the new DM
+                                    const chatId = document.getElementById('chatId').value;
+                                    const chatNameElement = document.getElementById('chatName');
+                                    
+                                    if (chatNameElement) {  // Ensure the chatName element exists
+                                        chatNameElement.innerText = newChatI; // Update chatName text to chatId
+                                    }
+                                    const token = localStorage.getItem('token');
+                                    if (chatId && token) {
+                                        document.getElementById('chatId').value = existingChatId;
+                                        socket.emit('joinChat', newChatId);
+                                    }
+                                } else {
+                                    console.error('Error creating DM:', data.message || 'Unknown error');
+                                    alert('Failed to create a DM. Please try again.');
+                                }
+                            } else {
+                                // Handle unexpected HTML responses
+                                const responseText = await response.text();
+                                console.error('Unexpected response format:', responseText);
+                                alert('An error occurred while creating the DM. Please try again.');
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            alert('An error occurred. Please try again.');
+                        }
                     }
                 } else {
                     alert('Unable to identify users. Please try again.');
@@ -559,16 +647,3 @@ socket.on('updateUsers', (users) => {
         console.error('Invalid users data:', users);
     }
 });
-
-
-
-
-
-
-// Function to join a chat with a specific ID
-
-
-// Function to join a chat with a specific ID
-
-
-// Function to generate a random 5-character chat ID

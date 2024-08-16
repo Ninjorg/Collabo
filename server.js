@@ -241,6 +241,43 @@ async function addChatToUser(user, chatId) {
     }
 }
 
+app.post('/checkDM', async (req, res) => {
+    try {
+        const { users } = req.body;
+
+        if (!users || !Array.isArray(users) || users.length !== 2) {
+            return res.status(400).json({ message: 'Invalid request data' });
+        }
+
+        const [user1, user2] = users;
+
+        // Query to find a chat with these two users
+        const chatsRef = collection(db, 'chats');
+        const q = query(chatsRef, where('users', 'array-contains-any', [user1, user2]));
+        const querySnapshot = await getDocs(q);
+
+        let chatId = null;
+
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            // Check if this chat contains exactly the two users
+            if (data.users.length === 2 && data.users.includes(user1) && data.users.includes(user2)) {
+                chatId = data.chatId;
+            }
+        });
+
+        if (chatId) {
+            return res.status(200).json({ chatId });
+        } else {
+            return res.status(404).json({ message: 'No DM found' });
+        }
+    } catch (error) {
+        console.error('Error checking DM existence:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
 // Function to create a DM chat
 
 app.post('/createDM', async (req, res) => {
@@ -614,12 +651,15 @@ io.on('connection', (socket) => {
 
     // Handle joining a chat
     socket.on('joinChat', async (chatId) => {
-        socket.join(chatId);
-        await addChatToUser(socket.user.email, chatId);
-        console.log(`User ${socket.user.username} joined chat ${chatId}`);
-    
-        // Fetch and emit chat messages from Firestore
         try {
+            // Join the specified chat room
+            socket.join(chatId);
+            console.log(`User ${socket.user.username} joined chat ${chatId}`);
+    
+            // Add chat to the user's list
+            await addChatToUser(socket.user.email, chatId);
+    
+            // Fetch and emit recent chat messages from Firestore
             const chatRef = doc(db, "chats", chatId);
             const chatDoc = await getDoc(chatRef);
     
@@ -631,52 +671,22 @@ io.on('connection', (socket) => {
                 const tenHoursAgo = new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString();
     
                 // Filter messages to include only those from the last 10 hours
-                const recentMessages = messages.filter(message => {
-                    return message.timestamp >= tenHoursAgo;
-                });
+                const recentMessages = messages.filter(message => message.timestamp >= tenHoursAgo);
     
+                // Emit recent messages to the client
                 socket.emit('loadMessages', recentMessages);
             } else {
                 console.log(`Chat ${chatId} does not exist`);
                 socket.emit('loadMessages', []);
             }
+    
+            // Update the list of users in the chat room
+            updateUsers(chatId);
         } catch (error) {
-            console.error(`Error loading messages for chat ${chatId}:`, error);
+            console.error(`Error joining chat ${chatId}:`, error);
         }
-        updateUsers();
     });
-    socket.on('joinDMChat', async (chatId) => {
-        socket.join(chatId);
-        await addChatToUser(socket.user.email, chatId);
-        console.log(`User ${socket.user.username} joined chat ${chatId}`);
     
-        // Fetch and emit chat messages from Firestore
-        try {
-            const chatRef = doc(db, "chats", chatId);
-            const chatDoc = await getDoc(chatRef);
-    
-            if (chatDoc.exists()) {
-                const chatData = chatDoc.data();
-                const messages = chatData.messages || [];
-    
-                // Define the cutoff time: 10 hours ago from the current time
-                const tenHoursAgo = new Date(Date.now() - 10 * 60 * 60 * 1000).toISOString();
-    
-                // Filter messages to include only those from the last 10 hours
-                const recentMessages = messages.filter(message => {
-                    return message.timestamp >= tenHoursAgo;
-                });
-    
-                socket.emit('loadMessages', recentMessages);
-            } else {
-                console.log(`Chat ${chatId} does not exist`);
-                socket.emit('loadMessages', []);
-            }
-        } catch (error) {
-            console.error(`Error loading messages for chat ${chatId}:`, error);
-        }
-        updateUsers();
-    });
     
 
     // Handle sending a message
