@@ -106,7 +106,13 @@ const updateChatList = (chats) => {
     const chatListElement = document.getElementById('chatList');
     chatListElement.innerHTML = '<h2>NOTEPAD</h2>';
     const uniqueChats = new Set(chats);
+
     uniqueChats.forEach((chatId) => {
+        // Skip chat IDs that start with 'DM'
+        if (chatId.startsWith('DM')) {
+            return;
+        }
+
         const chatItem = document.createElement('div');
         chatItem.classList.add('chat-item');
         chatItem.textContent = `#${chatId}`;
@@ -114,9 +120,11 @@ const updateChatList = (chats) => {
             document.getElementById('chatId').value = chatId;
             socket.emit('joinChat', chatId);
         });
+
         chatListElement.appendChild(chatItem);
     });
 };
+
 
 
 // Call fetchUserChats on page load
@@ -224,6 +232,7 @@ socket.on('receiveMessage', (message) => {
 
     // Show notification and update title
 });
+
 
 // Function to show the new message notification
 function showNewMessageNotification(message, chatId) {
@@ -458,7 +467,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Handle user list updates
 // Listen for updates to the user list from the server
 function generateRandomChatId() {
-    return Math.random().toString(36).substring(2, 7); // Generates a 5-character ID
+    const randomDigits = Math.random().toString().substring(2, 9); // Generates 7 random digits
+    return `DM${randomDigits}`;
 }
 
 // Function to join a chat with a specific ID
@@ -583,7 +593,7 @@ socket.on('updateUsers', (users) => {
                         
                         if (chatId && token) {
 
-                            document.getElementById('chatId').value = existingChatId;
+                            document.getElementById('chatId').value = `${existingChatId}`;
                             socket.emit('joinChat', existingChatId);
                         }
 
@@ -618,7 +628,7 @@ socket.on('updateUsers', (users) => {
                                     }
                                     const token = localStorage.getItem('token');
                                     if (chatId && token) {
-                                        document.getElementById('chatId').value = existingChatId;
+                                        document.getElementById('chatId').value = `${clickedUser}`;
                                         socket.emit('joinChat', newChatId);
                                     }
                                 } else {

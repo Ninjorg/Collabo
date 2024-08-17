@@ -80,22 +80,27 @@ const updateChatDocument = async (chatId, messages, username) => {
     try {
         const chatRef = doc(db, "chats", chatId);
 
-        // Get the current chat document
         const chatDoc = await getDoc(chatRef);
-        
+
         if (chatDoc.exists()) {
-            // If the document exists, update it with new messages
             await updateDoc(chatRef, {
                 messages: arrayUnion(...messages)
             });
         } else {
-            // If the document does not exist, create a new one
             await setDoc(chatRef, {
                 admin: username,
                 name: chatId,
                 messages: messages,
-                users: []
+                users: [username]  // Add the current user as part of the chat
             });
+        }
+
+        const updatedChatDoc = await getDoc(chatRef);
+        const users = updatedChatDoc.data().users;
+
+        // Add the chatId to each user's document
+        for (const user of users) {
+            await addChatToUser(user, chatId);
         }
 
         console.log(`Chat document ${chatId} updated successfully`);
@@ -103,7 +108,6 @@ const updateChatDocument = async (chatId, messages, username) => {
         console.error(`Error updating chat document ${chatId}:`, error);
     }
 };
-
 // Update isActive status of a user
 const updateUserStatus = async (username, status) => {
     try {
@@ -227,7 +231,6 @@ async function addChatToUser(user, chatId) {
 
         if (userDoc.exists()) {
             const userChats = userDoc.data().chats || [];
-            // Check if chatId is already in userChats
             if (!userChats.includes(chatId)) {
                 userChats.push(chatId);
                 await updateDoc(userRef, { chats: userChats });
@@ -240,6 +243,7 @@ async function addChatToUser(user, chatId) {
         console.error('Error updating user chats:', error);
     }
 }
+
 
 app.post('/checkDM', async (req, res) => {
     try {
@@ -682,9 +686,13 @@ io.on('connection', (socket) => {
     
             // Update the list of users in the chat room
             updateUsers(chatId);
+            for (const user of users) {
+                await addChatToUser(user, chatId);
+            }
         } catch (error) {
             console.error(`Error joining chat ${chatId}:`, error);
         }
+        
     });
     
     
@@ -700,7 +708,7 @@ io.on('connection', (socket) => {
             await updateChatDocument(chatId, [messageObject], messageObject.username);
     
             // Emit message to chat
-            io.emit('receiveMessage', messageObject);
+            io.to(chatId).emit('receiveMessage', messageObject);
             console.log(messageObject);
     
             // Retrieve user's current streak from Firestore
