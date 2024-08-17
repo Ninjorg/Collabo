@@ -97,33 +97,46 @@ const fetchUserChats = () => {
         }
     })
     .then(response => response.json())
-    .then(data => updateChatList(data.chats ))
+    .then(data => {
+        console.log('Fetched user chats:', data); // Debugging
+        updateChatList(data.chats);
+    })
     .catch(error => console.error('Error fetching user chats:', error));
 };
 
-// Update chat list on page load
+// Update chat list
 const updateChatList = (chats) => {
+    if (!Array.isArray(chats)) {
+        console.error('Chats data is not an array:', chats);
+        return;
+    }
+
     const chatListElement = document.getElementById('chatList');
     chatListElement.innerHTML = '<h2>NOTEPAD</h2>';
-    const uniqueChats = new Set(chats);
 
-    uniqueChats.forEach((chatId) => {
-        // Skip chat IDs that start with 'DM'
-        if (chatId.startsWith('DM')) {
-            return;
-        }
+    chats.forEach(({ id, notification }) => {
+        if (id.startsWith('DM')) return;
 
         const chatItem = document.createElement('div');
         chatItem.classList.add('chat-item');
-        chatItem.textContent = `#${chatId}`;
+        chatItem.textContent = `#${id}`;
+
+        if (notification > 0) {
+            const notificationBadge = document.createElement('span');
+            notificationBadge.classList.add('notification-badge');
+            notificationBadge.textContent = notification > 9 ? '9+' : notification;
+            chatItem.appendChild(notificationBadge);
+        }
+
         chatItem.addEventListener('click', () => {
-            document.getElementById('chatId').value = chatId;
-            socket.emit('joinChat', chatId);
+            document.getElementById('chatId').value = id;
+            socket.emit('joinChat', id);
         });
 
         chatListElement.appendChild(chatItem);
     });
 };
+
 
 
 
@@ -657,3 +670,5 @@ socket.on('updateUsers', (users) => {
         console.error('Invalid users data:', users);
     }
 });
+
+document.addEventListener('click', fetchUserChats);

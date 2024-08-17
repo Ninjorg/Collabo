@@ -46,6 +46,77 @@ if (!fs.existsSync(CHATS_DIR)) {
 
 // Default chats
 const DEFAULT_CHATS = ['general', 'homework', 'counting'];
+const updateChatNotification = async (username, chatId, increment = 1) => {
+    try {
+        const userRef = doc(db, 'users', username);
+        const userDoc = await getDoc(userRef);
+
+        if (userDoc.exists()) {
+            let userChats = userDoc.data().chats || [];
+            const chatIndex = userChats.findIndex(chat => chat.id === chatId);
+
+            if (chatIndex > -1) {
+                userChats[chatIndex].notification += increment;
+            } else {
+                userChats.push({ id: chatId, notification: increment });
+            }
+
+            await updateDoc(userRef, { chats: userChats });
+            console.log(`Notification updated for user ${username} in chat ${chatId}`);
+        } else {
+            console.error(`User ${username} not found`);
+        }
+    } catch (error) {
+        console.error('Error updating chat notifications:', error);
+    }
+};
+const resetChatNotification = async (username, chatId) => {
+    try {
+        const userRef = doc(db, 'users', username);
+        const userDoc = await getDoc(userRef);
+
+        if (userDoc.exists()) {
+            let userChats = userDoc.data().chats || [];
+            const chatIndex = userChats.findIndex(chat => chat.id === chatId);
+
+            if (chatIndex > -1) {
+                userChats[chatIndex].notification = 0;
+                await updateDoc(userRef, { chats: userChats });
+                console.log(`Notification reset for user ${username} in chat ${chatId}`);
+            }
+        } else {
+            console.error(`User ${username} not found`);
+        }
+    } catch (error) {
+        console.error('Error resetting chat notifications:', error);
+    }
+};
+const handleMessageSend = async (chatId, senderUsername, message, timestamp) => {
+    try {
+        const chatRef = doc(db, 'chats', chatId);
+        const chatDoc = await getDoc(chatRef);
+
+        if (chatDoc.exists()) {
+            await updateDoc(chatRef, {
+                messages: arrayUnion({ sender: senderUsername, text: message })
+            });
+
+            // Notify all users in the chat except the sender
+            const users = chatDoc.data().users || [];
+            for (const user of users) {
+                if (user !== senderUsername) {
+                    await updateChatNotification(user, chatId);
+                }
+            }
+
+            console.log(`Message sent in chat ${chatId} by ${senderUsername}`);
+        } else {
+            console.error(`Chat ${chatId} not found`);
+        }
+    } catch (error) {
+        console.error('Error sending message:', error);
+    }
+};
 
 // Utility function to read user data
 const readUsers = () => {
@@ -79,7 +150,6 @@ const writeUsers = (users) => {
 const updateChatDocument = async (chatId, messages, username) => {
     try {
         const chatRef = doc(db, "chats", chatId);
-
         const chatDoc = await getDoc(chatRef);
 
         if (chatDoc.exists()) {
@@ -98,7 +168,7 @@ const updateChatDocument = async (chatId, messages, username) => {
         const updatedChatDoc = await getDoc(chatRef);
         const users = updatedChatDoc.data().users;
 
-        // Add the chatId to each user's document
+        // Add the chatId to each user's document only if it's not already present
         for (const user of users) {
             await addChatToUser(user, chatId);
         }
@@ -223,7 +293,6 @@ const updateChatFile = (chatId, users) => {
     });
 };
 
-// Add chat to user's chats
 async function addChatToUser(user, chatId) {
     try {
         const userRef = doc(db, 'users', user);
@@ -231,10 +300,19 @@ async function addChatToUser(user, chatId) {
 
         if (userDoc.exists()) {
             const userChats = userDoc.data().chats || [];
-            if (!userChats.includes(chatId)) {
-                userChats.push(chatId);
+
+            // Check if chatId already exists in the user's chat list
+            const chatExists = userChats.some(chat => chat.id === chatId);
+
+            if (!chatExists) {
+                // Add the chat with the chatId and notifications set to 0
+                userChats.push({ id: chatId, notification: 0 });
+
+                // Update the user's chats in Firestore
                 await updateDoc(userRef, { chats: userChats });
-                console.log(`Chat ID ${chatId} added to user ${user}`);
+                console.log(`Chat ID ${chatId} added to user ${user} with notifications set to 0`);
+            } else {
+                console.log(`Chat ID ${chatId} already exists for user ${user}`);
             }
         } else {
             console.error(`User ${user} not found`);
@@ -243,6 +321,7 @@ async function addChatToUser(user, chatId) {
         console.error('Error updating user chats:', error);
     }
 }
+
 
 
 app.post('/checkDM', async (req, res) => {
@@ -659,6 +738,7 @@ io.on('connection', (socket) => {
             // Join the specified chat room
             socket.join(chatId);
             console.log(`User ${socket.user.username} joined chat ${chatId}`);
+            await resetChatNotification(socket.user.username, chatId);
     
             // Add chat to the user's list
             await addChatToUser(socket.user.email, chatId);
@@ -708,6 +788,7 @@ io.on('connection', (socket) => {
             await updateChatDocument(chatId, [messageObject], messageObject.username);
     
             // Emit message to chat
+            await handleMessageSend(chatId, messageObject.username, message, timestamp);
             io.to(chatId).emit('receiveMessage', messageObject);
             console.log(messageObject);
     
