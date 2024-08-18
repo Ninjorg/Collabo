@@ -104,6 +104,7 @@ const fetchUserChats = () => {
     .catch(error => console.error('Error fetching user chats:', error));
 };
 
+
 // Update chat list
 const updateChatList = (chats) => {
     if (!Array.isArray(chats)) {
@@ -549,7 +550,94 @@ async function checkDMExists(user1, user2) {
     }
     return null; // Return null if no DM exists or if an error occurred
 }
+const getUserList = () => {
+    const userListElement = document.getElementById('userList');
+    if (!userListElement) {
+        console.error('User list element not found.');
+        return [];
+    }
+    
+    // Assuming each user is an element inside userListElement
+    return Array.from(userListElement.children).map(userElement => userElement.textContent.trim());
+};
+const fetchUserNotifications = async () => {
+    try {
+    const currentUser = localStorage.getItem('username');
+    if (!currentUser) return;
 
+    // Fetch user list (assume you have a way to get this)
+    const userList = await getUserList(); // This should be defined based on your application logic
+
+    const response = await fetch('/getUserNotifications', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ currentUser, userList })
+    });
+
+    if (!response.ok) throw new Error('Failed to fetch notifications');
+    
+    const notifications = await response.json();
+    updateNotificationDisplay(notifications);
+
+    } catch (error) {
+    console.error('Error fetching user notifications:', error);
+    }
+};
+const userList = await getUserList();
+console.log(userList);
+  // Update notification display in the user list
+const updateNotificationDisplay = (notifications) => {
+    const userListElement = document.getElementById('userList');
+    userListElement.innerHTML = '';
+
+    for (const [username, notification] of Object.entries(notifications)) {
+        const user = document.createElement('div');
+        user.classList.add('user-item');
+        user.textContent = username;
+
+        if (notification > 0) {
+            const notificationBadge = document.createElement('span');
+            notificationBadge.classList.add('notification-badge');
+            notificationBadge.textContent = notification;
+            user.appendChild(notificationBadge);
+        }
+
+    userListElement.appendChild(userItem);
+    }
+};
+
+// function getDMNotificationCount(username) {
+//     // Create the URL with the username
+//     const url = `/dm-notification/${encodeURIComponent(username)}`;
+
+//     // Make the GET request to the server
+//     fetch(url)
+//         .then(response => {
+//             // Check if the response is successful
+//             if (!response.ok) {
+//                 throw new Error(`HTTP error! Status: ${response.status}`);
+//             }
+//             return response.json(); // Parse the response as JSON
+//         })
+//         .then(data => {
+//             // Assuming the server returns { notificationCount: number }
+//             console.log(`DM Notification Count for ${username}: ${data.notification}`);
+//         })
+//         .catch(error => {
+//             console.error('Error fetching DM notification count:', error);
+//         });
+// }
+
+// // Example usage:
+
+// // Periodically fetch notifications every 5 seconds
+// const currentUsername = localStorage.getItem('username');
+// setInterval(() => getDMNotificationCount(currentUsername), 5000);
+
+setInterval(fetchUserNotifications, 5000);
+  
 function updateChatName(Id) {
     const chatNameElement = document.getElementById('chatName');
     const chatId = document.getElementById('chatId')

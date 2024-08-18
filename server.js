@@ -293,6 +293,33 @@ const updateChatFile = (chatId, users) => {
     });
 };
 
+async function getDMNotificationCount(username) {
+    try {
+        // Reference to the user document in Firestore
+        const userRef = doc(db, 'users', username);
+        const userDoc = await getDoc(userRef);
+
+        if (userDoc.exists()) {
+            // Retrieve the user's chats
+            const userChats = userDoc.data().chats || [];
+
+            // Filter for chats that start with 'DM'
+            const dmChats = userChats.filter(chat => chat.id.startsWith('DM'));
+
+            // Sum up the notifications from these DM chats
+            const notificationCount = dmChats.reduce((total, chat) => total + (chat.notification || 0), 0);
+
+            return notificationCount;
+        } else {
+            console.error(`User ${username} not found`);
+            return 0;
+        }
+    } catch (error) {
+        console.error('Error fetching DM notification count:', error);
+        return 0;
+    }
+}
+
 const addChatToUser = async (user, chatId) => {
     try {
         const userRef = doc(db, 'users', user);
@@ -321,6 +348,61 @@ const addChatToUser = async (user, chatId) => {
         console.error('Error updating user chats:', error);
     }
 };
+
+async function findDMChatId(user1, user2) {
+    try {
+        // Query to find a chat with these two users
+        const chatsRef = collection(db, 'chats');
+        const q = query(
+            chatsRef,
+            where('isDM', '==', true),
+            where('users', 'array-contains-any', [user1, user2])
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        let foundDMChatId = null;
+
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            // Check if this chat contains exactly the two users
+            if (data.users.length === 2 && data.users.includes(user1) && data.users.includes(user2)) {
+                foundDMChatId = data.chatId;
+            }
+        });
+
+        return foundDMChatId;
+    } catch (error) {
+        console.error('Error finding DM chat ID:', error);
+        throw new Error('Internal server error');
+    }
+}
+app.post('/getUserNotifications', async (req, res) => {
+    try {
+      const { currentUser, userList } = req.body;
+      const notifications = {};
+  
+      for (const username of userList) {
+        // Find DM chat ID
+        const dmChatId = await findDMChatId(currentUser, username);
+        if (dmChatId) {
+          // Get notification value
+          const userDocRef = collection('users').doc(username);
+          const userDoc = await userDocRef.get();
+          
+          if (userDoc.exists) {
+            const notificationsCount = userDoc.data().notifications || 0;
+            notifications[username] = notificationsCount > 9 ? '9+' : notificationsCount;
+          }
+        }
+      }
+  
+      res.json(notifications);
+    } catch (error) {
+      console.error('Error fetching user notifications:', error);
+      res.status(500).send('Error fetching user notifications');
+    }
+});
 
 
 
@@ -544,6 +626,11 @@ app.get('/userStreak', async (req, res) => {
         console.error('Error fetching user streak:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
+});
+app.get('/dm-notifications/:username', async (req, res) => {
+    const username = req.params.username;
+    const notificationCount = await getDMNotificationCount(username);
+    res.json({ notificationCount });
 });
 
 
@@ -792,7 +879,6 @@ io.on('connection', (socket) => {
         const messageObject = { chatId, username: socket.user.username, message, timestamp };
     
         try {
-            addChatToUser(messageObject.username, messageObject.chatId);
             // Save message to Firestore
             const chatRef = doc(db, "chats", chatId);
             await updateChatDocument(chatId, [messageObject], messageObject.username);
@@ -818,7 +904,7 @@ io.on('connection', (socket) => {
                     await updateDoc(userRef, {
                         streak: [0, timestamp]
                     });
-                } else if (timeDifference >= 24 * 60 * 60 * 1000) { // 24 hours in milliseconds
+                } else if (timeDifference >= 7 * 60 * 60 * 1000) { // 24 hours in milliseconds
                     // Increment streak if less than 48 hours but more than 24 hours have passed
                     const newStreak = userData.streak[0] + 1;
                     await updateDoc(userRef, {
