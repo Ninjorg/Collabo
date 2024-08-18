@@ -4,7 +4,8 @@ body {
     margin: 0;
     height: 100vh;
     font-family: 'Arial Black', monospace;
-    background-color: #ffe1e1;
+    /* background-color: #ffc3c3; */
+    background: linear-gradient(135deg, #ff00cc, #ff5500);
 }
 #sidebar {
     width: 230px; /* Increased width to accommodate user list */
@@ -19,6 +20,7 @@ body {
     background-color: #ff0051;
     border-radius: 15px;
     transition: transform 0.4s ease;
+    overflow: scroll;
 }
 
 #sidebar:hover {
@@ -55,8 +57,8 @@ body {
 
 .chat-item:hover {
     transform: scale(1.05);
-    background-color: #cccccc9e;
-    color: #000000;
+    background-color: rgba(255, 255, 255, 0);
+    color: #ffffff;
 }
 #username {
     font-weight: bold;
@@ -81,8 +83,13 @@ body {
 }
 .user-item {
     padding: 5px;
-    background-color: #e0f7fa;
+    background-color: none;
     margin-bottom: 5px;
+}
+.user:hover {
+    transform: scale(1.05);
+    background-color: #cccccc00;
+    color: #ffffff;
 }
 .user {
     position: relative;
@@ -93,6 +100,7 @@ body {
     background-color: #31001878;
     margin-bottom: 5px;
     color: #e0f7fa;
+    transition: transform 0.4s ease; 
 }
 
 .active-dot {
@@ -255,9 +263,9 @@ body {
     margin: 0; /* Remove default margin */
     padding: 10px 0; /* Add padding for spacing */
 }
-#chatList{
+#chatList {
     max-height: 400px;
-    overflow: scroll;
+    overflow-y: auto; /* Enable scrolling */
 }
 #userList h2 {
     color: white;           /* Set text color to white */
@@ -265,9 +273,13 @@ body {
     margin: 0;              /* Remove default margin */
     padding: 10px 0;        /* Add padding for better spacing */
 }
-#userlist {
+
+#userList {
+    margin-top: 10px;
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
     max-height: 400px;
-    overflow: scroll;
+    overflow-y: auto; /* Enable scrolling */
 }
 
 /* Button Styles */
@@ -364,3 +376,11 @@ body {
     background-color: #0056b3;
 }
 
+.notification-badge {
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    margin-left: 10px;
+    font-size: 0.8em;
+}

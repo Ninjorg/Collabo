@@ -5,35 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <title>Collabo: Login</title>
-    <style>
-        /* Styling for the hint */
-        #classHint {
-            color: red;
-            margin-top: 20px;
-            font-size: 12px;
-        }
-    </style>
+    <link rel="stylesheet" href="./login.css">
 </head>
 <body>
-    <h1>Login</h1>
-    <form id="loginForm">
-        <input type="email" id="email" placeholder="Email" required /><br>
-        <input type="password" id="password" placeholder="Password" required /><br>
-        <input type="text" id="classId" placeholder="Class ID" required /><br>
-        <button type="submit" id="loginButton">Login</button>
-    </form>
-    <p id="signupPrompt">
-        If you don't have an account, <a href="signup.html">sign up here</a>.
-    </p>
-    <p id="classHint">P.S. Class ID is "ronit"</p>
-    
+    <!-- Container for the entire login section -->
+    <div id="loginContainer">
+        <h1>Login</h1>
+        
+        <!-- Login Form -->
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Email" required /><br>
+            <input type="password" id="password" placeholder="Password" required /><br>
+            <input type="text" id="classId" placeholder="Class ID" required /><br>
+            <button type="submit" id="loginButton">Login</button>
+        </form>
+
+        <!-- Sign-up Prompt -->
+        <p id="signupPrompt">
+            If you don't have an account, <a href="signup.html">sign up here</a>.
+        </p>
+        
+        <!-- Hint at the bottom -->
+        <p id="classHint">P.S. Class ID is "ronit"</p>
+    </div>
+
+    <!-- Modal for Terms and Conditions -->
+    <div id="termsModal" class="modal">
+        <h1>Terms and Conditions</h1>
+        <p>Welcome to Collabo. By using this platform, you agree to the following terms:</p>
+        <ul>
+            <li>You are responsible for your own actions on the platform.</li>
+            <li>You agree not to engage in spamming or any other disruptive behavior.</li>
+            <li>Collabo is not responsible for any actions taken by users on this platform.</li>
+            <li>Respect others and engage in constructive communication.</li>
+            <li>Any misuse of the platform may result in suspension or termination of your account.</li>
+        </ul>
+        <p>If you agree to these terms, please click the "Agree" button to proceed to the login page.</p>
+        <button id="agreeButton">Agree</button>
+    </div>
+
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if the user has already agreed to the terms
+            if (!localStorage.getItem('agreedToTerms')) {
+                document.getElementById('termsModal').style.display = 'block';
+            }
+        });
+
+        document.getElementById('agreeButton').addEventListener('click', function() {
+            localStorage.setItem('agreedToTerms', 'true');
+            document.getElementById('termsModal').style.display = 'none';
+        });
+
         document.getElementById('loginForm').addEventListener('submit', async (event) => {
             event.preventDefault();
 
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const classId = document.getElementById('classId').value; // Get classId value
+            const classId = document.getElementById('classId').value;
 
             // Check if the Class ID is correct
             if (classId !== 'ronit') {

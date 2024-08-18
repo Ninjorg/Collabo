@@ -1,182 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link id="theme-link" rel="stylesheet" href="styles.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Page</title>
-    <link rel="stylesheet" href="./home.css">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <title>Collabo</title>
+
+    <!-- Include Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- Include Socket.IO client library -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <!-- Include JWT Decode library -->
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <!-- Include Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js"></script>
+    <!-- Include Emoji Picker -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+    <!-- Your main JavaScript file -->
+    <script type="module" src="app.js"></script>
+
+    <style>
+        /* Add CSS for the top-right streak display */
+        #streakContainer {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        /* Add CSS for emoji picker button */
+        #emojiButton {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5em;
+            margin-right: 5px;
+        }
+        #emojiPicker {
+            display: none;
+            position: absolute;
+            bottom: 60px; /* Adjust based on your layout */
+            left: 10px; /* Adjust based on your layout */
+            z-index: 1000; /* Ensure it appears on top */
+        }
+    </style>
 </head>
 <body>
-    <div class="homePage">
-        <header>
-            <nav>
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="features.html">Features</a></li>
-                    <li><a href="about.html">About Us</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                    <li><a href="faq.html">FAQ</a></li>
-                    <li><a href="blog.html">Blog</a></li>
-                </ul>
-            </nav>
-        </header>
-        <div class="info">
-            <p>
-                <strong>Teacher <a href="teacher.html">log in</a> / Student <a href="login.html">log in</a>?</strong>
-            </p>
+    <div id="sidebar">
+        <div id="chatList"></div>
+        <div class="chatAdd"></div>
+        <div id="userList">
+            <h3>Users</h3>
+            <!-- User list will be dynamically inserted here -->
         </div>
-        <img src='collabo.png' alt="Collabo Banner" class="banner" />
-        <h1>Welcome to Collabo 👋</h1>
-        <p class="general">
-            Collabo is an educational tool designed to help students collaborate effectively. Created by middle schooler Ronit Parikh, it offers a way for students to communicate for educational purposes. Whether you're working on group projects, sharing resources, or discussing ideas, Collabo provides the platform you need to succeed together. With our advanced file-sharing capabilities, students can work on projects creatively and efficiently. Collabo is school-friendly and censors NSFW content/messages to ensure a safe and positive learning environment. Dive in and experience seamless collaboration today!
-        </p>
-
-        <section class="news">
-            <h2>Latest News</h2>
-            <article>
-                <h3>New Feature Alert: Enhanced File Sharing</h3>
-                <p>We've just rolled out an upgraded file-sharing system that allows you to upload and manage documents more efficiently. This new feature is designed to improve collaboration and streamline project management. Check it out in your dashboard today!</p>
-                <p><a href="blog.html#new-feature">Read more</a></p>
-            </article>
-            <article>
-                <h3>Upcoming Webinar: Maximizing Collabo's Tools</h3>
-                <p>Join us for an exclusive webinar where we'll cover tips and tricks for making the most out of Collabo's features. Learn how to enhance your productivity and collaboration with our platform. Don't miss it!</p>
-                <p><a href="events.html">Sign up here</a></p>
-            </article>
-        </section>
-
-        <section class="case-studies">
-            <h2>Case Studies</h2>
-            <article>
-                <h3>Case Study: Improved Group Project Outcomes</h3>
-                <p>Discover how Collabo helped a group of high school students improve their project outcomes by facilitating better communication and file sharing. Read their success story and learn how you can achieve similar results.</p>
-                <p><a href="case-studies.html#group-projects">Read the case study</a></p>
-            </article>
-            <article>
-                <h3>Case Study: Teacher's Efficiency Boost</h3>
-                <p>See how Collabo has transformed the way teachers organize and manage classroom activities. This case study highlights the positive impact on lesson planning and student engagement.</p>
-                <p><a href="case-studies.html#teacher-efficiency">Read the case study</a></p>
-            </article>
-        </section>
-
-        <section class="tutorials">
-            <h2>Helpful Tutorials</h2>
-            <article>
-                <h3>Getting Started with Collabo</h3>
-                <p>New to Collabo? Our getting started guide will walk you through the basics of setting up your account and using our core features effectively.</p>
-                <p><a href="tutorials.html#getting-started">Start here</a></p>
-            </article>
-            <article>
-                <h3>Advanced Tips and Tricks</h3>
-                <p>Learn advanced techniques for maximizing your use of Collabo. This tutorial covers tips for power users and how to customize your experience.</p>
-                <p><a href="tutorials.html#advanced-tips">Learn more</a></p>
-            </article>
-        </section>
-
-        <h1>About Collabo</h1>
-        <p class="general">Collabo is a great tool for collaboration at schools. Some of our team consists of students who are passionate about improving the life of students. We aim to make collaboration effortless and engaging for all users.</p>
-
-        <div class="testimonials">
-            <h2>Awards</h2>
-            <p>Collabo has been recognized for its innovation in educational technology and its commitment to enhancing student collaboration. Here are some of the awards we’ve received:</p>
-            <ul>
-                <li>Best Educational Tool 2024</li>
-                <li>Innovation Award in EdTech</li>
-                <li>Top Collaboration Platform for Students</li>
-            </ul>
-        </div>
-
-        <div class="features">
-            <h2>Features</h2>
-            <ul>
-                <li>Seamless file sharing for easy collaboration</li>
-                <li>Real-time messaging and notifications</li>
-                <li>Safe and secure environment with content moderation</li>
-                <li>Customizable group and project management tools</li>
-                <li>Intuitive interface for effortless communication</li>
-                <li>Integration with popular educational tools and platforms</li>
-                <li>Mobile-friendly design for on-the-go access</li>
-                <li>Detailed analytics and reporting for educators</li>
-                <li>Interactive learning modules and resources</li>
-            </ul>
-        </div>
-
-        <div class="testimonials">
-            <h2>What Our Users Say</h2>
-            <div class="testimonial">
-                <p class="general">"Collabo has transformed the way we work on projects. The ease of sharing files and communicating has made our group work much more efficient!"</p>
-                <p><strong>- Emily R., High School Student</strong></p>
-            </div>
-            <div class="testimonial">
-                <p class="general">"As a teacher, I love how Collabo keeps my students engaged and organized. It's a fantastic tool for any classroom!"</p>
-                <p><strong>- Mr. Johnson, Math Teacher</strong></p>
-            </div>
-            <div class="testimonial">
-                <p class="general">"The mobile app is a game-changer! I can stay connected with my team and manage our projects even when I'm on the go." </p>
-                <p><strong>- Sarah K., College Student</strong></p>
-            </div>
-        </div>
-
-        <div class="meet-team">
-            <h2>Meet the Team</h2>
-            <div class="team-row">
-                <div class="team-member">
-                    <img src="kanye.jpg" alt="Team Member 1" class="team-photo">
-                    <h3>Kanye West</h3>
-                    <p>"You don't got the answers"</p>
-                </div>
-                <div class="team-member">
-                    <img src="ronitpfp2.jpg" alt="Team Member 2" class="team-photo">
-                    <h3>Ronit Parikh</h3>
-                    <p>"I eat banana"</p>
-                </div>
-                <div class="team-member">
-                    <img src="playboy.png" alt="Team Member 3" class="team-photo">
-                    <h3>Jordan Carter</h3>
-                    <p>"I AM MUSIC"</p>
-                </div>
-            </div>
-            <div class="team-row">
-                <div class="team-member">
-                    <img src="Khalid.jpeg" alt="Team Member 4" class="team-photo">
-                    <h3>Khaled Mohamed Khaled</h3>
-                    <p>"Life is Roblox."</p>
-                </div>
-                <div class="team-member">
-                    <img src="utkarsh.png" alt="Team Member 5" class="team-photo">
-                    <h3>Rajesh Wajesh</h3>
-                    <p>"Full stack Web App developer with blockchain experience"</p>
-                </div>
-                <div class="team-member">
-                    <img src="edward.jpg" alt="Team Member 6" class="team-photo">
-                    <h3>Edward Lai</h3>
-                    <p>"Jai HINDH!"</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="faq">
-            <h2>Frequently Asked Questions</h2>
-            <div class="faq-item">
-                <h3>How do I sign up for Collabo?</h3>
-                <p>Scroll down to the bottom of the page and click on the "Sign Up" button in the footer. Follow the prompts to create your account.</p>
-            </div>
-            <div class="faq-item">
-                <h3>Is Collabo free to use?</h3>
-                <p>Collabo offers a free basic plan with optional premium features available for a fee. Check out our pricing page for more details.</p>
-            </div>
-            <div class="faq-item">
-                <h3>How can I contact support?</h3>
-                <p>If you need assistance, please visit our Contact page and fill out the support form, or email us directly at support@collabo.com.</p>
-            </div>
-        </div>
-
-        <footer>
-            <p>© 2024 Collabo. All rights reserved.</p>
-            <p>Created by Ronit Parikh</p>
-            <p><a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms of Service</a></p>
-        </footer>
     </div>
+    <div id="chatContainer">
+        <div class="top-bar">
+            <!-- Add streak display to the top-right corner -->
+            <div id="streakContainer">
+                🔥<span id="streakValue">Loading...</span>
+            </div>
+            
+            
+            <input type="text" id="chatId" placeholder="Join/Create chats" required />
+            <div class="mode-buttons">
+                <button class="mode-btn" data-theme="default" title="Default"><img src="gear.png" alt="Default"></button>
+                <button class="mode-btn" data-theme="ninja" title="Ninja"><img src="ninja.png" alt="Ninja"></button>
+                <button class="mode-btn" data-theme="ocean" title="Ocean"><img src="water.png" alt="ocean"></button>
+                <button class="mode-btn" data-theme="daisy" title="Daisy"><img src="flower.png" alt="daisy"></button>
+                <button class="mode-btn" data-theme="moon" title="Moon"><img src="moon.png" alt="moon"></button>
+            </div>
+        </div>
+        <div id="chat"></div>
+        <form id="chatForm">
+            <div style="display: flex; align-items: center; width: 100%; max-width: 400px;">
+                <button type="button" id="emojiButton">😊</button>
+                <emoji-picker id="emojiPicker"></emoji-picker>
+                <textarea id="message" placeholder="Type a message" required></textarea>
+                <button type="submit" id="sendMessage">Send</button>
+            </div>
+        </form>
+        <p><span id="username"></span></p>
+        <button id="logout">Logout</button>
+    </div>
+    <script src="theme-switcher.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const username = localStorage.getItem('username'); // Assuming you store username in localStorage
+    
+            if (username) {
+                try {
+                    const response = await fetch(`/userStreak?username=${username}`);
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        document.getElementById('streakValue').textContent = data.streak || 0;
+                    } else {
+                        document.getElementById('streakValue').textContent = 'Error fetching streak';
+                        console.error(data.error);
+                    }
+                } catch (error) {
+                    document.getElementById('streakValue').textContent = 'Error fetching streak';
+                    console.error('Error fetching streak:', error);
+                }
+            } else {
+                document.getElementById('streakValue').textContent = 'Not logged in';
+            }
+        });
+
+    
+        // Handle emoji picker toggle
+        document.getElementById('emojiButton').addEventListener('click', () => {
+            const emojiPicker = document.getElementById('emojiPicker');
+            emojiPicker.style.display = emojiPicker.style.display === 'none' || emojiPicker.style.display === '' ? 'block' : 'none';
+        });
+    
+        // Ensure only one event listener is attached
+        document.querySelector('emoji-picker').removeEventListener('emoji-click', handleEmojiClick);
+
+        
+
+    
+        document.querySelector('emoji-picker').addEventListener('emoji-click', handleEmojiClick);
+    </script>
 </body>
 </html>

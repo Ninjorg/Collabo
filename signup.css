@@ -1,0 +1,94 @@
+/* Full-screen background with gradient */
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(135deg, #ff00cc, #ff5500); /* Gradient from light blue to light green */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Container for the entire sign-up section */
+#signupContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Title */
+h1 {
+    color: #ffffff;
+    font-size: 48px;
+    margin-bottom: 20px;
+
+}
+
+/* Container for the sign-up form */
+#signupForm {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+    width: 100%;
+    text-align: center;
+}
+
+/* Form elements */
+label {
+    display: block;
+    margin: 10px 0 5px;
+    color: #ff0051;
+    font-size: 16px;
+    text-align: left;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+/* Sign-up button */
+button {
+    width: 100%;
+    background-color: #ff0051;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    font-size: 18px;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #800129;
+}
+
+/* Sign-up prompt */
+p {
+    font-size: 20px;
+    color: #ffffff;
+    margin-top: 20px;
+}
+
+p a {
+    color: #3c00ff;
+    text-decoration: none;
+}
+
+p a:hover {
+    text-decoration: underline;
+}
