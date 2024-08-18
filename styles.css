@@ -1,135 +1,153 @@
-
 body {
     display: flex;
     margin: 0;
     height: 100vh;
     font-family: 'Arial Black', monospace;
-    /* background-color: #ffc3c3; */
-    background: linear-gradient(135deg, #ff00cc, #ff5500);
+    background: linear-gradient(180deg, #ffc3c3, #ff004cb3);
+    color: #333;
+    overflow: hidden;
 }
+
 #sidebar {
-    width: 230px; /* Increased width to accommodate user list */
-    background-color: #f4f4f4;
+    width: 250px;
+    background-color: #ff004c;
     border-right: 1px solid #000000;
-    padding: 10px;
-    box-shadow: 2px 0 5px rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
     overflow-y: auto;
     margin: 10px;
     display: flex;
     flex-direction: column;
-    background-color: #ff0051;
-    border-radius: 15px;
-    transition: transform 0.4s ease;
-    overflow: scroll;
 }
 
 #sidebar:hover {
-    transform: scale(1.03);
+    transform: scale(1.05);
 }
+
 #chatContainer {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* Ensure the form stays at the bottom */
-    padding: 10px;
+    justify-content: flex-end;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 20px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
+
 #chat {
-    border: 3px solid #ff0000;
+    border: 2px solid #ff004c;
     flex: 1;
-    overflow-y: scroll;
+    overflow-y: auto;
     margin-bottom: 10px;
-    margin-right: 15px;
-    padding: 10px;
-    border-radius: 15px;
+    padding: 15px;
+    border-radius: 20px;
+    background-color: #fff;
 }
+
 .message {
-    padding: 5px;
-}
-.chat-item {
     padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    background-color: #f1f1f1;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.message:hover {
+    background-color: #ff004c;
+    color: #fff;
+    transform: scale(1.03);
+}
+
+.chat-item {
+    padding: 12px;
     border-radius: 15px;
     cursor: pointer;
     background-color: #31001878;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     color: #e0f7fa;
-    transition: transform 0.4s ease; /* Optional: For smooth scaling */
+    transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
 .chat-item:hover {
-    transform: scale(1.05);
-    background-color: rgba(255, 255, 255, 0);
+    transform: scale(1.07);
+    background-color: #ff004c;
     color: #ffffff;
 }
+
 #username {
     font-weight: bold;
 }
+
 .toastify-message {
     background-color: #007bff;
     color: white;
+    border-radius: 10px;
 }
+
 #chatForm {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin-top: auto;
+    width: 100%;
 }
+
 .chatAdd {
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
+
 #userList {
-    margin-top: 10px;
+    margin-top: 15px;
     border-top: 1px solid #ccc;
-    padding-top: 10px;
+    padding-top: 15px;
+    max-height: 400px;
+    overflow-y: auto;
 }
+
 .user-item {
-    padding: 5px;
-    background-color: none;
-    margin-bottom: 5px;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
 }
+
 .user:hover {
     transform: scale(1.05);
     background-color: #cccccc00;
     color: #ffffff;
 }
+
 .user {
     position: relative;
-    padding-right: 20px; /* Adjust padding to make space for the dot */
+    padding-right: 20px;
     padding: 10px;
     border-radius: 15px;
     cursor: pointer;
     background-color: #31001878;
     margin-bottom: 5px;
     color: #e0f7fa;
-    transition: transform 0.4s ease; 
+    transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
 .active-dot {
     position: absolute;
     top: 50%;
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     margin-left: 5px;
     background-color: rgb(79, 255, 79);
     border-radius: 50%;
     transform: translateY(-50%);
-    border: 2.5px solid black; /* Add a black border to create the outline */
-}
-.message {
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-    position: relative;
-    margin-bottom: 20px;
-    
+    border: 2.5px solid black;
 }
 
 .timestamp {
-    font-size: 0.6em;
+    font-size: 0.8em;
     color: gray;
-    pad: 2px;
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 .username {
@@ -139,38 +157,37 @@ body {
 
 .text {
     margin-top: 5px;
-    background-color: black;
-    color: white;
-    padding: 10px;
-    border-radius: 7px;
+    background-color: #000;
+    color: #fff;
+    padding: 12px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: transform 0.4s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.text:hover{
-    background-color: white;
-    color: black;
+.text:hover {
+    background-color: #fff;
+    color: #000;
     transform: scale(1.05);
 }
 
-/* Special styling for messages from the current user */
 .current-user {
     align-items: flex-end;
     text-align: right;
 }
-/* Styling for the new message label */
+
 .new-message-notification {
     position: fixed;
     bottom: 20px;
     right: 20px;
     background-color: rgb(255, 248, 170);
     color: black;
-    padding: 10px;
-    border-radius: 5px;
-    display: flex; /* Use flexbox */
-    align-items: center; /* Center items vertically */
-    justify-content: center; /* Center items horizontally */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
     z-index: 1000;
@@ -180,37 +197,22 @@ body {
     opacity: 1;
 }
 
-.current-user .timestamp {
-    background-color:rgba(255, 255, 255, 0.1);
-}
-.current-user .username {
-    display: none;
-}
 .current-user .text {
-    background-color: #ff0051; /* Example background color for current user messages */
-    padding: 10px;
-    border-radius: 7px;
-    cursor: pointer;
-    transition: transform 0.4s ease;
+    background-color: #ff0051;
+    border-radius: 10px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
-.current-user .text:hover{
-    background-color: white;
+
+.current-user .text:hover {
+    background-color: #fff;
     color: #ff0051;
     transform: scale(1.07);
 }
 
 .current-user .username {
+    display: block;
     font-weight: bold;
-    color: #007bff; /* Example color for username of the current user */
-}
-
-/* Additional CSS for chat form */
-#chatForm {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: auto;
-    width: 100%;
+    color: #007bff;
 }
 
 #chatId {
@@ -226,107 +228,86 @@ body {
     color: white;
     font-weight: bold;
 }
+
 #message {
-    width: 100%; /* Make it take up 100% of the available width */
+    width: 100%;
     max-width: 900px;
-    padding: 10px;
-    height: 10px; /* Increase the height for better usability */
-    text-align: left;
-    align-content: center;
+    padding: 12px;
+    height: auto;
     border-radius: 10px;
     border: 3px solid #ff0051;
     background-color: #ff00004d;
-    color: rgb(0, 0, 0);
+    color: #000;
     font-weight: bold;
-    font-size: 15px;
-    margin-right: 10px; /* Space between message box and button */
+    font-size: 16px;
+    margin-right: 10px;
 }
-#message::placeholder{
-    color: rgb(0, 0, 0);
+
+#message::placeholder {
+    color: #000;
 }
+
 #sendMessage {
-    padding: 8px 16px;
+    padding: 10px 20px;
     background-color: #ff0051;
     color: white;
     font-weight: bold;
     border: none;
-    border-radius: 5px;
+    border-radius: 10px;
     cursor: pointer;
-    align-content: center;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
+
 #sendMessage:hover {
     background-color: #e60048;
+    transform: scale(1.05);
 }
-#chatList h2 {
+
+#chatList h2,
+#userList h2 {
     color: white;
     text-align: center;
-    margin: 0; /* Remove default margin */
-    padding: 10px 0; /* Add padding for spacing */
-}
-#chatList {
-    max-height: 400px;
-    overflow-y: auto; /* Enable scrolling */
-}
-#userList h2 {
-    color: white;           /* Set text color to white */
-    text-align: center;     /* Center the text horizontally */
-    margin: 0;              /* Remove default margin */
-    padding: 10px 0;        /* Add padding for better spacing */
+    margin: 0;
+    padding: 15px 0;
 }
 
-#userList {
-    margin-top: 10px;
-    border-top: 1px solid #ccc;
-    padding-top: 10px;
+#chatList, #userList {
     max-height: 400px;
-    overflow-y: auto; /* Enable scrolling */
+    overflow-y: auto;
 }
 
-/* Button Styles */
 .mode-buttons {
     display: flex;
-    gap: 10px; /* Spacing between buttons */
+    gap: 10px;
 }
 
 .mode-btn {
-    width: 40px; /* Adjust size as needed */
+    width: 40px;
     height: 40px;
     border: none;
     border-radius: 50%;
-    overflow: hidden;
     background-color: transparent;
     cursor: pointer;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: transform 0.3s ease;
 }
 
 .mode-btn img {
-    width: 35px; /* Adjust size as needed */
+    width: 35px;
     height: 35px;
     object-fit: cover;
 }
 
-/* Top bar styles */
 .top-bar {
     display: flex;
     align-items: center;
-    gap: 10px; /* Space between input and buttons */
-    margin-bottom: 10px;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-#chatId {
-    flex: 1; /* Allow input to take up available space */
-    padding: 8px;
-    border-radius: 20px;
-    border: 4px solid #ffffff;
-    background-color: #ff0051;
-    text-align: center;
-    font-size: 30px;
-    color: white;
-    font-weight: bold;
-}
 #logout {
     background-color: #e60048;
     color: white;
@@ -335,40 +316,40 @@ body {
     height: 30px;
     border: none;
     border-radius: 20px;
-    transition: transform 0.4s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 #logout:hover {
-    transform: scale(1.2);
-
-
+    background-color: #ff0051;
+    transform: scale(1.1);
 }
 
-/* Popup Styles */
 .popup {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     padding: 20px;
-    background-color: white;
+    background-color: #fff;
     border: 1px solid #ccc;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
     z-index: 1000;
 }
 
 .popup p {
     margin: 0;
     font-size: 16px;
+    color: #333;
 }
 
 .popup-close {
-    display: inline-block;
     margin-top: 10px;
-    padding: 5px 10px;
+    padding: 5px 15px;
     background-color: #007bff;
     color: white;
     border: none;
+    border-radius: 10px;
     cursor: pointer;
 }
 
@@ -376,11 +357,19 @@ body {
     background-color: #0056b3;
 }
 
-.notification-badge {
-    background-color: red;
-    color: white;
-    border-radius: 50%;
-    padding: 2px 6px;
-    margin-left: 10px;
-    font-size: 0.8em;
+#container {
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+#main-content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 15px;
+    width: 100%;
 }
