@@ -8,96 +8,179 @@
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <div class="homePage">
-        <div class="info">
-            <p>
-                <strong>Teacher <a href="teacher.html">log in</a> / Student <a href="login.html">log in</a>?</strong>
-            </p>
-        </div>
-        <img src='collabo.png' alt="Collabo Banner" class="banner" />
-        <h1>Welcome to Collabo 👋</h1>
-        <p class="general">
-            Collabo is an educational tool designed to help students collaborate effectively. Created by middle schooler Ronit Parikh, it offers a way for students to communicate for educational purposes. Whether you're working on group projects, sharing resources, or discussing ideas, Collabo provides the platform you need to succeed together. With our advanced file-sharing capabilities, students can work on projects creatively and efficiently. Collabo is school-friendly and censors NSFW content/messages to ensure a safe and positive learning environment. Dive in and experience seamless collaboration today!
-        </p>
-        <h1>About Collabo</h1>
-        <p class="general">Collabo is a great tool for collaboration at schools. Some of our team consists students who are passionate about improving the life of students.</p>
-        <div class="testimonials">
-            <h2>Awards</h2>
+    
+    <header class="header">
+        <div class="container">
             
+            <nav class="navbar">
+                <ul>
+                    <div class="logo">
+                        <img src="collabo.png" alt="Collabo Logo" class="logo-img">
+                    </div>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#team">Team</a></li>
+                    <li><a href="#awards">Awards</a></li>
+                    <li><a href="#districts">Districts</a></li>
+                    <li><a href="#reviews">Reviews</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+            </nav>
         </div>
-        <div class="features">
-            <h2>Features</h2>
-            <ul>
-                <li>Seamless file sharing for easy collaboration</li>
-                <li>Real-time messaging and notifications</li>
-                <li>Safe and secure environment with content moderation</li>
-                <li>Customizable group and project management tools</li>
-                <li>Intuitive interface for effortless communication</li>
-            </ul>
-        </div>
-        <div class="testimonials">
-            <h2>What Our Users Say</h2>
-            <div class="testimonial">
-                <p class="general">"Collabo has transformed the way we work on projects. The ease of sharing files and communicating has made our group work much more efficient!"</p>
-                <p><strong>- Emily R., High School Student</strong></p>
-            </div>
-            <div class="testimonial">
-                <p class="general">"As a teacher, I love how Collabo keeps my students engaged and organized. It's a fantastic tool for any classroom!"</p>
-                <p><strong>- Mr. Johnson, Math Teacher</strong></p>
-            </div>
-        </div>
-        <div class="meet-team">
-            <h2>Meet the Team</h2>
-            <div class="team-row">
-                <div class="team-member">
-                    <img src="kanye.jpg" alt="Team Member 1" class="team-photo">
-                    <h3>Kanye West</h3>
-                    <p>"You don't got the answers"</p>
+    </header>
+    <section class="news-update">
+        <img src="current-news.jpg" alt="Current News" class="news-img">
+    </section>
+    <div class="homePage">
+        <section class="intro">
+            <div class="container">
+                <div class="info">
+                    <p>
+                        <strong>Teacher <a href="teacher.html">log in</a> / Student <a href="login.html">log in</a>?</strong>
+                    </p>
                 </div>
-                <div class="team-member">
-                    <img src="ronitpfp2.jpg" alt="Team Member 2" class="team-photo">
-                    <h3>Ronit Parikh</h3>
-                    <p>"I eat banana"</p>
-                </div>
-                <div class="team-member">
-                    <img src="playboy.png" alt="Team Member 3" class="team-photo">
-                    <h3>Jordan Carter</h3>
-                    <p>"I AM MUSIC"</p>
+                <h1>Welcome to Collabo 👋</h1>
+                <p class="general">
+                    Collabo is an educational tool designed to help students collaborate effectively. Created by middle schooler Ronit Parikh, it offers a way for students to communicate for educational purposes. Whether you're working on group projects, sharing resources, or discussing ideas, Collabo provides the platform you need to succeed together. With our advanced file-sharing capabilities, students can work on projects creatively and efficiently. Collabo is school-friendly and censors NSFW content/messages to ensure a safe and positive learning environment. Dive in and experience seamless collaboration today!
+                </p>
+                <img src="collabo_banner.png" alt="Collabo Banner" class="banner" />
+            </div>
+        </section>
+
+        <section id="about" class="about">
+            <div class="container">
+                <h2>About Collabo</h2>
+                <p class="general">Collabo is a great tool for collaboration at schools. Some of our team consists students who are passionate about improving the life of students.</p>
+                <div class="student-images">
+                    <div class="student-image" style="background-image: url('placeholder1.jpg');"></div>
+                    <div class="student-image" style="background-image: url('placeholder2.jpg');"></div>
+                    <div class="student-image" style="background-image: url('placeholder3.jpg');"></div>
+                    <div class="student-image" style="background-image: url('placeholder4.jpg');"></div>
                 </div>
             </div>
-            <div class="team-row">
-                <div class="team-member">
-                    <img src="Khalid.jpeg" alt="Team Member 4" class="team-photo">
-                    <h3>Khaled Mohamed Khaled</h3>
-                    <p>"Life is Roblox."</p>
+        </section>
+
+        <section id="features" class="features">
+            <div class="container">
+                <h2>Features</h2>
+                <ul>
+                    <li>Seamless file sharing for easy collaboration</li>
+                    <li>Real-time messaging and notifications</li>
+                    <li>Safe and secure environment with content moderation</li>
+                    <li>Customizable group and project management tools</li>
+                    <li>Intuitive interface for effortless communication</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="awards" class="awards">
+            <div class="container">
+                <h2>Education Awards</h2>
+                <ul class="awards-list">
+                    <li><strong>Best Educational Tool 2023</strong> - EdTech Awards</li>
+                    <li><strong>Innovative Classroom Solution 2022</strong> - Learning Today</li>
+                    <li><strong>Top Collaboration Platform 2021</strong> - School Innovators</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="districts" class="districts">
+            <div class="container">
+                <h2>Districts Partnered With</h2>
+                <div class="district-logos">
+                    <img src="district1.png" alt="District 1 Logo">
+                    <img src="district2.png" alt="District 2 Logo">
+                    <img src="district3.png" alt="District 3 Logo">
+                    <!-- Add more district logos as needed -->
                 </div>
-                <div class="team-member">
-                    <img src="utkarsh.png" alt="Team Member 5" class="team-photo">
-                    <h3>Rajesh Wajesh</h3>
-                    <p>"Full stack Web App developer with blockchain experience"</p>
+            </div>
+        </section>
+
+        <section id="reviews" class="reviews">
+            <div class="container">
+                <h2>Student Reviews</h2>
+                <div class="review">
+                    <p class="review-text">"Collabo has completely transformed the way we work on group projects!"</p>
+                    <p class="reviewer">- <strong>John Doe</strong>, Grade 8</p>
+                    <div class="rating">Rating: <strong>9/10</strong></div>
                 </div>
-                <div class="team-member">
-                    <img src="edward.jpg" alt="Team Member 6" class="team-photo">
-                    <h3>Edward Lai</h3>
-                    <p>"Jai HINDH!"</p>
+                <div class="review">
+                    <p class="review-text">"I love the real-time messaging and file-sharing features. It makes collaboration so much easier!"</p>
+                    <p class="reviewer">- <strong>Jane Smith</strong>, Grade 7</p>
+                    <div class="rating">Rating: <strong>10/10</strong></div>
+                </div>
+                <div class="review">
+                    <p class="review-text">"The user-friendly interface makes it simple to manage projects and communicate with my classmates."</p>
+                    <p class="reviewer">- <strong>Emily Johnson</strong>, Grade 9</p>
+                    <div class="rating">Rating: <strong>8/10</strong></div>
                 </div>
             </div>
-        </div>
-        <div class="faq">
-            <h2>Frequently Asked Questions</h2>
-            <div class="faq-item">
-                <h3>How do I sign up for Collabo?</h3>
-                <p>Scroll down to the bottom of the page and click on the "Sign Up" button in the footer. Follow the prompts to create your account.</p>
+        </section>
+
+        <section id="team" class="meet-team">
+            <div class="container">
+                <h2>Meet the Team</h2>
+                <div class="team-row">
+                    <div class="team-member">
+                        <img src="kanye.jpg" alt="Kanye West" class="team-photo">
+                        <h3>Kanye West</h3>
+                        <p>"You don't got the answers"</p>
+                    </div>
+                    <div class="team-member">
+                        <img src="ronitpfp2.jpg" alt="Ronit Parikh" class="team-photo">
+                        <h3>Ronit Parikh</h3>
+                        <p>"I eat banana"</p>
+                    </div>
+                    <div class="team-member">
+                        <img src="playboy.png" alt="Jordan Carter" class="team-photo">
+                        <h3>Jordan Carter</h3>
+                        <p>"I AM MUSIC"</p>
+                    </div>
+                </div>
+                <div class="team-row">
+                    <div class="team-member">
+                        <img src="Khalid.jpeg" alt="Khaled Mohamed Khaled" class="team-photo">
+                        <h3>Khaled Mohamed Khaled</h3>
+                        <p>"Life is Roblox."</p>
+                    </div>
+                    <div class="team-member">
+                        <img src="utkarsh.png" alt="Rajesh Wajesh" class="team-photo">
+                        <h3>Rajesh Wajesh</h3>
+                        <p>"Full stack Web App developer with blockchain experience"</p>
+                    </div>
+                    <div class="team-member">
+                        <img src="edward.jpg" alt="Edward Lai" class="team-photo">
+                        <h3>Edward Lai</h3>
+                        <p>"Jai HINDH!"</p>
+                    </div>
+                </div>
             </div>
-            <div class="faq-item">
-                <h3>Is Collabo free to use?</h3>
-                <p>Yes, Collabo is completely free for students and educators. There are no hidden fees or charges.</p>
+        </section>
+
+        <section id="faq" class="faq">
+            <div class="container">
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-item">
+                    <h3>How do I sign up for Collabo?</h3>
+                    <p>Scroll down to the bottom of the page and click on the "Sign Up" button in the footer. Follow the prompts to create your account.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Is Collabo free to use?</h3>
+                    <p>Yes, Collabo is completely free for students and educators. There are no hidden fees or charges.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>How does Collabo ensure user safety?</h3>
+                    <p>Collabo employs advanced content moderation tools to filter inappropriate content and provide a safe environment for all users.</p>
+                </div>
             </div>
-            <div class="faq-item">
-                <h3>How does Collabo ensure user safety?</h3>
-                <p>Collabo employs advanced content moderation tools to filter inappropriate content and provide a safe environment for all users.</p>
-            </div>
-        </div>
+        </section>
     </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>© 2024 Collabo. All rights reserved.</p>
+            <p><a href="signup.html">Sign Up</a> | <a href="login.html">Log In</a></p>
+        </div>
+    </footer>
 </body>
 </html>
