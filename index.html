@@ -49,6 +49,11 @@
             left: 10px; /* Adjust based on your layout */
             z-index: 1000; /* Ensure it appears on top */
         }
+
+        /* Add CSS for sidebar toggle */
+        #sidebar.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -94,7 +99,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const username = localStorage.getItem('username'); // Assuming you store username in localStorage
-    
+
             if (username) {
                 try {
                     const response = await fetch(`/userStreak?username=${username}`);
@@ -113,7 +118,19 @@
             } else {
                 document.getElementById('streakValue').textContent = 'Not logged in';
             }
+
+            // Add event listener for the left arrow key
+            document.addEventListener('keydown', (event) => {
+                const sidebar = document.getElementById('sidebar');
+                if (event.key === 'ArrowLeft') {
+                    sidebar.style.display = 'none';
+                } else if (event.key === 'ArrowRight') {
+                    sidebar.style.display = 'block';
+                }
+            });
+            
         });
+
 
     
         // Handle emoji picker toggle
@@ -125,10 +142,7 @@
         // Ensure only one event listener is attached
         document.querySelector('emoji-picker').removeEventListener('emoji-click', handleEmojiClick);
 
-        
 
-    
-        document.querySelector('emoji-picker').addEventListener('emoji-click', handleEmojiClick);
     </script>
 </body>
 </html>
