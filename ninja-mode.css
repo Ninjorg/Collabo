@@ -4,7 +4,7 @@ body {
     margin: 0;
     height: 100vh;
     font-family: 'Arial', sans-serif; /* Adjusted for a more Google-like font */
-    background-color: #eeeeee; /* Light background similar to Google Docs */
+    background-color: #ffffff; /* Light background similar to Google Docs */
 }
 
 /* Sidebar Styles */
@@ -88,7 +88,6 @@ body {
 
 /* Chat Area Styles */
 #chat {
-    border: 1px solid #dcdcdc; /* Subtle border */
     flex: 1;
     overflow-y: scroll;
     margin-bottom: 10px;
@@ -100,67 +99,47 @@ body {
 
 /* Message Styles */
 .message {
-    padding: 5px;
-    margin-bottom: 10px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
     position: relative;
+    background-color: #ffffff; /* White background like Google's cards */
+    border-radius: 8px; /* Rounded corners */
+    padding: 15px; /* More padding for a card-like appearance */
+    margin-bottom: 15px; /* Space between messages */
+    cursor: pointer;
+    zoom: 125%;
+    margin-left: 70px;
 }
 
-.timestamp {
-    font-size: 0.75em;
-    color: gray;
-    padding: 2px;
-    border-radius: 8px;
+.message:hover {
+    
 }
 
 .username {
-    font-weight: bold;
-    display: none;
+    color: #000000; /* Google's link blue color */
+    margin-bottom: 5px; /* Space between username and text */
+    font-size: 0.7em; /* Slightly smaller font */
 }
 
 .text {
     margin-top: 5px;
-    background-color: #f1f3f4; /* Light gray background */
-    color: black;
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.3s ease, background-color 0.3s ease;
+    font-size: 1em; /* Regular text size */
+    color: #0091ff; /* Google's content text color */
+    line-height: 1.5; /* Improved readability */
 }
 
-.text:hover {
-    background-color: #e8e8e8; /* Slightly darker gray on hover */
-    color: black;
-    transform: scale(1.02);
+.message .text:hover {
+    text-decoration: underline;
 }
 
-/* Special Styling for Current User's Messages */
-.current-user {
-    align-items: flex-end;
-    text-align: right;
+.timestamp {
+    font-size: 0.75em;
+    color: #5f6368; /* Subtle gray for timestamp */
+    margin-top: 10px; /* Space between text and timestamp */
 }
 
-
-.current-user .username {
-    display: none;
-}
-
-.current-user .text {
-    background-color: #dbe2e8; /* Subtle blue-gray */
-    padding: 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.3s ease, background-color 0.3s ease;
-}
-
-.current-user .text:hover {
-    background-color: #cfd8dc; /* Slightly darker blue-gray on hover */
-    color: black;
-    transform: scale(1.02);
-}
 
 /* Notification Styles */
 .new-message-notification {
@@ -208,13 +187,13 @@ body {
 }
 
 #message {
-    width: 100%;
-    max-width: 900px;
+    width: 1200px;
+    max-width: 1200px;
     padding: 10px;
-    height: 50px; /* Adjusted height for better usability */
+    height: 10px; /* Adjusted height for better usability */
     text-align: left;
     align-content: center;
-    border-radius: 8px;
+    border-radius: 100px;
     border: 2px solid #dcdcdc;
     background-color: #f1f3f4;
     color: #000;
