@@ -49,7 +49,7 @@ document.getElementById('logout').addEventListener('click', () => {
 
 // Message cooldown logic
 let lastMessageTime = 0;
-const MESSAGE_COOLDOWN = 4000; // 3 seconds in milliseconds
+const MESSAGE_COOLDOWN = 0; // 3 seconds in milliseconds
 
 document.getElementById('sendMessage').addEventListener('click', (e) => {
     e.preventDefault();
@@ -180,13 +180,18 @@ socket.on('loadMessages', (messages) => {
         userElement.classList.add('username');
         userElement.textContent = message.username || 'Unknown';
 
+        const imageElement = document.createElement('img'); // Create an img element
+        imageElement.classList.add('avatar'); // Add a class for styling
+        imageElement.src = 'AVATAR.png'; // Set the source of the image to AVATAR.png
+        imageElement.alt = 'User Avatar'; // Set an alt text for accessibility
         const textElement = document.createElement('div');
         textElement.classList.add('text');
         textElement.textContent = `${message.username}: ${message.message}`;
 
+
         const timestampElement = document.createElement('div');
         timestampElement.classList.add('timestamp');
-        timestampElement.textContent = message.timestamp || 'No timestamp';
+        timestampElement.textContent = message.displayTime || 'No timestamp';
 
         messageElement.appendChild(userElement);
         messageElement.appendChild(textElement);
@@ -216,33 +221,41 @@ socket.on('receiveMessage', (message) => {
     }
 
     const chat = document.getElementById('chat');
+    const chatId = document.getElementById('chatId').value;
 
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('message');
+    if (message.chatId == chatId) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
 
-    // Apply special class if the message is from the current user
-    if (message.username === currentUser) {
-        messageElement.classList.add('current-user');
+        // Apply special class if the message is from the current user
+        if (message.username === currentUser) {
+            messageElement.classList.add('current-user');
+        }
+
+        const imageElement = document.createElement('img'); // Create an img element
+        imageElement.classList.add('avatar'); // Add a class for styling
+        imageElement.src = 'AVATAR.png'; // Set the source of the image to AVATAR.png
+        imageElement.alt = 'User Avatar'; // Set an alt text for accessibility
+
+        const timestampElement = document.createElement('div');
+        timestampElement.classList.add('timestamp');
+        timestampElement.textContent = message.timestamp || 'No timestamp';
+
+        const userElement = document.createElement('div');
+        userElement.classList.add('username');
+        userElement.textContent = message.username || 'Unknown';
+
+        const textElement = document.createElement('div');
+        textElement.classList.add('text');
+        textElement.textContent = `${message.username}: ${message.message}`;
+
+        messageElement.appendChild(timestampElement);
+        messageElement.appendChild(userElement);
+        messageElement.appendChild(textElement);
+
+        chat.appendChild(messageElement);
+        chat.scrollTop = chat.scrollHeight;
     }
-
-    const timestampElement = document.createElement('div');
-    timestampElement.classList.add('timestamp');
-    timestampElement.textContent = message.timestamp || 'No timestamp';
-
-    const userElement = document.createElement('div');
-    userElement.classList.add('username');
-    userElement.textContent = message.username || 'Unknown';
-
-    const textElement = document.createElement('div');
-    textElement.classList.add('text');
-    textElement.textContent = `${message.username}: ${message.message}`;
-
-    messageElement.appendChild(timestampElement);
-    messageElement.appendChild(userElement);
-    messageElement.appendChild(textElement);
-
-    chat.appendChild(messageElement);
-    chat.scrollTop = chat.scrollHeight;
 
     // Show notification and update title
 });
@@ -725,11 +738,11 @@ socket.on('updateUsers', (users) => {
                                     const chatNameElement = document.getElementById('chatName');
                                     
                                     if (chatNameElement) {  // Ensure the chatName element exists
-                                        chatNameElement.innerText = newChatI; // Update chatName text to chatId
+                                        chatNameElement.innerText = newChatId; // Update chatName text to chatId
                                     }
                                     const token = localStorage.getItem('token');
                                     if (chatId && token) {
-                                        document.getElementById('chatId').value = `${clickedUser}`;
+                                        document.getElementById('chatId').value = `${newChatId}`;
                                         socket.emit('joinChat', newChatId);
                                     }
                                 } else {
@@ -760,192 +773,3 @@ socket.on('updateUsers', (users) => {
 });
 
 document.addEventListener('click', fetchUserChats);
-(response => {
-    const currentStreak = response.streak || 0;
-    
-    if (currentStreak >= requiredStreak) {
-        themeLink.href = `${theme}.css`; // Apply the selected theme
-        localStorage.setItem('theme', theme); // Save the theme to localStorage
-    } else {
-        alert(`You need a streak of ${requiredStreak} to unlock the ${theme} theme.`);
-    }
-})
-.catch(error => {
-    console.error('Error checking streak for theme:', error);
-});
-} else {
-console.error(`Invalid theme selected: ${theme}`);
-}
-}
-
-function disableAllButtons() {
-modeButtons.forEach(button => {
-button.disabled = true; // Disable all buttons if the user is not logged in or there's an error
-});
-}
-
-// Apply the saved theme on page load
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme) {
-themeLink.href = `${savedTheme}.css`;
-}
-});
-
-// Handle profile picture upload
-const profilePicInput = document.getElementById('profilePicInput');
-const profilePicDisplay = document.getElementById('profilePicDisplay');
-
-profilePicInput.addEventListener('change', () => {
-const file = profilePicInput.files[0];
-if (file) {
-const reader = new FileReader();
-reader.onload = (e) => {
-profilePicDisplay.src = e.target.result; // Display the uploaded image
-};
-reader.readAsDataURL(file);
-}
-});
-
-// Save profile picture to the database
-document.getElementById('saveProfilePic').addEventListener('click', () => {
-const file = profilePicInput.files[0];
-const username = localStorage.getItem('username');
-
-if (file && username) {
-const storageRef = firebase.storage().ref();
-const fileRef = storageRef.child(`profilePics/${username}.jpg`);
-
-fileRef.put(file).then(() => {
-fileRef.getDownloadURL().then((url) => {
-const userRef = firebase.firestore().collection('users').doc(username);
-userRef.update({
-    profilePicUrl: url
-}).then(() => {
-    alert('Profile picture updated successfully!');
-}).catch((error) => {
-    console.error('Error updating profile picture:', error);
-});
-});
-}).catch((error) => {
-console.error('Error uploading file:', error);
-});
-} else {
-alert('Please select a file and ensure you are logged in.');
-}
-});
-
-// Display saved profile picture
-const loadProfilePic = async () => {
-const username = localStorage.getItem('username');
-if (username) {
-const userRef = firebase.firestore().collection('users').doc(username);
-const userDoc = await userRef.get();
-
-if (userDoc.exists) {
-const userData = userDoc.data();
-if (userData.profilePicUrl) {
-profilePicDisplay.src = userData.profilePicUrl; // Load the saved profile picture
-}
-} else {
-console.error('User document not found.');
-}
-}
-};
-
-// Call the function to load profile picture on page load
-loadProfilePic();
-
-// Function to handle direct messages
-function sendDirectMessage(recipientUsername, message) {
-const senderUsername = localStorage.getItem('username');
-const timestamp = new Date().toISOString();
-
-if (recipientUsername && message && senderUsername) {
-socket.emit('sendDirectMessage', {
-sender: senderUsername,
-recipient: recipientUsername,
-message,
-timestamp
-});
-}
-}
-
-// Listen for direct messages
-socket.on('receiveDirectMessage', (data) => {
-const { sender, message, timestamp } = data;
-const directMessageContainer = document.getElementById('directMessages');
-
-const messageElement = document.createElement('div');
-messageElement.classList.add('direct-message');
-
-const senderElement = document.createElement('div');
-senderElement.classList.add('direct-message-sender');
-senderElement.textContent = sender;
-
-const textElement = document.createElement('div');
-textElement.classList.add('direct-message-text');
-textElement.textContent = message;
-
-const timestampElement = document.createElement('div');
-timestampElement.classList.add('direct-message-timestamp');
-timestampElement.textContent = new Date(timestamp).toLocaleTimeString();
-
-messageElement.appendChild(senderElement);
-messageElement.appendChild(textElement);
-messageElement.appendChild(timestampElement);
-
-directMessageContainer.appendChild(messageElement);
-directMessageContainer.scrollTop = directMessageContainer.scrollHeight;
-});
-
-// Handle user typing indicator
-let typingTimeout;
-const typingIndicator = document.getElementById('typingIndicator');
-
-document.getElementById('message').addEventListener('input', () => {
-socket.emit('userTyping', { username: currentUser });
-
-clearTimeout(typingTimeout);
-typingTimeout = setTimeout(() => {
-socket.emit('userStoppedTyping', { username: currentUser });
-}, 1000);
-});
-
-socket.on('displayTypingIndicator', (username) => {
-typingIndicator.textContent = `${username} is typing...`;
-});
-
-socket.on('hideTypingIndicator', () => {
-typingIndicator.textContent = '';
-});
-
-// Handle chat history loading
-socket.on('loadChatHistory', (chatHistory) => {
-const chat = document.getElementById('chat');
-chat.innerHTML = ''; // Clear existing chat
-
-chatHistory.forEach(message => {
-const messageElement = document.createElement('div');
-messageElement.classList.add('message');
-
-const timestampElement = document.createElement('div');
-timestampElement.classList.add('timestamp');
-timestampElement.textContent = new Date(message.timestamp).toLocaleString();
-
-const userElement = document.createElement('div');
-userElement.classList.add('username');
-userElement.textContent = message.username;
-
-const textElement = document.createElement('div');
-textElement.classList.add('text');
-textElement.textContent = message.message;
-
-messageElement.appendChild(timestampElement);
-messageElement.appendChild(userElement);
-messageElement.appendChild(textElement);
-
-chat.appendChild(messageElement);
-});
-
-chat.scrollTop = chat.scrollHeight;
-});
