@@ -174,6 +174,13 @@ socket.on('loadMessages', (messages) => {
         // Apply special class if the message is from the current user
         if (message.username === currentUser) {
             messageElement.classList.add('current-user');
+        } else {
+            // Add avatar image for other users
+            const imageElement = document.createElement('img');
+            imageElement.classList.add('avatar');
+            imageElement.src = message.picture;
+            imageElement.alt = 'User Avatar';
+            messageElement.appendChild(imageElement);
         }
 
         const userElement = document.createElement('div');
@@ -182,7 +189,7 @@ socket.on('loadMessages', (messages) => {
 
         const imageElement = document.createElement('img'); // Create an img element
         imageElement.classList.add('avatar'); // Add a class for styling
-        imageElement.src = 'AVATAR.png'; // Set the source of the image to AVATAR.png
+        imageElement.src = message.picture; // Set the source of the image to AVATAR.png
         imageElement.alt = 'User Avatar'; // Set an alt text for accessibility
         const textElement = document.createElement('div');
         textElement.classList.add('text');
@@ -216,10 +223,9 @@ function updateTitle() {
 
 
 socket.on('receiveMessage', (message) => {
-    if (message.username !== currentUser) {
-        showNewMessageNotification(message);
+    if (message.username === currentUser) {
+        messageElement.classList.add('current-user');
     }
-
     const chat = document.getElementById('chat');
     const chatId = document.getElementById('chatId').value;
 
@@ -230,11 +236,18 @@ socket.on('receiveMessage', (message) => {
         // Apply special class if the message is from the current user
         if (message.username === currentUser) {
             messageElement.classList.add('current-user');
+        } else {
+            // Add avatar image for other users
+            const imageElement = document.createElement('img');
+            imageElement.classList.add('avatar');
+            imageElement.src = message.picture;
+            imageElement.alt = 'User Avatar';
+            messageElement.appendChild(imageElement);
         }
 
         const imageElement = document.createElement('img'); // Create an img element
         imageElement.classList.add('avatar'); // Add a class for styling
-        imageElement.src = 'AVATAR.png'; // Set the source of the image to AVATAR.png
+        imageElement.src = message.picture; // Set the source of the image to AVATAR.png
         imageElement.alt = 'User Avatar'; // Set an alt text for accessibility
 
         const timestampElement = document.createElement('div');
@@ -439,6 +452,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 break;
             case 'ninja':
                 themeLink.href = 'ninja-mode.css';
+                function hideMessage() {
+                    const messageElement = document.getElementById('message');
+                    messageElement.classList.remove('hidden'); // Hide the element
+                }
+                hideMessage();
                 break;
             case 'moon':
                 themeLink.href = 'moon.css';
@@ -649,7 +667,7 @@ const updateNotificationDisplay = (notifications) => {
 // const currentUsername = localStorage.getItem('username');
 // setInterval(() => getDMNotificationCount(currentUsername), 5000);
 
-setInterval(fetchUserNotifications, 5000);
+document.addEventListener('click', fetchUserNotifications);
   
 function updateChatName(Id) {
     const chatNameElement = document.getElementById('chatName');
