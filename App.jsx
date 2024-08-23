@@ -791,3 +791,64 @@ socket.on('updateUsers', (users) => {
 });
 
 document.addEventListener('click', fetchUserChats);
+
+// Search messages
+const searchMessages = (query) => {
+    const chat = document.getElementById('chat');
+    const messages = chat.getElementsByClassName('message');
+    Array.from(messages).forEach(message => {
+        const text = message.querySelector('.text').textContent.toLowerCase();
+        if (text.includes(query.toLowerCase())) {
+            message.style.display = 'block';
+        } else {
+            message.style.display = 'none';
+        }
+    });
+};
+
+// Event listener for search input
+document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchMessages(e.target.value);
+});
+
+
+// Notify server when user is typing
+const typingIndicator = (chatId) => {
+    socket.emit('typing', { chatId });
+};
+
+// Show typing indicator
+socket.on('userTyping', (username) => {
+    const typingElement = document.getElementById('typingIndicator');
+    if (typingElement) {
+        typingElement.textContent = `${username} is typing...`;
+        setTimeout(() => {
+            typingElement.textContent = '';
+        }, 3000); // Hide after 3 seconds
+    }
+});
+
+// Event listener for typing
+document.getElementById('message').addEventListener('input', () => {
+    const chatId = document.getElementById('chatId').value;
+    if (chatId) {
+        typingIndicator(chatId);
+    }
+});
+// Update user presence
+socket.on('updatePresence', (userStatus) => {
+    const userElement = document.querySelector(`[data-username="${userStatus.username}"]`);
+    if (userElement) {
+        userElement.classList.toggle('online', userStatus.online);
+    }
+});
+
+// Emit user presence status
+const updateUserPresence = (status) => {
+    socket.emit('updatePresence', { username: localStorage.getItem('username'), online: status });
+};
+
+// Update presence when window focus changes
+window.addEventListener('focus', () => updateUserPresence(true));
+window.addEventListener('blur', () => updateUserPresence(false));
+
