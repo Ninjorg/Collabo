@@ -11,51 +11,72 @@
     
     <header class="header">
         <div class="container">
-            
             <nav class="navbar">
                 <ul>
                     <div class="logo">
                         <img src="collabo.png" alt="Collabo Logo" class="logo-img">
                     </div>
                     <li><a href="#about">About</a></li>
+                    <li><a href="#faq">FAQ</a></li>
                     <li><a href="#features">Features</a></li>
                     <li><a href="#team">Team</a></li>
                     <li><a href="#awards">Awards</a></li>
                     <li><a href="#districts">Districts</a></li>
                     <li><a href="#reviews">Reviews</a></li>
-                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#blog">Blog</a></li>
+                    <li><a href="#contact">Contact</a></li>
                 </ul>
             </nav>
         </div>
     </header>
+    
+    <div class="info">
+        <p>
+            <strong>Teacher <a href="teacher.html">log in</a> / Student <a href="login.html">log in</a>?</strong>
+        </p>
+    </div>
+    
     <section class="news-update">
         <img src="news.jpg" alt="Current News" class="news-img">
     </section>
+
     <div class="homePage">
         <section class="intro">
             <div class="container">
-                <div class="info">
-                    <p>
-                        <strong>Teacher <a href="teacher.html">log in</a> / Student <a href="login.html">log in</a>?</strong>
-                    </p>
-                </div>
                 <h1>Welcome to Collabo 👋</h1>
                 <p class="general">
-                    Collabo is an educational tool designed to help students collaborate effectively. Created by middle schooler Ronit Parikh, it offers a way for students to communicate for educational purposes. Whether you're working on group projects, sharing resources, or discussing ideas, Collabo provides the platform you need to succeed together. With our advanced file-sharing capabilities, students can work on projects creatively and efficiently. Collabo is school-friendly and censors NSFW content/messages to ensure a safe and positive learning environment. Dive in and experience seamless collaboration today!
+                    Collabo is an educational tool designed to help students collaborate effectively. Created by Ronit Parikh, it offers a way for students to communicate for educational purposes. Whether you're working on group projects, sharing resources, or discussing ideas, Collabo provides the platform you need to succeed together. With our advanced file-sharing capabilities, students can work on projects creatively and efficiently. Collabo is school-friendly and censors NSFW content/messages to ensure a safe and positive learning environment. Dive in and experience seamless collaboration today!
                 </p>
-                <img src="collabo_banner.png" alt="Collabo Banner" class="banner" />
             </div>
         </section>
 
         <section id="about" class="about">
             <div class="container">
                 <h2>About Collabo</h2>
-                <p class="general">Collabo is a great tool for collaboration at schools. Some of our team consists students who are passionate about improving the life of students.</p>
+                <p class="general">Collabo is a great tool for collaboration at schools. Some of our team consists of students who are passionate about improving the lives of students.</p>
                 <div class="student-images">
                     <div class="student-image" style="background-image: url('placeholder1.jpg');"></div>
                     <div class="student-image" style="background-image: url('placeholder2.jpg');"></div>
                     <div class="student-image" style="background-image: url('placeholder3.jpg');"></div>
                     <div class="student-image" style="background-image: url('placeholder4.jpg');"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="faq" class="faq">
+            <div class="container">
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-item">
+                    <h3>How do I sign up for Collabo?</h3>
+                    <p>Scroll down to the bottom of the page and click on the "Sign Up" button in the footer. Follow the prompts to create your account.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Is Collabo free to use?</h3>
+                    <p>Yes, Collabo is completely free for students and educators. There are no hidden fees or charges.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>How does Collabo ensure user safety?</h3>
+                    <p>Collabo employs advanced content moderation tools to filter inappropriate content and provide a safe environment for all users.</p>
                 </div>
             </div>
         </section>
@@ -157,24 +178,26 @@
             </div>
         </section>
 
-        <section id="faq" class="faq">
+        <section id="blog" class="blog">
             <div class="container">
-                <h2>Frequently Asked Questions</h2>
-                <div class="faq-item">
-                    <h3>How do I sign up for Collabo?</h3>
-                    <p>Scroll down to the bottom of the page and click on the "Sign Up" button in the footer. Follow the prompts to create your account.</p>
+                <h2>Our Blog</h2>
+                <div class="blog-post">
+                    <h3>How to Maximize Your Use of Collabo</h3>
+                    <p>Discover tips and tricks to get the most out of Collabo. From project management to real-time communication, we've got you covered!</p>
+                    <a href="blog/post1.html" class="read-more">Read More</a>
                 </div>
-                <div class="faq-item">
-                    <h3>Is Collabo free to use?</h3>
-                    <p>Yes, Collabo is completely free for students and educators. There are no hidden fees or charges.</p>
+                <div class="blog-post">
+                    <h3>Collabo in the Classroom: Success Stories</h3>
+                    <p>Read about how teachers and students are using Collabo to enhance their learning experience and achieve better results.</p>
+                    <a href="blog/post2.html" class="read-more">Read More</a>
                 </div>
-                <div class="faq-item">
-                    <h3>How does Collabo ensure user safety?</h3>
-                    <p>Collabo employs advanced content moderation tools to filter inappropriate content and provide a safe environment for all users.</p>
+                <div class="blog-post">
+                    <h3>Upcoming Features and Updates</h3>
+                    <p>Get a sneak peek at the exciting new features and updates coming to Collabo soon. Stay ahead of the curve!</p>
+                    <a href="blog/post3.html" class="read-more">Read More</a>
                 </div>
             </div>
         </section>
-    </div>
 
     <footer class="footer">
         <div class="container">
@@ -182,14 +205,7 @@
             <p><a href="signup.html">Sign Up</a> | <a href="login.html">Log In</a></p>
         </div>
     </footer>
-
-    <script>
-        document.querySelectorAll('.faq-item h3').forEach(item => {
-            item.addEventListener('click', () => {
-                const faqItem = item.parentElement;
-                faqItem.classList.toggle('active');
-            });
-        });
-    </script>
+    
+    <script src="./home.js"></script>
 </body>
 </html>
