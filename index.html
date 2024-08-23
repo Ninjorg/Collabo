@@ -1,30 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <link id="theme-link" rel="stylesheet" href="styles.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link id="theme-link" rel="stylesheet" href="styles.css">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <title>Collabo</title>
 
-    <!-- Include Toastify CSS -->
+    <!-- Include external libraries -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <!-- Include Socket.IO client library -->
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
-    <!-- Include JWT Decode library -->
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
-    <!-- Include Toastify JS -->
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js"></script>
-    <!-- Include Emoji Picker -->
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
-    <!-- Your main JavaScript file -->
     <script type="module" src="app.js"></script>
 
     <style>
-        /* Add CSS for the top-right streak display */
+        /* Style for streak display */
         #streakContainer {
             position: absolute;
             top: 10px;
@@ -34,7 +30,8 @@
             padding: 5px 10px;
             border-radius: 5px;
         }
-        /* Add CSS for emoji picker button */
+
+        /* Style for emoji picker button */
         #emojiButton {
             background: none;
             border: none;
@@ -42,6 +39,7 @@
             font-size: 1.5em;
             margin-right: 5px;
         }
+
         #emojiPicker {
             display: none;
             position: absolute;
@@ -50,12 +48,53 @@
             z-index: 1000; /* Ensure it appears on top */
         }
 
-        /* Add CSS for sidebar toggle */
+        /* Style for sidebar */
         #sidebar.hidden {
             display: none;
         }
+
+        /* General chat container styling */
+        #chatContainer {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        #chat {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        form {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        textarea {
+            flex: 1;
+            padding: 10px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
     </style>
 </head>
+
 <body>
     <div id="sidebar">
         <div id="chatList"></div>
@@ -67,44 +106,42 @@
     </div>
     <div id="chatContainer">
         <div class="top-bar">
-            <!-- Add streak display to the top-right corner -->
+            <!-- Streak display -->
             <div id="streakContainer">
                 🔥<span id="streakValue">Loading...</span>
             </div>
-            
-            
+
+            <!-- Chat ID input and theme buttons -->
             <input type="text" id="chatId" placeholder="Join/Create chats" required />
             <div class="mode-buttons">
                 <button class="mode-btn" data-theme="default" title="Default"><img src="gear.png" alt="Default"></button>
                 <button class="mode-btn" data-theme="ninja" title="Ninja"><img src="ninja.png" alt="Ninja"></button>
-                <button class="mode-btn" data-theme="ocean" title="Ocean"><img src="water.png" alt="ocean"></button>
-                <button class="mode-btn" data-theme="daisy" title="Daisy"><img src="flower.png" alt="daisy"></button>
-                <button class="mode-btn" data-theme="moon" title="Moon"><img src="moon.png" alt="moon"></button>
+                <button class="mode-btn" data-theme="ocean" title="Ocean"><img src="water.png" alt="Ocean"></button>
+                <button class="mode-btn" data-theme="daisy" title="Daisy"><img src="flower.png" alt="Daisy"></button>
+                <button class="mode-btn" data-theme="moon" title="Moon"><img src="moon.png" alt="Moon"></button>
             </div>
         </div>
         <div id="chat"></div>
         <form id="chatForm">
-            <div style="display: flex; align-items: center; width: 100%; max-width: 400px;">
-                <button type="button" id="emojiButton">😊</button>
-                <emoji-picker id="emojiPicker"></emoji-picker>
-                <textarea id="message" placeholder="Type a message" required></textarea>
-                <button type="submit" id="sendMessage">Send</button>
-            </div>
+            <button type="button" id="emojiButton">😊</button>
+            <emoji-picker id="emojiPicker"></emoji-picker>
+            <textarea id="message" placeholder="Type a message" required></textarea>
+            <button type="submit" id="sendMessage">Send</button>
         </form>
         <p><span id="username"></span></p>
         <button id="logout">Logout</button>
     </div>
     <script src="theme-switcher.js"></script>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            const username = localStorage.getItem('username'); // Assuming you store username in localStorage
+            const username = localStorage.getItem('username');
 
             if (username) {
                 try {
                     const response = await fetch(`/userStreak?username=${username}`);
                     const data = await response.json();
-                    
+
                     if (response.ok) {
                         document.getElementById('streakValue').textContent = data.streak || 0;
                     } else {
@@ -119,30 +156,26 @@
                 document.getElementById('streakValue').textContent = 'Not logged in';
             }
 
-            // Add event listener for the left arrow key
             document.addEventListener('keydown', (event) => {
                 const sidebar = document.getElementById('sidebar');
                 if (event.key === 'ArrowLeft') {
-                    sidebar.style.display = 'none';
+                    sidebar.classList.add('hidden');
                 } else if (event.key === 'ArrowRight') {
-                    sidebar.style.display = 'block';
+                    sidebar.classList.remove('hidden');
                 }
             });
-            
+
+            document.getElementById('emojiButton').addEventListener('click', () => {
+                const emojiPicker = document.getElementById('emojiPicker');
+                emojiPicker.style.display = emojiPicker.style.display === 'none' || emojiPicker.style.display === '' ? 'block' : 'none';
+            });
+
+            document.querySelector('emoji-picker').addEventListener('emoji-click', (event) => {
+                const messageArea = document.getElementById('message');
+                messageArea.value += event.detail.emoji.unicode;
+            });
         });
-
-
-    
-        // Handle emoji picker toggle
-        document.getElementById('emojiButton').addEventListener('click', () => {
-            const emojiPicker = document.getElementById('emojiPicker');
-            emojiPicker.style.display = emojiPicker.style.display === 'none' || emojiPicker.style.display === '' ? 'block' : 'none';
-        });
-    
-        // Ensure only one event listener is attached
-        document.querySelector('emoji-picker').removeEventListener('emoji-click', handleEmojiClick);
-
-
     </script>
 </body>
+
 </html>
