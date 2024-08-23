@@ -851,4 +851,102 @@ const updateUserPresence = (status) => {
 // Update presence when window focus changes
 window.addEventListener('focus', () => updateUserPresence(true));
 window.addEventListener('blur', () => updateUserPresence(false));
+// Pin a message
+const pinMessage = (messageId) => {
+    const pinnedMessages = JSON.parse(localStorage.getItem('pinnedMessages') || '[]');
+    if (!pinnedMessages.includes(messageId)) {
+        pinnedMessages.push(messageId);
+        localStorage.setItem('pinnedMessages', JSON.stringify(pinnedMessages));
+        displayPinnedMessages();
+    }
+};
+
+// Display pinned messages
+const displayPinnedMessages = () => {
+    const pinnedMessages = JSON.parse(localStorage.getItem('pinnedMessages') || '[]');
+    const pinnedContainer = document.getElementById('pinnedMessages');
+    pinnedContainer.innerHTML = '';
+    pinnedMessages.forEach(messageId => {
+        const message = document.getElementById(messageId);
+        if (message) {
+            pinnedContainer.appendChild(message.cloneNode(true));
+        }
+    });
+};
+
+// Event listener for pinning messages
+document.getElementById('chat').addEventListener('click', (e) => {
+    if (e.target.classList.contains('pin-message')) {
+        pinMessage(e.target.dataset.messageId);
+    }
+});
+
+// Call on page load
+displayPinnedMessages();
+// Handle file upload
+document.getElementById('fileInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    const chatId = document.getElementById('chatId').value;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('chatId', chatId);
+
+    fetch('/uploadFile', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            socket.emit('sendFile', { file: data.fileUrl, chatId });
+        } else {
+            console.error('File upload failed:', data.error);
+        }
+    })
+    .catch(error => console.error('Error uploading file:', error));
+});
+
+// Handle receiving files
+socket.on('receiveFile', (file) => {
+    const chat = document.getElementById('chat');
+    const fileElement = document.createElement('div');
+    fileElement.classList.add('file-message');
+    fileElement.innerHTML = `<a href="${file.url}" download>${file.filename}</a>`;
+    chat.appendChild(fileElement);
+});
+// Check for mentions
+const checkForMentions = (message) => {
+    const username = localStorage.getItem('username');
+    if (message.includes(`@${username}`)) {
+        showMentionNotification();
+    }
+};
+
+// Show mention notification
+const showMentionNotification = () => {
+    let notification = document.getElementById('mentionNotification');
+
+    if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'mentionNotification';
+        notification.classList.add('mention-notification');
+        document.body.appendChild(notification);
+    }
+
+    notification.innerHTML = '';
+    notification.textContent = 'You were mentioned in a message!';
+    notification.classList.add('show');
+
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+};
+
+// Call checkForMentions on receiving messages
+socket.on('receiveMessage', (message) => {
+    checkForMentions(message.text);
+});
 
