@@ -49,7 +49,7 @@ document.getElementById('logout').addEventListener('click', () => {
 
 // Message cooldown logic
 let lastMessageTime = 0;
-const MESSAGE_COOLDOWN = 0; // 3 seconds in milliseconds
+const MESSAGE_COOLDOWN = 4000; // 3 seconds in milliseconds
 
 document.getElementById('sendMessage').addEventListener('click', (e) => {
     e.preventDefault();
@@ -178,7 +178,7 @@ socket.on('loadMessages', (messages) => {
             // Add avatar image for other users
             const imageElement = document.createElement('img');
             imageElement.classList.add('avatar');
-            imageElement.src = 'AVATAR.png';
+            imageElement.src = message.picture;
             imageElement.alt = 'User Avatar';
             messageElement.appendChild(imageElement);
         }
@@ -186,6 +186,12 @@ socket.on('loadMessages', (messages) => {
         const userElement = document.createElement('div');
         userElement.classList.add('username');
         userElement.textContent = message.username || 'Unknown';
+
+        const userLink = document.createElement('div');
+        userLink.classList.add('userlink');
+        userLink.textContent = `https://${message.username}/collabo/search` || 'unknown';
+
+        
 
         const imageElement = document.createElement('img'); // Create an img element
         imageElement.classList.add('avatar'); // Add a class for styling
@@ -201,6 +207,7 @@ socket.on('loadMessages', (messages) => {
         timestampElement.textContent = message.displayTime || 'No timestamp';
 
         messageElement.appendChild(userElement);
+        messageElement.appendChild(userLink);
         messageElement.appendChild(textElement);
         messageElement.appendChild(timestampElement);
 
@@ -223,24 +230,28 @@ function updateTitle() {
 
 
 socket.on('receiveMessage', (message) => {
-    if (message.username === currentUser) {
-        messageElement.classList.add('current-user');
-    }
-    const chat = document.getElementById('chat');
     const chatId = document.getElementById('chatId').value;
+    if (message.username !== currentUser) {
+        showNewMessageNotification(message, chatId);
+    }
 
-    if (message.chatId == chatId) {
+    const chat = document.getElementById('chat');
+
+
+    if (message.chatId === chatId) {
+
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
 
         // Apply special class if the message is from the current user
+
         if (message.username === currentUser) {
             messageElement.classList.add('current-user');
         } else {
             // Add avatar image for other users
             const imageElement = document.createElement('img');
             imageElement.classList.add('avatar');
-            imageElement.src = 'AVATAR.png';
+            imageElement.src = message.picture;
             imageElement.alt = 'User Avatar';
             messageElement.appendChild(imageElement);
         }
@@ -250,9 +261,8 @@ socket.on('receiveMessage', (message) => {
         imageElement.src = 'AVATAR.png'; // Set the source of the image to AVATAR.png
         imageElement.alt = 'User Avatar'; // Set an alt text for accessibility
 
-        const timestampElement = document.createElement('div');
-        timestampElement.classList.add('timestamp');
-        timestampElement.textContent = message.timestamp || 'No timestamp';
+
+        
 
         const userElement = document.createElement('div');
         userElement.classList.add('username');
@@ -262,14 +272,18 @@ socket.on('receiveMessage', (message) => {
         textElement.classList.add('text');
         textElement.textContent = `${message.username}: ${message.message}`;
 
-        messageElement.appendChild(timestampElement);
+        const timestampElement = document.createElement('div');
+        timestampElement.classList.add('timestamp');
+        timestampElement.textContent = message.displayTime || 'No timestamp';
+
+        
         messageElement.appendChild(userElement);
         messageElement.appendChild(textElement);
+        messageElement.appendChild(timestampElement);
 
         chat.appendChild(messageElement);
         chat.scrollTop = chat.scrollHeight;
     }
-
     // Show notification and update title
 });
 
@@ -297,20 +311,36 @@ function showNewMessageNotification(message, chatId) {
     const textContent = `New message in ${message.chatId}: ${message.username}: ${message.message}`;
     notification.appendChild(imageElement);
     notification.appendChild(document.createTextNode(textContent));
-
-    notification.classList.add('show');
-
-    // Hide the notification after 3 seconds
-    setTimeout(() => {
-        notification.classList.remove('show');
-    }, 3000);
-    notification.classList.add('show');
-
-    // Hide the notification after 3 seconds
-    setTimeout(() => {
-        notification.classList.remove('show');
-    }, 3000);
     
+    fetch('/userChats', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Fetched user chats:', data); // Debugging
+        
+        // Iterate over each chat and output it
+        data.chats.forEach((chat, index) => {
+            if (chat.id === message.chatId) {
+                notification.classList.add('show');
+            };
+        });
+
+        // You can also update the chat list here
+        updateChatList(data.chats);
+    })
+    .catch(error => console.error('Error fetching user chats:', error));
+    
+
+    // Hide the notification after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 3000);
+
+
 
     // Increment the new message count and update the title
     newMessageCount++;
@@ -435,6 +465,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         switchTheme(theme);
                     } else if (currentStreak < requiredStreak) {
                         alert(`Your streak is not big enough to access this theme. ${requiredStreak} days needed!`);
+                        switchTheme('default');
                     }
                     
                 })
@@ -452,11 +483,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 break;
             case 'ninja':
                 themeLink.href = 'ninja-mode.css';
-                function hideMessage() {
-                    const messageElement = document.getElementById('message');
-                    messageElement.classList.remove('hidden'); // Hide the element
-                }
-                hideMessage();
                 break;
             case 'moon':
                 themeLink.href = 'moon.css';
@@ -591,33 +617,8 @@ const getUserList = () => {
     // Assuming each user is an element inside userListElement
     return Array.from(userListElement.children).map(userElement => userElement.textContent.trim());
 };
-const fetchUserNotifications = async () => {
-    try {
-    const currentUser = localStorage.getItem('username');
-    if (!currentUser) return;
 
-    // Fetch user list (assume you have a way to get this)
-    const userList = await getUserList(); // This should be defined based on your application logic
 
-    const response = await fetch('/getUserNotifications', {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ currentUser, userList })
-    });
-
-    if (!response.ok) throw new Error('Failed to fetch notifications');
-    
-    const notifications = await response.json();
-    updateNotificationDisplay(notifications);
-
-    } catch (error) {
-    console.error('Error fetching user notifications:', error);
-    }
-};
-const userList = await getUserList();
-console.log(userList);
   // Update notification display in the user list
 const updateNotificationDisplay = (notifications) => {
     const userListElement = document.getElementById('userList');
@@ -667,7 +668,7 @@ const updateNotificationDisplay = (notifications) => {
 // const currentUsername = localStorage.getItem('username');
 // setInterval(() => getDMNotificationCount(currentUsername), 5000);
 
-setInterval(fetchUserNotifications, 5000);
+
   
 function updateChatName(Id) {
     const chatNameElement = document.getElementById('chatName');
