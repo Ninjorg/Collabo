@@ -349,6 +349,30 @@ const addChatToUser = async (user, chatId) => {
     }
 };
 
+const addProfilePictureToUser = async (user) => {
+    try {
+        const userRef = doc(db, 'users', user);
+        const userDoc = await getDoc(userRef);
+
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            // Check if the user's document contains a profile picture
+            if (!userData.picture) {
+                // Set the user's picture to "AVATAR.png" if it doesn't exist
+                await updateDoc(userRef, { picture: "AVATAR.png" });
+                console.log(`Profile picture for user ${user} set to AVATAR.png`);
+            } else {
+                console.log(`User ${user} already has a profile picture: ${userData.picture}`);
+            }
+        } else {
+            console.error(`User ${user} not found`);
+        }
+    } catch (error) {
+        console.error('Error updating user data:', error);
+    }
+};
+
+
 async function findDMChatId(user1, user2) {
     try {
         // Query to find a chat with these two users
@@ -543,7 +567,7 @@ async function removeChatFromUser(username, chatId) {
 
 // Sign-up route
 app.post('/signup', async (req, res) => {
-    const { fullname, schoolmail, username, email, password } = req.body;
+    const { fullname, schoolmail, username, email, password, picture } = req.body;
 
     // Validate input
     if (!username || !email || !password || !fullname || !schoolmail) {
@@ -590,6 +614,7 @@ app.post('/signup', async (req, res) => {
             chats: [{ id: 'general', notification: 0 },{ id: 'homework', notification: 0 },{ id: 'counting', notification: 0 }],
             isActive: true,
             streak: [0, "2024-08-10T23:30:41.107Z"],
+            picture,
             fullname,
             schoolmail,
             verify: true,
@@ -799,6 +824,7 @@ io.on('connection', (socket) => {
             const data = doc.data();
             console.log(`User data for ${doc.id}:`, data); // Debugging line
             return {
+                
                 username: data.username,
                 isActive: data.isActive ?? false, // Default to false if isActive is undefined
             };
@@ -876,7 +902,17 @@ io.on('connection', (socket) => {
     // Handle sending a message
     socket.on('sendMessage', async ({ chatId, message }) => {
         const timestamp = new Date().toISOString();
-        const messageObject = { chatId, username: socket.user.username, message, timestamp };
+        const displayTime = new Date(timestamp).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        username = socket.user.username;
+        const userRef = doc(db, 'users', username);
+        const userDoc = await getDoc(userRef);
+
+        let picture = userDoc.data().picture;
+        const messageObject = { picture, chatId, username: socket.user.username, message, timestamp, displayTime };
     
         try {
             // Save message to Firestore
@@ -885,7 +921,7 @@ io.on('connection', (socket) => {
     
             // Emit message to chat
             await handleMessageSend(chatId, messageObject.username, message, timestamp);
-            io.to(chatId).emit('receiveMessage', messageObject);
+            io.emit('receiveMessage', messageObject);
             console.log(messageObject);
     
             // Retrieve user's current streak from Firestore
